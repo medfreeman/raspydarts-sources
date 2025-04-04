@@ -2850,7 +2850,7 @@ class Screen(pygame.Surface):
 
         if align == 'Left':
             pos_x = int(self.res_x_16 / 2)
-            max_x = 8 * self.res_x_16 - pos_x
+            max_x = int(self.res_x - (self.res_x_16 / 2))
         else:
             pos_x = 3 * self.res_x_16
             max_x = 13 * self.res_x_16
@@ -5925,10 +5925,7 @@ class Screen(pygame.Surface):
             games = sorted(games)
 
         nb_elements = len(games)
-        if nb_elements > 16:
-            nb_column = 5
-        else:
-            nb_column = 4
+        nb_column = 5
 
         refresh = True
         old_selection = None
@@ -5985,9 +5982,9 @@ class Screen(pygame.Surface):
                 self.update_screen()
                 refresh = False
             elif old_selection is None or selection is None:
-                self.update_screen(rect_array=[click_zones[click_zone] for click_zone in click_zones] + game_desc_rect)
+                self.update_screen(rect_array=[click_zones[click_zone] for click_zone in click_zones])
             else:
-                self.update_screen(rect_array=[old_selection, selection] + game_desc_rect)
+                self.update_screen(rect_array=[old_selection, selection])
 
             key = self.rpi.listen_inputs(
                     ['arrows', 'fx', 'alpha', 'math'],
