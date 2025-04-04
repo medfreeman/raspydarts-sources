@@ -15,7 +15,14 @@ HEADERS = ['12', '-', '-', '-', '-', '-', '-']
 OPTIONS = {'theme': 'default', 'Double_bull': False}
 NB_DARTS = 3
 GAME_RECORDS = {'Points Per Round':'DESC', 'Points Per Dart':'DESC'}
+VERSION = '1.00'
 
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 1 and nb_players <= 12, VERSION, 12
+    
 class CPlayerExtended(cplayer.Player):
     '''
     Extended player class
@@ -192,10 +199,9 @@ class Game(cgame.Game):
         if actual_round >= self.max_round and actual_player == self.nb_players - 1 \
                 and player_launch == int(self.nb_darts):
             self.infos += f"Last round reached ({actual_round}){self.lf}"
-            winner = self.check_winner(players)
-            if winner != -1:
-                self.infos += f"Player {winner} wins !{self.lf}"
-                self.winner = winner
+            self.winner = self.check_winner(players)
+            if self.winner is not None:
+                self.infos += f"Player {self.winner} wins !{self.lf}"
                 handler['return_code'] = 3
             else:
                 handler['return_code'] = 2
@@ -220,17 +226,6 @@ class Game(cgame.Game):
         # Next please !
         return handler
 
-    def check_winner(self, players):
-        '''
-        Method to check if there is a winnner
-        '''
-        bestscoreid = -1
-        # Find the better score
-        for player in players:
-            if bestscoreid == -1 or player.score > players[bestscoreid].score:
-                bestscoreid = player.ident
-        return bestscoreid
-
     def early_player_button(self, players, actual_player, actual_round):
         '''
         Function launched if the player hit the player button before having
@@ -243,19 +238,19 @@ class Game(cgame.Game):
         return_code = 1
 
         # Eventually divide by 2
+        '''
         if players[actual_player].round_points == 0:
             self.infos += 'Dividing score by half! And early !{self.lf}'
             # Divide score by half
             players[actual_player].score = int(players[actual_player].score / 2)
-
+        '''
         # Last round - check winner or return Game over
         if actual_round == self.max_round and actual_player == self.nb_players - 1:
             # Game over
             return_code = 2
-            winner = self.check_winner(players)
-            if winner != -1:
-                self.winner = winner
-                self.infos += f'Player {winner} wins !{self.lf}'
+            self.winner = self.check_winner(players)
+            if self.winner is not None:
+                self.infos += f'Player {self.winner} wins !{self.lf}'
                 # Victory
                 return_code = 3
 
@@ -274,8 +269,20 @@ class Game(cgame.Game):
         '''
         To avoid Ouin ouin
         '''
-        pass
-
+        #pass
+        players[actual_player].columns[player_launch-1] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        players[actual_player].darts_thrown += 1
+        check = False
+        players[actual_player].columns[player_launch - 1] = ('cross-mark', 'image')
+        players[actual_player].round_points += 0 
+        
+        if player_launch == 3 and players[actual_player].round_points == 0:
+            self.infos += 'Dividing score by half! And early !{self.lf}'
+            # Divide score by half
+            players[actual_player].score = int(players[actual_player].score / 2)
+            self.display.play_sound('whatamess')
+        
     def next_game_order(self, players):
         '''
         Define the next game players order, depending of previous games' score

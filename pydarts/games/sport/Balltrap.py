@@ -8,12 +8,19 @@ from include import cplayer
 from include import cgame
 
 #
+VERSION = '1.00'
 LOGO = 'Balltrap.png' # Background image - relative to images folder
 HEADERS = ['PL1', 'PL2', '-', '-', '-', 'BULL', '-'] # Columns headers - Must be a string
 #OPTIONS = {'Time':'500', 'Repetition': 10} # Dictionnay of options
 OPTIONS = {'theme': 'default', 'Time': 500} # Dictionnay of options
 NB_DARTS = 3
 GAME_RECORDS = {'Score': 'DESC', 'Reached Score': 'DESC', 'Hits': 'DESC'}
+
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players <= 12, VERSION, 12
 
 class CPlayerExtended(cplayer.Player):
     """
@@ -263,7 +270,6 @@ class Game(cgame.Game):
             players[actual_player].columns[0] = (f'{players[actual_player].goals[players[actual_player].next]}', 'str')
             players[actual_player].actual_hit = players[actual_player].goals[players[actual_player].next]
             self.targets_list = [f'{mult}{players[actual_player].goals[players[actual_player].next]}' for mult in ['S', 's', 'D', 'T']]
-
         if not self.bull:
             # Return S20#green|D20#red|T20#blue
             self.rpi.set_target_leds('|'.join([f'{value}#{self.colors[0]}' \
@@ -318,3 +324,11 @@ class Game(cgame.Game):
             player.stats['Score'] = player.score
             player.stats['Reached Score'] = player.actual_hit
             player.stats['Hits'] = player.get_total_hit()
+
+    def miss_button(self, players, actual_player, actual_round, player_launch):
+        '''
+        Miss button
+        '''
+        players[actual_player].columns[player_launch+1] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        players[actual_player].darts_thrown += 1

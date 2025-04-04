@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import time
-from RPi import GPIO as gpio
-
+import subprocess
 import pygame
-import pyautogui
-
 # For GPIO Extender
+from RPi import GPIO as gpio
 from . import cgpio_extender
 
 MAX_GPIO = 27
+LAST_GPIO = None
+COUNT_GPIO = 0
 # pylint: disable=no-member
 USEREVENT = pygame.USEREVENT
 # pylint: enable=no-member
@@ -25,7 +25,8 @@ gamecontext = {
          ,'j' : 'JOKER'
          ,'c' : 'CHEAT'
          ,'m' : 'MISSDART'
-         ,'r' : 'BACK'
+         ,'p' : 'BACK'
+         ,'x' : 'DEBUG'
          ,'g' : 'GAMEBUTTON'
          ,'u' : 'VOLUME-MUTE'
          }
@@ -78,7 +79,7 @@ shiftmath = {
 
 buttons_list = ['NEXTPLAYER', 'BACK', 'GAMEBUTTON', 'VALIDATE', 'CANCEL', 'UP',
             'DOWN', 'LEFT', 'RIGHT', 'PLUS', 'MINUS', 'VOLUME_UP',
-            'VOLUME_DOWN', 'VOLUME_MUTE', 'DEMOLED', 'CPTPLAYER']
+            'VOLUME_DOWN', 'VOLUME_MUTE', 'MISSDART', 'CPTPLAYER']
 
 events_list = {
          'LIGHT_FLASH': 1,
@@ -91,14 +92,38 @@ events_list = {
 #         'SCREEN': 7
          }
 
-def simkeypress():
+SCREENSAVER = True
+try:
+    subprocess.Popen(['xscreensaver-command', '-deactivate'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+except:
+    SCREENSAVER = False
+    
+def wake_up(video_process, sound_process):
     '''
-    In order to wake-up from screen saver
+    In order to wake-up from screen saver and stop running video
     '''
-    pyautogui.FAILSAFE = False
-    print(f"[DEBUG] simkeypress()")
-    pyautogui.keyDown('shift')
-    pyautogui.keyUp('shift')
+
+    if video_process is not None:
+        # Stop running video
+        try:
+            video_process.stdin.write(b'q')
+            video_process.stdin.flush()
+            video_process.stdin.close()
+        except Exception as error:
+            print(f"exception is {error}")
+
+    if SCREENSAVER == True :
+        try:
+            subprocess.Popen(['xscreensaver-command', '-deactivate'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except Exception as error:
+            # Maybe xscreensaver is not installed
+            print(f"exception is {error}")
+
+    if sound_process is not None:
+        try:
+            sound_process.stop()
+        except Exception as error:
+            print(f"exception is {error}")
 
 ####################
 # New Fresh class that handle raspberry GPIO created by Remi D. (Reredede)
@@ -108,8 +133,10 @@ class Craspberry():
     """
     Raspberry class
     """
-
     def __init__(self, logs, config, conf_target_led, event, t_event=None):
+        """
+        Init class
+        """
         self.logs = logs
         self.shift = False
         self.config = config
@@ -140,6 +167,7 @@ class Craspberry():
         self.target_leds = ""
         self.target_leds_blink = ""
         self.newresolution = []
+        self.banned_gpio = None
 
         if config.file_exists:
             # Apply config file configuration
@@ -210,10 +238,14 @@ class Craspberry():
             gpio.setup(pin, gpio.OUT)
 
         if not self.extended_gpio:
-            for pin in [pin for pin in self.pins.values() if pin is not False]:
-                if 0 < int(pin) <= MAX_GPIO:
-                    self.logs.log("DEBUG", f"GPIO {pin} set to input")
-                    gpio.setup(pin, gpio.IN, pull_up_down=gpio.PUD_UP)
+            for pin in [pin for pin in self.pins]:
+                if self.pins[pin] is not False:
+                    if 0 < int(self.pins[pin]) <= MAX_GPIO and pin not in ('PIN_MISSDART', 'MISSDART'):
+                        self.logs.log("DEBUG", f"GPIO {pin} set to input")
+                        gpio.setup(self.pins[pin], gpio.IN, pull_up_down=gpio.PUD_UP)
+                    if 0 < int(self.pins[pin]) <= MAX_GPIO and pin in ('PIN_MISSDART', 'MISSDART'):
+                        self.logs.log("DEBUG", f"GPIO {pin} set to input")
+                        gpio.setup(self.pins[pin], gpio.IN, pull_up_down=gpio.PUD_DOWN)
 
     def init_gpio(self, pins, direction):
         """
@@ -264,7 +296,6 @@ class Craspberry():
         self.logs.log("DEBUG", f"conf_inputs[key]={conf_inputs[key]}")
         self.logs.log("DEBUG", f"self.conf_inputs[key]={self.conf_inputs[key]}")
         self.logs.log("DEBUG", f"self.config.inputs[key]={self.config.inputs[key]}")
-
 
     def set_outputs_conf(self, conf_outputs):
         """
@@ -429,12 +460,38 @@ class Craspberry():
         """
         Read GPIO (Button's)
         """
+        global COUNT_GPIO
+        global LAST_GPIO
 
+        gpio_read = None
+        p_key = None
         for key in self.pins:
-            if self.pins[key] is not False and gpio.input(self.pins[key]) == gpio.LOW :
+            if ((self.pins[key] is not False and gpio.input(self.pins[key]) == gpio.LOW and key not in ('PIN_MISSDART', 'MISSDART'))
+                    or
+                (self.pins[key] is not False and gpio.input(self.pins[key]) == gpio.HIGH and key in ('PIN_MISSDART', 'MISSDART'))):
                 # Button pressed
-                return key.replace('PIN_','BTN_')
-        return False
+                if key != self.banned_gpio:
+                    gpio_read = key
+                else:
+                    p_key = key
+
+
+        if gpio_read is not None:
+            if gpio_read == LAST_GPIO:
+                COUNT_GPIO += 1
+                if COUNT_GPIO > 30:
+                    self.banned_gpio = gpio_read
+                    print(f"[WARNING] Gpio {gpio_read} is banned !")
+                else:
+                    return gpio_read.replace('PIN_','BTN_')
+            elif self.banned_gpio is None:
+                LAST_GPIO = gpio_read
+                return gpio_read.replace('PIN_','BTN_')
+        elif p_key is None:
+            LAST_GPIO = None
+            COUNT_GPIO = 0
+            self.banned_gpio = None
+            return False
 
     def test_buttons(self):
         """
@@ -474,7 +531,7 @@ class Craspberry():
         for index in (5, 6, 7):
             pygame.time.set_timer(USEREVENT + index, 0)
 
-    def listen_inputs(self, k_type=['num', 'alpha', 'fx', 'arrows'], specials=['enter', 'tab', 'backspace', 'left shift', 'escape', 'space', 'double-click', 'single-click', 'resize'], wait_for=None, context='menus', timeout=0, light=None, events=None, firstname=None):
+    def listen_inputs(self, k_type=['num', 'alpha', 'fx', 'arrows'], specials=['enter', 'tab', 'backspace', 'left shift', 'escape', 'space', 'double-click', 'single-click', 'resize'], wait_for=None, context='menus', timeout=0, light=None, events=None, firstname=None, video_process=None, sound_process=None):
         """
         Read input : MXP, GPIO, keyboard, mouse, ...
         """
@@ -526,7 +583,7 @@ class Craspberry():
                         self.gpio.strobe_buttons(['LIGHT_PLAYERS'], iterations=2)
                     self.reset_timers()
                     self.sleep = True
-                    simkeypress()
+                    wake_up(video_process, sound_process)
                     return inputs.replace('PIN_', 'BTN_')
             else:
                 # Wihout extend card
@@ -534,7 +591,7 @@ class Craspberry():
                 if inputs:
                     self.logs.log("DEBUG", f"Input debug (GPIO) : {inputs}")
                     self.reset_timers()
-                    simkeypress()
+                    wake_up(video_process, sound_process)
                     return inputs
 
             # Read target
@@ -548,7 +605,7 @@ class Craspberry():
                 self.reset_timers()
                 if not self.extended_gpio:
                     self.sleep = True
-                simkeypress()
+                wake_up(video_process, sound_process)
                 return inputs
 
             # If serial returns false, try to read keyboard
@@ -556,7 +613,7 @@ class Craspberry():
             if inputs is not None:
                 self.logs.log("DEBUG", f"Input debug (pyGame) : {inputs}")
                 if inputs is not False:
-                    simkeypress()
+                    wake_up(video_process, sound_process)
 
             # Return Serial input if expected (or if nothing expected)
             if inputs is False or (inputs is not None and (wait_for is None or str(inputs) in wait_for)):
@@ -745,6 +802,9 @@ class Craspberry():
                         pygame.time.set_timer(USEREVENT + event, delay)
 
     def strobe_buttons(self, buttons, iterations=3, delay=10, delay_off=100):
+        """
+        Make light strobe blink times
+        """
         if self.extended_gpio and buttons:
             self.gpio.strobe_buttons(buttons, iterations, delay, delay_off)
 

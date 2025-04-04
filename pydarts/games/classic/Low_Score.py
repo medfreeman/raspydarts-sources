@@ -14,7 +14,14 @@ GAME_RECORDS = {'Points Per Round': 'ASC', 'Points Per Dart': 'ASC'}
 NB_DARTS = 3
 LOGO = 'Low_Score.png'
 HEADERS = ['D1', 'D2', 'D3', '', 'Rnd', 'PPD', 'PPR']
+VERSION = '1.00'
 
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 1 and nb_players <= 12, VERSION, 12
+    
 class CPlayerExtended(cplayer.Player):
     '''
     Extended player class
@@ -141,15 +148,12 @@ class Game(cgame.Game):
         # Check for end of game (no more rounds to play)
         if player_launch == self.nb_darts and actual_round >= self.max_round \
                 and actual_player == len(players) - 1:
-            bestscoreid = -1
-            bestscore = 10000
-            for player in players:
-                if player.score < bestscore:
-                    bestscore = player.score
-                    bestscoreid = player.ident
-            self.winner = bestscoreid
-            handler['return_code'] = 3
-
+            self.winner = self.check_winner(players, high=False)
+            if self.winner is not None:
+                handler['return_code'] = 3
+            else:
+                # No winner : last round reached
+                handler['return_code'] = 2
         return handler
 
     def miss_button(self, players, actual_player, actual_round, player_launch):
@@ -158,7 +162,10 @@ class Game(cgame.Game):
         '''
         players[actual_player].score += self.penality
         players[actual_player].columns[player_launch-1] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
         players[actual_player].darts_thrown += 1
+        # play penality sound
+        self.display.play_sound('penality')
         # Refresh stats
         players[actual_player].columns[5] = (players[actual_player].show_ppd(), 'int')
         players[actual_player].columns[6] = (players[actual_player].avg(actual_round), 'int')

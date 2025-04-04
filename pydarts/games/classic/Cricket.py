@@ -15,15 +15,17 @@ from math import sqrt
 LOGO = 'Cricket'
 HEADERS = ['20', '19', '18', '17', '16', '15', 'B']
 OPTIONS = {'theme': 'default', 'max_round': 20, 'optioncrazy': False, 'optioncutthroat': False, 'drinkscore': 200,
-        'Teaming': False, 'optionteamscore': False, 'optionhandicap': False, 'mpr': False}
+        'Teaming': False, 'optionteamscore': False, 'optionhandicap': False, 'mpr': False, 'colorised': False}
 NB_DARTS = 3
 GAME_RECORDS = {'MPR': 'DESC', 'Hits per round': 'DESC', 'GiveOut': 'ASC'}
 
+VERSION = '1.00'
+
 def check_players_allowed(nb_players):
     """
-    Check if numbers of players is ok according to options
+    Check if number of players is ok according to options
     """
-    return nb_players <= 8
+    return nb_players >= 1 and nb_players <= 8, VERSION, 8
 
 class CPlayerExtended(cplayer.Player):
     """
@@ -65,6 +67,7 @@ class Game(cgame.Game):
         self.handicap = options['optionhandicap']
         self.show_mpr = options['mpr']
         self.drink_score = int(options['drinkscore'])
+        self.game_is_ok_for_color = options['colorised']
 
         #  Get the maxiumum round number
         self.max_round = int(options['max_round'])
@@ -93,15 +96,15 @@ class Game(cgame.Game):
         Post dart check
         """
 
+        handler = self.init_handler()
         # Find teamMate (only for teaming)
         mate = self.mate(actual_player, len(players))
         # Init
         play_closed = False  # Should we play the closed sound ?
         play_open = False  # Should we play the open sound ?
-        play_hit = False  # Should we play the Double & triple sound ?
+        play_hit = True  # Should we play the Double & triple sound ?
         play_scored = False  # Should we play the Scored sound ?
 
-        return_code = 0
         touchcount4total = False
         self.infos = f"Player {players[actual_player].ident} -\
                 Score before playing: {players[actual_player].score}\n"
@@ -120,13 +123,10 @@ class Game(cgame.Game):
 
             hit_value = min(to_add, 3 - players[actual_player].get_col_value(column_hit))
 
-            if players[actual_player].get_col_value(column_hit) == 0 and to_add < 3:
-                # column is open
-                play_open = True
-            elif players[actual_player].get_col_value(column_hit) + to_add >= 3 \
+            if players[actual_player].get_col_value(column_hit) + to_add >= 3 \
                     and players[actual_player].get_col_value(column_hit) < 3:
                 # column is closed
-                play_closed = True
+                play_open = True
             else:
                 # open and not closed : increment
                 play_hit = True
@@ -150,6 +150,7 @@ class Game(cgame.Game):
 
             if self.get_column_state(actual_player, players, self.headers.index(value)) > 3:
                 overtouched = 0
+                play_closed = True
             else:
                 hit_value += overtouched
 
@@ -196,7 +197,7 @@ class Game(cgame.Game):
             if not players[actual_player].pay_drink and \
                     players[actual_player].score >= self.drink_score and self.cutthroat:
                 players[actual_player].pay_drink = True
-                self.display.play_sound('diegoaimaboir')
+                handler['sound'] = 'diegoaimaboir'
 
             # Added buttons if the player had a surplus (common to Cut Throat and Normal Mode)
             if overtouched > 0 and touchcount4total:
@@ -204,21 +205,19 @@ class Game(cgame.Game):
                 play_hit = True  # Its a valid hit, play sound
 
             # Sound handling to avoid multiple sounds playing at a time
-            if play_scored:
-                self.display.play_sound('very_deep')
-                self.logs.log("DEBUG", "Playing Scored Sound")
+            if play_closed:
+                handler['sound'] = 'closed'
+            elif play_scored:
+                handler['sound'] = 'very_deep'
             elif play_open:
-                self.display.play_sound('open')
-                self.logs.log("DEBUG", "Playing Open Sound")
-            elif play_closed:
-                self.display.play_sound('closed')
-                self.logs.log("DEBUG", "Playing Closed Sound")
+                handler['sound'] = 'open'
             elif play_hit:
-                if super().play_show(players[actual_player].darts, hit, play_special=True):
-                    self.display.sound_for_touch(hit)  # Its a valid hit, play sound
-                self.logs.log("DEBUG", "Playing Simple Hit Sound")
+                handler['show'] = (players[actual_player].darts, hit, True)
+                handler['sound'] = hit
             else:
-                self.display.play_sound('plouf')
+                handler['sound'] = 'plouf'
+        else:
+            handler['sound'] = 'plouf'
 
         # Count darts played
         players[actual_player].add_dart(actual_round, player_launch, hit, hit_value=hit_value)
@@ -236,26 +235,26 @@ class Game(cgame.Game):
 
         # If it was last throw and no touch : play sound for "round missed"
         if player_launch == self.nb_darts and players[actual_player].roundhits == 0:
-            self.display.play_sound('chaussette')
+            handler['sound'] = 'chaussette'
 
         # Check if there is a winner
-        winner = self.check_winner(players)
+        winner = self.check_winner(players, actual_round, actual_player, player_launch)
         if winner is not None:
             self.infos += f"Player {winner} wins !{self.lf}"
             self.winner = winner
-            return_code = 3
+            handler['return_code'] = 3
 
         # Last throw of the last round
         elif actual_round >= self.max_round and actual_player == self.nb_players - 1 \
                 and player_launch == self.nb_darts:
             self.infos += f"Last Round Reached ({actual_round}{self.lf}"
-            return_code = 2
+            handler['return_code'] = 2
 
         # Display Recap text
         self.logs.log("DEBUG", self.infos)
 
         # And return code
-        return return_code
+        return handler
 
     def nb_touch(self, player):
         """
@@ -270,10 +269,16 @@ class Game(cgame.Game):
 
         return (nb_hit, closed)
 
-    def check_winner(self, players):
+    def check_winner(self, players, actual_round, actual_player, player_launch):
         """
         Method to check if there is a winnner
+        Round  player 1   player 2     resultat
+        1-20    f 700       150        p1 gagne, le jeu stop car fermé et score p1 > p2
+        1-20    f 30        150        le jeu continu jusqu'au round 20, ou p1 > p2, ou p2 ferme. Puis meilleur score gagne
+        20      f 30        150        p2 gagne car meilleur score
+        20        150       180        p2 gagne car meilleur score
         """
+        # doit retourner None en cas d'égalité
         winner_id = None
         index = 0
         if self.teaming:
@@ -299,7 +304,6 @@ class Game(cgame.Game):
             for team in best:
                 if team[1]:   # All closed
                     winners.append(team[0])
-
         else:
             # Find the best score
             for player in players:
@@ -320,8 +324,37 @@ class Game(cgame.Game):
                     winners.append(player[0])
 
         # If the player who have the best score has closed all the gates
-        if len(winners) == 1:
+        if len(winners) == 1: # and winners[0] == actual_player:
             return winners[0]
+        else:
+            # Ajout score si fin (not All closed)
+            if actual_round >= self.max_round and actual_player == self.nb_players - 1 \
+                   and player_launch == self.nb_darts:
+                if self.cutthroat:
+                    best_score = 99999
+                else:
+                    best_score = -1
+                #
+                if self.teaming:
+                    for team_id in range(0, max_player):
+                        if (teams[team_id][2] >= best_score and not self.cutthroat) \
+                               or(teams[team_id][2] <= best_score and self.cutthroat):
+                            if teams[team_id][2] != best_score:
+                                best_score = teams[team_id][2]
+                                winner_id = team_id
+                            else:
+                                winner_id = None #egalité
+                else:
+                    for player in players:
+                        if (player.score >= best_score and not self.cutthroat) \
+                               or (player.score <= best_score and self.cutthroat):
+                            if player.score != best_score:
+                                best_score = player.score
+                                winner_id = player.ident
+                            else:
+                                #egalité must return None
+                                winner_id = None
+                return winner_id
         return None
 
     def random_header(self, actual_player, players, force=False, columns=None):
@@ -672,8 +705,8 @@ class Game(cgame.Game):
 
         # If last round reached
         if actual_round == self.max_round and actual_player == self.nb_players - 1:
-            winner = self.check_winner(players)
-            if winner != -1:
+            winner = self.check_winner(players, actual_round, actual_player, self.nb_darts)
+            if winner is not None:
                 self.winner = winner
                 self.infos += f"Player {winner} wins !{self.lf}"
                 return 3
@@ -800,6 +833,8 @@ class Game(cgame.Game):
         """
         self.logs.log("DEBUG", "MissButtonPressed")
         players[actual_player].darts_thrown += 1
+        players[actual_player].add_dart(actual_round, player_launch, 'MISS', hit_value=0)
+        self.display.play_sound('treasure_crane_jaune')
 
     def check_players_allowed(self, nb_players):
         """
@@ -1118,14 +1153,17 @@ class Game(cgame.Game):
             for option, value in self.options.items():
                 if option == 'theme':
                     continue
+                text = self.display.lang.translate(f'{game}-{option}')
+
                 if value is True:
-                    self.display.blit_text(f'{game}-{option}', right_x, option_y, right_width, option_height, color=self.display.colorset['game-green'], dafont='Impact', align='Right')
+                    self.display.blit_text(f'{text}', right_x, option_y, right_width, option_height, color=self.display.colorset['game-green'], dafont='Impact', align='Right')
                 elif value is False:
-                    self.display.blit_text(f'{game}-{option}', right_x, option_y, right_width, option_height, color=self.display.colorset['game-red'], dafont='Impact', align='Right')
+                    self.display.blit_text(f'{text}', right_x, option_y, right_width, option_height, color=self.display.colorset['game-red'], dafont='Impact', align='Right')
                 else:
-                    self.display.blit_text(f'{self.display.lang.translate(game + "-" + option)} : {value}', right_x, option_y, right_width, option_height, color=self.display.colorset['game-option'], dafont='Impact', align='Right')
+                    self.display.blit_text(f'{text} : {value}', right_x, option_y, right_width, option_height, color=self.display.colorset['game-option'], dafont='Impact', align='Right')
                 option_y -= option_height
-        self.display.blit_text(f"{game.replace('_', ' ')}", right_x, option_y - option_height, right_width, option_height * 2, color=(255, 0, 0), dafont='Impact', align='Right')
+        self.display.blit_text(f"{game.replace('_', ' ')}  ", right_x, option_y - option_height, right_width, option_height * 2, color=(255, 0, 0), dafont='Impact', align='Right')
+
 
         self.display.save_background()
         self.display.update_screen()

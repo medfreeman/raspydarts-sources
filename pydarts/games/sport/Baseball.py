@@ -3,19 +3,16 @@
 Game by LaDite - jeu base sur le castle de david
 """
 
-"""
 
----------------------- RESTE A FAIRE
-
-- remettre option tour max 9 et option egalite = false
-
-"""
+# Versions
+# 1.00
 
 from include import cplayer
 from include import cgame
 import random
 import subprocess
 
+VERSION = '1.00'
 # Dictionnay of options - Text format only
 OPTIONS = {'theme': 'default', 'max_round': 9, '7eme_manche': False, 'noequal': True, 'team': False}
 
@@ -33,7 +30,7 @@ def check_players_allowed(nb_players):
     """
     Return the player number max for a game.
     """
-    return nb_players <= 4
+    return nb_players >= 1 and nb_players <= 4, VERSION, 4
 
 class CPlayerExtended(cplayer.Player):
     """
@@ -347,6 +344,15 @@ class Game(cgame.Game):
         for player in players:
         """
         player.stats['Points Per Round'] = player.avg(actual_round)
+
+    def miss_button(self, players, actual_player, actual_round, player_launch):
+        '''
+        Miss button
+        '''
+        players[actual_player].columns[player_launch+1] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        players[actual_player].darts_thrown += 1
+
 
     def display_segment(self):
         """

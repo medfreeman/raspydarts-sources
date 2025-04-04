@@ -7,17 +7,17 @@ import random
 
 # This class is used for common methods and var shared by games - All games have a inherited version of this class
 
-
 class Game:
     """
     Generic game class
     """
 
-    def __init__(self, display, game, nb_players, options, config, logs, rpi, dmd, video_player, game_is_ok_for_color = True): #by Manu script. 
+    def __init__(self, display, game, nb_players, options, config, logs, rpi, dmd, video_player, free_launch=False, game_is_ok_for_color = True):   
         self.logs = logs
         self.options = options
         self.game = game
-        self.game_is_ok_for_color = game_is_ok_for_color #by Manu script.
+        self.free_launch = free_launch
+        self.game_is_ok_for_color = game_is_ok_for_color  
         self.nb_players = nb_players
         self.config = config
         self.display = display
@@ -38,8 +38,27 @@ class Game:
         self.max_round = 10
         self.nb_darts = 3
 
-        self.neighbors = {'1': ['20', '18', '4', '5', 'B'], '2': ['17', '15', '3', '10', 'B'], '3': ['17', '19', '7', '2', 'B'], '4': ['13', '18', '1', '6', 'B'], '5': ['20', '12', '1', '9', 'B'], '6': ['10', '13', '4', '15', 'B'], '7': ['16', '19', '3', '8', 'B'], '8': ['11', '16', '7', '14', 'B'], '9': ['12', '14', '5', '11', 'B'], '10': ['12', '14', '5', '11', 'B'], '11': ['14', '8', '9', '16', 'B'], '12': ['5', '9', '20', '14', 'B'], '13': ['17', '19', '2',  '7', 'B'], '14': ['11', '9', '12', '8', 'B'], '15': ['2', '10', '6', '17', 'B'], '16': ['7', '8', '19', '11', 'B'], '17': ['2', '3', '15', '19', 'B'], '18': ['1', '4', '13', '20', 'B'], '19': ['3', '7', '16', '17', 'B'], '20': ['1', '5', '12', '18', 'B']
-                          }
+        self.neighbors = {'1': ['20', '18', '4', '5', 'B'],
+                '2': ['17', '15', '3', '10', 'B'],
+                '3': ['17', '19', '7', '2', 'B'],
+                '4': ['13', '18', '1', '6', 'B'],
+                '5': ['20', '12', '1', '9', 'B'],
+                '6': ['10', '13', '4', '15', 'B'],
+                '7': ['16', '19', '3', '8', 'B'],
+                '8': ['11', '16', '7', '14', 'B'],
+                '9': ['12', '14', '5', '11', 'B'],
+                '10': ['12', '14', '5', '11', 'B'],
+                '11': ['14', '8', '9', '16', 'B'],
+                '12': ['5', '9', '20', '14', 'B'],
+                '13': ['17', '19', '2',  '7', 'B'],
+                '14': ['11', '9', '12', '8', 'B'],
+                '15': ['2', '10', '6', '17', 'B'],
+                '16': ['7', '8', '19', '11', 'B'],
+                '17': ['2', '3', '15', '19', 'B'],
+                '18': ['1', '4', '13', '20', 'B'],
+                '19': ['3', '7', '16', '17', 'B'],
+                '20': ['1', '5', '12', '18', 'B']
+                }
 
         self.target_order = [1, 18, 4, 13, 6, 10, 15, 2,
                              17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5, 20]
@@ -73,10 +92,21 @@ class Game:
         self.logs.log("DEBUG", f"Try to play intros/intro_{self.game}")
         video = self.display.file_class.get_full_filename(
             f"intros/intro_{self.game}", 'videos')
+
         sound = self.display.file_class.get_full_filename(
-            f"{self.game}_intro", 'sounds')
-        self.display.play_sound(sound)
-        self.video_player.play_video(video, wait=True)
+                f"{self.game}_intro", 'sounds')
+
+        return self.display.play_sound(sound), self.video_player.play_video(video)
+    
+    def play_intro_only_video(self):
+        """
+        Play intro : video
+        """
+        self.logs.log("DEBUG", f"Try to play intros/intro_{self.game}")
+        video = self.display.file_class.get_full_filename(
+            f"intros/intro_{self.game}", 'videos')
+
+        return self.video_player.play_video(video)
 
     def get_score_from_hit(self, hit, sb_value=25, db_value=50):
         """
@@ -130,7 +160,7 @@ class Game:
         Show standard video animation on Raspydarts Video Player
         Return False is show is played else True
         """
-        return not self.video_player.play_show(darts, hit, play_special)
+        return self.video_player.play_show(darts, hit, play_special)
 
     def post_pre_dart_check(self, players, actual_round, actual_player, player_launch):
         """
@@ -448,7 +478,7 @@ class Game:
         """
         Play video
         """
-        self.video_player.play_video(video)
+        return self.video_player.play_video(video)
 
     def SendTextToDmd(self, text, tempo=None, sens=None, iteration=None):
         """
@@ -467,3 +497,52 @@ class Game:
         if hit[:1] == 'T':
             return 3
         return 0
+
+    def check_winner(self, players, high=True):
+        '''
+        Method to check WHO is the winnner
+        '''
+        deuce = False #égalité
+        master = False #utilisé pour les jeux qui disent score = winscore
+        print(f"check_winner self.options : {self.options}")
+        if 'master' in self.options: # master , true or false , le score doit etre egale pour gagner
+            if self.options['master']:
+                master = True
+            self.logs.log("DEBUG", f"check_winner master is in self.options with value = {master}")
+
+        if 'winscore' in self.options: # score minimal pour gagner
+            best_score = int(self.options['winscore'])
+            self.logs.log("DEBUG", f"check_winner winscore is in self.options with value = {best_score}")
+            if not master:
+                best_score -= 1
+        elif 'startingat' in self.options:
+            best_score = int(self.options['startingat'])
+            self.logs.log("DEBUG", f"check_winner startingat is in self.options with value = {best_score}")
+        elif high:
+            best_score = 0
+        else:
+            best_score = 999999
+        best_player = None
+        for player in players:
+            if not master :
+                if (not high and player.score < best_score) or (high and player.score > best_score): # le plus gros/petit score gagne
+                    best_score = player.score
+                    deuce = False #necessary to reset deuce if there is a deuce with a higher score !
+                    best_player = player.ident
+                elif player.score == best_score:
+                    deuce = True
+                    best_player = None
+            else: # master = True
+                if player.score == best_score:
+                    best_player = player.ident
+                    deuce = False
+                    break
+# best_count not exist                
+#        self.logs.log("DEBUG", \
+#                f"Best score : {best_score} / Count={best_count} / Player = {best_player}")
+        if deuce:
+            self.infos += f"There is a score deuce ! Two people have {best_score}.{self.lf}"
+            self.infos += f"No winner!{self.lf}"
+            return None
+        return best_player
+

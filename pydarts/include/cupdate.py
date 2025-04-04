@@ -8,11 +8,12 @@ from io import BytesIO
 import ast
 import time
 import pycurl
+import requests
 
 BACKUP_PATH = '/pydarts/backup'
 VERSION_FILE = '/pydarts/VERSION'
 BACKUP_SCRIPT = '/pydarts/scripts/Backup.sh'
-headers = ["accept: application/json"]
+HEADERS = ["accept: application/json"]
 TIMEOUT = 10000
 
 def get_version(logs):
@@ -31,7 +32,7 @@ def set_version(logs, version):
     """
     Update VERSION file with version
     """
-
+    
     with open(VERSION_FILE, 'w', encoding="utf-8") as version_file:
         version_file.write(f'{version}')
     version_file.close()
@@ -42,6 +43,9 @@ def get_list(logs, host, port, actual_version, last=True):
     Get list of availables updates
     If version, only thoose where version > actual_version
     """
+
+    if ISCONNECTED == False:
+        return
 
     url =  f'{host}:{port}/api/v1/updates?last={last}&version={actual_version}'
 
@@ -70,13 +74,16 @@ def download(logs, host, port, filename, expected_size):
     Download file
     """
 
+    if ISCONNECTED == False:
+        return
+
     backup_name = f'{BACKUP_PATH}/{filename}'
     url = f'{host}:{port}/api/v1/updates/{filename}'
     with open(backup_name, 'wb') as downloaded:
         query = pycurl.Curl()
         query.setopt(query.URL, url)
         query.setopt(query.WRITEDATA, downloaded)
-        query.setopt(pycurl.HTTPHEADER, headers)
+        query.setopt(pycurl.HTTPHEADER, HEADERS)
         query.setopt(pycurl.CONNECTTIMEOUT, TIMEOUT)
         query.setopt(pycurl.FOLLOWLOCATION, True)
 
@@ -113,6 +120,7 @@ def get_last(logs, host, port, actual_version):
     return available_update['file'], available_update['full_version'], available_update['size']
 
 def download_update(logs, host, port, update_file, update_size):
+
     if download(logs, host, port, update_file, update_size):
         return update_file, update_size
 
@@ -122,6 +130,7 @@ def apply_update(logs, file_name, version):
     """
     Apply downloaded update
     """
+
     os.system(f"{BACKUP_SCRIPT} r {file_name}")
 
     set_version(logs, version)
@@ -129,3 +138,40 @@ def apply_update(logs, file_name, version):
     logs.log("DEBUG", f"{version} restored")
 
     return get_version(logs)
+
+def send_infos(logs, game, nb_players, options, rpi_version, rpi_serial, action, competition_mode, play_id):
+
+    if ISCONNECTED == False:
+        return
+
+    if competition_mode:
+        mode = 'competition'
+    else:
+        mode = 'loisir'
+
+    data_1 = {"game": f"{game}", "nb_players":nb_players, "options": f"{options}", \
+            "rpi_version": f"{rpi_version}", "rpi_serial": f"{rpi_serial}", "action": f"{action}", \
+            "play_id": f"{play_id}", "play_mode": f"{mode}"}
+    url= 'http://raspydarts.fr:8080/api/plays'
+
+    headers = {"Content-Type": "application/json", "accept": "*/*"}
+
+    try:
+        res = requests.post(url, json=data_1, headers=headers, timeout=(1,1))
+        response_code = res.status_code
+        logs.log("DEBUG", f"Response code is {response_code}")
+    except Exception as exception:
+        logs.log("ERROR", f"Unable to reach {url}")
+        logs.log("ERROR", f"Exception is {exception}")
+
+def connected_to_the_web():
+    try:
+        response = requests.get("https://www.google.com/")
+        if(response.status_code == 200):                
+            return True
+    except:
+        pass
+    return False   
+
+
+ISCONNECTED = connected_to_the_web()

@@ -1,7 +1,14 @@
 # -*- coding: utf-8 -*-
-"""
+'''
 Game by ... poilou !
-"""
+'''
+# Versions
+# 1.01a
+# Correction du mode Deuce (permet aux joueurs de terminer leur coups avant de déclarer un vainqueur ou une égalité
+# Dans le cas ou les joueurs atteignent le max round en mode Deuce, dans ce cas le meilleur score (le plus bas) sera gagnant
+# Affiche en jaune les points réalisable pour renvoyer l'adversaire aux points de début de jeu lors du mode Zap (cumulable avec les verts pour arriver à zéro)
+# Affichage sur l'écran de la combinaison zap
+# Colorisation des joueurs pour être plus agréable avec le zap
 
 import collections# To use OrderedDict to sort players from the last score they add
 import random   # For PNJ
@@ -13,35 +20,43 @@ from include import cplayer
 from include import cgame
 from include import cstats
 from include import chandicap
+try: 
+    from include import cdebug
+    DEBUG = {'debug-record': False, 'debug-replay': False, 'debug-extra_info': True} 
+except:
+    print('Class cdebug not found in include')
 
+VERSION = '1.01b'
 # Background image - relative to images folder
 LOGO = 'Ho_One.png'
 # Columns headers - Must be a string
 HEADERS = [ 'D1', 'D2', 'D3', '', 'Rnd', 'PPD', 'PPR' ]
 # Dictionnay of options - will be used at the initial screen
 OPTIONS = {'theme': 'default', 'startingat': 301, 'max_round': 20, 'double_in': False, 'double_out': False, \
-        'master_in': False, 'master_out': False, 'league': False, 'split_bull': True, 'zap': False}
+        'master_in': False, 'master_out': False, 'league': False, 'split_bull': True, 'zap': False, 'equal': False, 'colorised' : True}
 # Dictionnary of stats and dislay order (For exemple, avg is displayed in descending order)
 GAME_RECORDS = {'Points Per Round':'DESC', 'Points Per Dart':'DESC'}
 # How many darts the player is allowed to throw
 NB_DARTS = 3 # How many darts the player is allowed to throw
 
+
 def check_players_allowed(nb_players):
-    """
+    '''
     Check if number of players is ok according to options
-    """
-    return nb_players <= 8
+    '''
+    return nb_players <= 8, VERSION, 8
 
 ############
 # Extend the basic player's class
 ############
 class CPlayerExtended(cplayer.Player):
-    """
+    '''
     Extended Player class
-    """
+    '''
     def __init__(self, ident, nb_columns, interior=False):
         super().__init__(ident, nb_columns, interior)
         self.pre_play_score = None
+        self.unlocked = False
         # Init Player Records to zero
         for record in GAME_RECORDS:
             self.stats[record] = '0'
@@ -50,9 +65,9 @@ class CPlayerExtended(cplayer.Player):
 # Your Game's Class
 ############
 class Game(cgame.Game):
-    """
+    '''
     Ho One game class
-    """
+    '''
     def __init__(self, display, game, nb_players, options, config, logs, rpi, dmd, video_player):
         super().__init__(display, game, nb_players, options, config, logs, rpi, dmd, video_player)
         # game_records is the dictionnary of stats (see above)
@@ -61,8 +76,9 @@ class Game(cgame.Game):
         self.logo = LOGO
         self.headers = HEADERS
         self.options = options
+        self.game_is_ok_for_color = options['colorised']        
         # For rpi
-        self.nb_darts = NB_DARTS # Tohttps://www.dsih.fr/tal darts the player has to play
+        self.nb_darts = NB_DARTS # To darts the player has to play
         self.rpi = rpi
         # Load handicap and stat classes
         self.handicap = chandicap.Handicap('Ho_One', config, self.logs)
@@ -77,15 +93,51 @@ class Game(cgame.Game):
         self.starting_at = int(options['startingat'])
         self.league = options['league']
         self.zap = options['zap']
+        self.equal = options['equal']
         self.frozen = False
         self.infos = ""
         self.winner = None
-
+        
+        self.colors = [display.colorset['player1'],
+                       display.colorset['player2'],
+                       display.colorset['player3'],
+                       display.colorset['player4'],
+                       display.colorset['player5'],
+                       display.colorset['player6'],
+                       display.colorset['player7'],
+                       display.colorset['player8'],
+                       display.colorset['player9'],
+                       display.colorset['player10'],
+                       display.colorset['player11'],
+                       display.colorset['player12']]
+        
+        # DEBUG dictionnary special for developer
+        self.debug_info = False # par default
+        self.debug_record = False
+        self.debug_replay = False
+        try:
+            DEBUG
+        except NameError:
+            print ('Class cdebug not found in include')
+        else :
+            self.debuglevel = int(config.get_value('SectionGlobals', 'debuglevel', 0))
+            if self.debuglevel == 2: #Ajouter les options du dictionnaire DEBUG
+                #on charge les options (le dictionnaire DEBUG est inclus dans OPTIONS lorsque l'on est en debuglevel 2
+                self.debug_info = options['debug-extra_info']
+                # DEBUG dictionnary special for developer
+                self.debug = cdebug.Debug(display, game, nb_players, options, config, logs, rpi, dmd, video_player)
+                self.debug.Pos_cible(200,250)
+                self.debug_replay = options['debug-replay']
+                self.debug_record = options['debug-record']
+                #self.actual_round = None
+                self.debug.closeFile()
+                if self.debug_replay:
+                    self.debug_record = False
+        
         if nb_players != 4 and self.league:
             self.logs.log("ERROR", \
                     "League option can only be used with 4 players! Disabling league play!")
-            self.options['league'] = 'False'
-            self.league = False
+            
         elif self.league:
             self.display.teaming = True
         # Decide on BullEye value
@@ -96,22 +148,20 @@ class Game(cgame.Game):
         self.dart_icon = self.display.file_class.get_full_filename('dart_icon', 'images')
         self.online_icon = self.display.file_class.get_full_filename('online', 'images')
 
-        #for index in range(16):
-        #     f_image = self.display.file_class.get_full_filename('/home/pi/.pydarts/images/explosion/frame{:0>2}.gif'.format(index), 'images')
-        #     self.display.display_image(f_image, 0, 0, 284, 392, Scale=True, UseCache=True)
         self.margin = self.display.margin
         self.margin_2 = 2 * self.display.margin
         self.margin_4 = 4 * self.display.margin
 
     def pre_dart_check(self, players, actual_round, actual_player, player_launch):
-        """
+        '''
         Actions done before each dart throw - for example, check if the player is allowed to play
-        """
+        '''
         return_code = 0
         mate_score = 0
         other_team_score = 0
         self.frozen = False
         self.possible_hits = []
+        self.possible_zaps = []
         # Set score at startup
         if player_launch == 1:
             players[actual_player].reset_darts()
@@ -143,6 +193,10 @@ class Game(cgame.Game):
                 players[actual_player].columns.append(['', 'str'])
         # Display avg
         if actual_round == 1 and player_launch == 1:
+            players[actual_player].unlocked = False
+            if not self.master_in and not self.double_in:
+                players[actual_player].unlocked = True
+            
             players[actual_player].columns[5] = (0.0, 'int')
             players[actual_player].columns[6] = (0.0, 'int')
         else:
@@ -155,31 +209,9 @@ class Game(cgame.Game):
 
         # Get Playing Suggestions
         # Double IN or Master IN
-
-        if players[actual_player].points == 0 :
-            if self.double_in:
-                self.rpi.set_target_leds('|'.join([f'D{i}#{self.colors[0]}' \
-                        for i in range(1, 21)]))
-
-            if self.master_in:
-                self.rpi.set_target_leds('|'.join([f'T{i}#{self.colors[0]}' \
-                        for i in range(1, 21)]\
-                        + [f'D{i}#{self.colors[0]}' for i in range(1, 21)]\
-                        + [f'SB#{self.colors[0]}', f'DB#{self.colors[0]}']))
-        else :
-            # Possible win ?
-            self.possible_hits = self.search_possibilities(players[actual_player].score, player_launch)
-
-            # Display if there is a suggestion to display
-            if len(self.possible_hits) >= 1:
-                players[actual_player].columns[player_launch - 1] = (self.possible_hits[0], 'str', 'green')
-            if len(self.possible_hits) >= 2:
-                players[actual_player].columns[player_launch] = (self.possible_hits[1], 'str', 'green')
-            if len(self.possible_hits) >= 3:
-                players[actual_player].columns[player_launch + 1] = (self.possible_hits[2], 'str', 'green')
-
-            self.rpi.set_target_leds('|'.join([f'{key}#{self.colors[0]}' \
-                    for key in self.possible_hits]))
+            
+        leds = self.Sugestions_cible(players,actual_player, player_launch)
+        self.rpi.set_target_leds(('|'.join(leds)))
 
         #Get scores for teammate and opposite team and see if freeze rule is in effect
         if self.league:
@@ -200,22 +232,73 @@ class Game(cgame.Game):
                 self.frozen = False
                 players[actual_player].columns[3] = ('', 'str', 'game-red')
 
+        if self.debug_info:
+            print(f"Leds = {leds}")
+            self.debug.leds = [] # efface l'ancienne combinaison
+            self.debug.ho_one_cible(leds,True) 
+            if player_launch == 1 and actual_round == 1 and actual_player == 0:
+                if self.debug_replay or self.debug_record:
+                    self.debug_replay = self.debug.open_debug(self.debug_replay,self.debug_record)
+                    if self.debug_replay:
+                        self.actual_round = self.debug.load_debug(players,self.post_dart_check, self.nb_darts, self.Sugestions_cible)
         # Print debug output
         self.logs.log("DEBUG", self.infos)
         return return_code
 
+    def Sugestions_cible(self,players,actual_player,player_launch):
+        # Get Playing Suggestions
+        # Double IN or Master IN
+        leds = []
+        suggestion_color = self.colors[actual_player]
+        if None != self.display.colorset['suggestion-color-allplayer']:
+            suggestion_color = self.display.colorset['suggestion-color-allplayer']
+        if players[actual_player].points == 0 and (self.double_in or self.master_in):
+            if not players[actual_player].unlocked:
+                if self.double_in:
+                    leds.extend(f'D{i}#{suggestion_color}' for i in range(1, 21))
+
+                if self.master_in:
+                    leds.extend(f'T{i}#{suggestion_color}' for i in range(1, 21))
+                    leds.extend(f'D{i}#{suggestion_color}' for i in range(1, 21))
+                    leds.extend(f'S{l}#{suggestion_color}' for l in ['B'])
+                    leds.extend(f'D{l}#{suggestion_color}' for l in ['B'])
+        else :
+            # Possible zap ?
+            if self.zap:
+                for p in players:
+                    if actual_player != p.ident and p.score < players[actual_player].score:
+                        zapping = self.search_possibilities(players[actual_player].score - p.score, player_launch)
+                        if len(zapping) > 0: #ne prend en compte que si existe une solution
+                            leds.extend(f'{key}#{self.colors[p.ident]}' for key in zapping)
+                            self.possible_zaps.extend(f'{key}' for key in zapping)
+                            self.possible_zaps.append(f'@{p.ident}|')
+            # Possible win ?
+            self.possible_hits = self.search_possibilities(players[actual_player].score, player_launch)
+
+            # Display if there is a suggestion to display
+            if len(self.possible_hits) >= 1:
+                players[actual_player].columns[player_launch - 1] = (self.possible_hits[0], 'str', 'green')
+            if len(self.possible_hits) >= 2:
+                players[actual_player].columns[player_launch] = (self.possible_hits[1], 'str', 'green')
+            if len(self.possible_hits) >= 3:
+                players[actual_player].columns[player_launch + 1] = (self.possible_hits[2], 'str', 'green')
+                
+            leds.extend(f'{key}#{suggestion_color}' for key in self.possible_hits)
+            
+        return leds
+        
     def post_pre_dart_check(self, players, actual_round, actual_player, player_launch):
-        """
+        '''
         Called after player annoucement,...
-        """
+        '''
         if self.rpi.target_leds != '':
             return ['PRESSURE']
         return ['NOPRESSURE']
 
     def pnj_score(self, players, actual_player, level, player_launch):
-        """
+        '''
         Computer Strike
-        """
+        '''
         # Principe :
         #   Affecter à différentes possibilités un taux de réussite :
         #   - Pneu ou pas (L'expert ne fait jamais de pneu, le noob beaucoup)
@@ -321,9 +404,9 @@ class Game(cgame.Game):
         return score
 
     def update_stats(self, players, actual_player, hit):
-        """
+        '''
         Updates PPR / PPD ...
-        """
+        '''
         try:
             score = self.score_map[hit]
         except: # pylint: disable=bare-except
@@ -335,32 +418,40 @@ class Game(cgame.Game):
         players[actual_player].columns[6] = (players[actual_player].show_ppr(), 'int')
 
     def post_dart_check(self, hit, players, actual_round, actual_player, player_launch):
-        """
+        '''
         Function run after each dart throw - for example, add points to player
-        """
+        '''
 
         players[actual_player].add_dart(actual_round, player_launch, hit)
+        #debug Mode
+        if self.debug_info:
+            if self.debug_record:
+                self.debug.record(f"{actual_player}{hit}\n")
+            else:
+                if player_launch == 1: #se trouve en pre_dart mais en relecture on n'y repasse pas
+                    players[actual_player].pre_play_score = players[actual_player].score                    
+                print(f"actual_round, actual_player, hit")
+                print(f"{actual_round}, {actual_player}, {hit}")
+                print(f"subscore = players[actual_player].score - self.score_map[hit]")
+                print(f"subscore = {players[actual_player].score} - {self.score_map[hit]}")
 
-        return_code = 0
         # Define a var for substracted score
         subscore = players[actual_player].score - self.score_map[hit]
         #################################
         # Starting Ho One
 
         handler = self.init_handler()
-
-        if players[actual_player].score == self.starting_at:
+        handler['return_code'] = 0
+        
+        if players[actual_player].score == self.starting_at and not players[actual_player].unlocked:
             # All good opening cases
-            if not(self.double_in or self.master_in) \
-                   or ( \
-                       hit[:1] == 'D' \
-                       or (self.master_in and (hit[:1] == 'T' or hit[1:] == 'B')) \
-                    ):
+            if not(self.double_in or self.master_in) or \
+                   (  hit[:1] == 'D' or (self.master_in and (hit[:1] == 'T' or hit[1:] == 'B'))):
                 handler['show'] = (players[actual_player].darts, hit, True)
                 handler['sound'] = hit
-
                 players[actual_player].score = subscore # Substract
                 self.update_stats(players, actual_player, hit)
+                players[actual_player].unlocked = True #empeche de devoir refaire un double / triple avec le mode Zap
 
                 if self.zap:
                     index = 0
@@ -393,6 +484,10 @@ class Game(cgame.Game):
                 self.winner = players[actual_player].ident
                 players[actual_player].score = 0
                 self.update_stats(players, actual_player, hit)
+                if self.equal and actual_player < len(players)-1:
+                    # Next player can equal
+                    handler['return_code'] = 1 # pas le dernier joueur
+                    players[actual_player].points -= players[actual_player].round_points
             # else it is a fail
             else:
                 # Next player
@@ -421,7 +516,6 @@ class Game(cgame.Game):
             if handler['sound'] is None:
                 handler['sound'] = hit
                 handler['show'] = (players[actual_player].darts, hit, True)
-
         # Any other case it is a fail
         else:
             handler['return_code'] = 1
@@ -429,36 +523,110 @@ class Game(cgame.Game):
             players[actual_player].score = players[actual_player].pre_play_score
             players[actual_player].points -= players[actual_player].round_points #for ppd, ppr
 
-        # Check last round
-        if actual_round >= self.max_round and actual_player == self.nb_players - 1 \
+        #check equal mode dans le cas du dernier joueur avec 3 darts lancé ou subscore <= 0 (dépassement ou égaliser)
+        if self.equal and actual_player == len(players)-1 and ((player_launch == int(self.nb_darts)) or (subscore <= 0)) and actual_round < self.max_round:
+            self.winner = -1
+            egalite = -1
+            for p in players:
+                if p.score == 0 : #score gagnant
+                    self.winner = p.ident
+                    egalite += 1
+                    handler['return_code'] = 3 #gagnant
+            if egalite > 0:  
+                    handler['return_code'] = 2 #game over car égalité sur un score de 0 avec au moins 2 joueurs
+                    
+        # Check last round dans le cas ou celui-ci est atteint alors equal mode est ignoré
+        elif actual_round == self.max_round and actual_player == self.nb_players - 1 \
                 and player_launch == int(self.nb_darts):
             self.infos += f"Last round reached ({actual_round}){self.lf}"
             handler['return_code'] = 2
-
+            #Ajout d'un gagnant au point by Manu
+            self.winner = self.check_winner(players)
+            if self.winner is not None:
+                handler['return_code'] = 3
         # Store what he played in the table
         players[actual_player].columns[player_launch - 1] = (self.score_map[hit], 'int')
 
         self.refresh_stats(players, actual_round)
+        #debug
+        if self.debug_info and handler['return_code'] > 1:
+            self.debug.closeFile()
 
-        # Next please !
         return handler
+    
+    def check_winner(self, players):
+        '''
+        Method to check WHO is the winnner
+        '''
+        deuce = False
+        best_score = self.starting_at
+        best_player = None
+        for player in players:
+            if player.score < best_score: # le plus petit score gagne
+                best_score = player.score
+                deuce = False #necessary to reset deuce if there is a deuce with a higher score !
+                best_player = player.ident
+            elif player.score == best_score:
+                deuce = True
+                best_player = None
+        if deuce:
+            self.infos += f"There is a score deuce ! Two people have {best_score}.{self.lf}"
+            self.infos += f"No winner!{self.lf}"
+        return best_player # None si égalité, sinon plus petit score
 
     def miss_button(self, players, actual_player, actual_round, player_launch):
-        """
+        '''
         Whan missed button pressed
-        """
+        '''
+        return_code = 0
+        players[actual_player].add_dart(actual_round, player_launch, 'MISS', hit_value=0)
+        self.display.play_sound('treasure_crane_jaune')
         self.logs.log("DEBUG", f"MissButtonPressed : {player_launch}")
         players[actual_player].columns[player_launch - 1] = ('tyre', 'image')
-        players[actual_player].darts_thrown += 1
+        if player_launch == int(self.nb_darts):
+            if self.debug_info and self.debug_record:
+                self.debug.record(f"{actual_player}EPB\n") #Early player button
+            return_code = self.early_player_button(players, actual_player, actual_round)
+        # Or just increment dart thrown
+        else:
+            players[actual_player].darts_thrown += 1
+            if self.debug_info and self.debug_record:
+                self.debug.record(f"{actual_player}MB\n") #miss button
         # Refresh stats
         players[actual_player].columns[5] = (players[actual_player].show_ppd(), 'int')
         players[actual_player].columns[6] = (players[actual_player].avg(actual_round), 'int')
         self.refresh_stats(players, actual_round)
+        return return_code
+        
+    def early_player_button(self, players, actual_player, actual_round):
+        '''
+        Pushed Player Early
+        '''
+        self.winner = -1
+        if actual_round == self.max_round and actual_player == len(players) - 1:
+            self.winner = self.check_winner(players)
+            if self.winner != None:
+                self.infos += f"Current winner is Player {self.winner}"
+                return 3
+            return 2
+        elif actual_player == len(players) - 1: #pas au dernier tour mais un gagnant à zero est possible a cause du mode deuce
+            egalite = -1
+            for p in players:
+                if p.score == 0 : #score gagnant
+                    self.winner = p.ident
+                    egalite += 1
+            if egalite > 0:
+                return 2 #game over egalité cas possible si il y a plus de 2 joueurs (1 et 2 à 0 , 3 fini son tour)....
+            elif egalite == 0:
+                return 3 #gagnant
+        #rien le jeu continue
+        return 1
+
 
     def search_possibilities(self, score, player_launch):
-        """
+        '''
         Used to help drunken player
-        """
+        '''
         #/!\return value must be iterable and must have at least 3 values
         return_value = []
         # 1 dart possibility
@@ -496,17 +664,17 @@ class Game(cgame.Game):
         return return_value
 
     def refresh_stats(self, players, actual_round):
-        """
+        '''
         Method to frefresh Each player.stat - Specific to every game
-        """
+        '''
         for player in players:
             player.stats['Points Per Round'] = player.show_ppr()
             player.stats['Points Per Dart'] = player.show_ppd()
 
     def next_game_order(self, players):
-        """
+        '''
         Define the next game players order, depending of previous games' score
-        """
+        '''
         scores = {}
         # Create a dict with player and his score
         for player in players:
@@ -518,21 +686,21 @@ class Game(cgame.Game):
         return list(new_order.keys())
 
     def get_score(self, player):
-        """
+        '''
         Return score of player
-        """
+        '''
         return player.score
 
     def next_set_order(self, players):
-        """
+        '''
         Sort players for next set
-        """
+        '''
         players.sort(key=self.get_score, reverse=True)
 
     def mate(self, actual_player, nb_players):
-        """
+        '''
         Find your teammate
-        """
+        '''
         mate = -1
         if actual_player < nb_players / 2:
             mate = actual_player + nb_players / 2
@@ -541,9 +709,9 @@ class Game(cgame.Game):
         return int(mate)
 
     def check_handicap(self, players):
-        """
+        '''
         Check for handicap and record appropriate marks for player
-        """
+        '''
         self.logs.log("DEBUG", "Checking for handicaps!")
         list_ppd = []
         for player in players:
@@ -555,10 +723,10 @@ class Game(cgame.Game):
         return self.handicap.hoonehandicap(list_ppd, self.starting_at, players)
 
     def check_players_allowed(self, nb_players):
-        """
+        '''
         Check if number of players is ok according to options
-        """
-        if self.league and nb_players > 4:
+        '''
+        if self.league and nb_players != 4:
             return False
 
         return nb_players <= 8
@@ -726,7 +894,8 @@ class Game(cgame.Game):
                     player_x += int(player_width / 2)
 
                 self.display.blit_rect(player_x, player_y, player_width, heading_height, heading_color)
-                self.display.blit_rect(player_x, player_y + heading_height, player_width, player_height - heading_height, player_color)
+#                self.display.blit_rect(player_x, player_y + heading_height, player_width, player_height - heading_height, player_color)
+                self.display.blit_rect(player_x, player_y + heading_height, player_width, player_height - heading_height, self.colors[player.ident])
 
                 if self.display.colorset['game-bg'] is not None:
                     pygame.draw.line(self.display.screen, self.display.colorset['game-bg'], (player_x, player_y + heading_height), (player_x + player_width, player_y + heading_height), 2)
@@ -737,8 +906,8 @@ class Game(cgame.Game):
                     align = 'Left'
                 else:
                     align = 'Right'
-                pygame.draw.line(self.display.screen, color, (player_x, player_y), (player_x + player_width, player_y), self.margin_2)
-                self.display.blit_text(name, player_x, player_y - self.margin_2, player_width, heading_height + self.margin_2, color=player_color, dafont='Impact', align=align)
+                #pygame.draw.line(self.display.screen, color, (player_x, player_y), (player_x + player_width, player_y), self.margin_2)
+                self.display.blit_text(name, player_x, player_y - self.margin, player_width, heading_height + self.margin_2, color=player_color, dafont='Impact', align=align)
                 self.display.blit_text(score, player_x, player_y + heading_height, player_width, player_height - heading_height, color=heading_color, dafont='Impact', align=align)
             else:
                 # For actual player's infos
@@ -783,10 +952,13 @@ class Game(cgame.Game):
             right_y += right_height
 
         # Display possibilities
+        if self.debug_info:
+            self.debug.ho_one_cible(affiche=True)
 
         if len(self.possible_hits) > 0 and not end_of_game:
             text = ' / '.join(self.possible_hits)
-            self.display.blit_text(f'{text}', right_x, right_y + 3 * right_height, right_width, right_height * 2, color=self.display.colorset['game-green'], dafont='Impact', align='Left', margin=False)
+            self.display.blit_text(f'{text}', right_x, right_y + 3 * right_height, right_width, right_height * 2, color=self.colors[8], dafont='Impact', align='Left', margin=False, Alpha = 255)
+            
 
         # Game's options
         option_height = right_height / 2
@@ -797,13 +969,13 @@ class Game(cgame.Game):
                 if option == 'theme':
                     continue
                 if value is True:
-                    self.display.blit_text(f'{game}-{option}', right_x, option_y, right_width, option_height, color=self.display.colorset['menu-ok'], dafont='Impact', align='Right', margin=False, divider=1)
+                    self.display.blit_text(f'{game}-{option}', right_x, option_y, right_width, option_height, color=self.display.colorset['menu-ok'], dafont='Impact', align='Right', margin=False, divider=1, game=game)
                 elif value is False:
-                    self.display.blit_text(f'{game}-{option}', right_x, option_y, right_width, option_height, color=self.display.colorset['menu-ko'], dafont='Impact', align='Right', margin=False, divider=1)
+                    self.display.blit_text(f'{game}-{option}', right_x, option_y, right_width, option_height, color=self.display.colorset['menu-ko'], dafont='Impact', align='Right', margin=False, divider=1, game=game)
                 else:
-                    self.display.blit_text(f'{self.display.lang.translate(game + "-" + option)} : {value}', right_x, option_y, right_width, option_height, color=self.display.colorset['game-option'], dafont='Impact', align='Right', margin=False, divider=1)
+                    self.display.blit_text(f'{self.display.lang.translate(game + "-" + option, game)} : {value}', right_x, option_y, right_width, option_height, color=self.display.colorset['game-option'], dafont='Impact', align='Right', margin=False, divider=1, game=game)
                 option_y -= option_height
-        self.display.blit_text(f"{game.replace('_', ' ')}", right_x, option_y - option_height, right_width, option_height * 2, color=(255, 0, 0), dafont='Impact', align='Right', margin=False)
+        self.display.blit_text(f"{game.replace('_', ' ')}", right_x, option_y - option_height, right_width, option_height * 2, color=(255, 0, 0), dafont='Impact', align='Right', margin=False, game=game)
 
         # Dartts' scores
         mid_x = int(self.display.res['x'] / 4) + self.margin
@@ -842,7 +1014,7 @@ class Game(cgame.Game):
         old_score = -100
         for player in t_players:
             score = player.score
-            color = player.color
+            color = self.colors[player.ident] #player.color
 
             round_pos_y = min_pos_y + int((max_pos_y - min_pos_y) * score / self.starting_at)
             text_pos_y = round_pos_y
@@ -856,11 +1028,26 @@ class Game(cgame.Game):
             pygame.draw.line(self.display.screen, color, (round_pos_x + line_add, round_pos_y + line_add), (round_pos_x + add + int(self.display.res['x'] / 12), round_pos_y + line_add), 5)
             index += 1
             old_score = score
+            
+        #zap display information    
+        if len(self.possible_zaps) > 0 and not end_of_game and self.zap:
+            text = ' / '.join(self.possible_zaps)
+            lignes = text.count("|") # recherche du pipe pour couper la ligne
+            posy = right_y
+            while lignes > 0: #forcement superieur à 0 si du text présent (minimum text = 'S1 / |'
+                ou = text.find("|") # position du pipe
+                aff = text[:text.find("@")-2]
+                whois = int(text[text.find("@")+1:ou]) # p.ident
+                self.display.blit_text(f'{aff}', 250, (posy - 2 * right_height) + 3 * right_height, right_width, right_height, color=self.colors[whois], dafont='Impact', align='Left', margin=False, Alpha = 255)
+                text = text[ou+4:] # car suivant sera /  exemple sur 2 lignes:  S12 / | / S15 / | 
+                lignes = text.count("|") # mise à jour
+                posy += right_height # on saute une ligne à l'écran pour écrire la suite au cas ou
 
         height = int(self.display.res['y'] / 24)
         pos_y = mid_y - height
 
         for index in range(3):
+        
             if index == rem_darts - 1:
 
                 # scrolling dart
@@ -923,9 +1110,9 @@ class Game(cgame.Game):
         pygame.draw.line(self.display.screen, col, (rect[0] + rect[2], rect[1]), (rect[0] + rect[2], rect[1] + rect[3]), 2)
 
     def display_hit(self, rectangles, players, actual_player, player_launch, hit):
-        """
+        '''
         Nice hit animation
-        """
+        '''
 
         if hit == 'MISSDART':
             return

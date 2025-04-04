@@ -127,35 +127,44 @@ class Cfile():
         theme_dir = f'{self.theme_dir}/{sub_dir}'
         personnal_dir = f"{self.config.user_dir}/{sub_dir}"
         official_dir = f"{self.config.root_dir}/{sub_dir}"
+        
+        directories = [theme_dir, personnal_dir, official_dir]
+        for pathDirectory in directories:
 
-        for extension in extensions:
-            full_file_name = f"{file_name.replace(f'.{extension}', '')}.{extension}"
+            if file_type == 'sound':
+                    print(f"--> {theme_dir}")
 
-            # Search for file first
-            # Search in theme first
-            # then in personnal folder
-            # else in official folder
-            #if file_type != 'fonts':
-            #    self.logs.log("DEBUG", f"Search for {theme_dir}/{full_file_name}")
-            if isfile(f'{theme_dir}/{full_file_name}'): #and getsize(f'{theme_dir}/{full_file_name}') > 0:
-            #    if file_type != 'fonts':
-            #        self.logs.log("DEBUG", f"Return {theme_dir}/{full_file_name} from 1")
-                return f'{theme_dir}/{full_file_name}'
+                    if isdir(theme_dir + "/game_start"):
+                        print("il existe")
+            
+            for extension in extensions:
+                full_file_name = f"{file_name.replace(f'.{extension}', '')}.{extension}"
 
-            #if file_type != 'fonts':
-            #    self.logs.log("DEBUG", f"Search for {personnal_dir}/{full_file_name}")
-            if isfile(f'{personnal_dir}/{full_file_name}') and getsize(f'{personnal_dir}/{full_file_name}') > 0:
-            #    if file_type != 'fonts':
-            #        self.logs.log("DEBUG", f"Return {theme_dir}/{full_file_name} from 2")
-                return f'{personnal_dir}/{full_file_name}'
+                # Search for file first
+                # Search in theme first
+                # then in personnal folder
+                # else in official folder
+                #if file_type != 'fonts':
+                #    self.logs.log("DEBUG", f"Search for {theme_dir}/{full_file_name}")
+                if isfile(f'{pathDirectory}/{full_file_name}') and getsize(f'{pathDirectory}/{full_file_name}') > 0:
+                #    if file_type != 'fonts':
+                #        self.logs.log("DEBUG", f"Return {theme_dir}/{full_file_name} from 1")
+                    return f'{pathDirectory}/{full_file_name}'
 
-            # Else, in official folder
-            #if file_type != 'fonts':
-            #    self.logs.log("DEBUG", f"Search for {official_dir}/{full_file_name}")
-            if isfile(f'{official_dir}/{full_file_name}') and getsize(f'{official_dir}/{full_file_name}') > 0:
-            #    if file_type != 'fonts':
-            #        self.logs.log("DEBUG", f"Return {theme_dir}/{full_file_name} from 3")
-                return f'{official_dir}/{full_file_name}'
+                #if file_type != 'fonts':
+                #    self.logs.log("DEBUG", f"Search for {personnal_dir}/{full_file_name}")
+                #if isfile(f'{personnal_dir}/{full_file_name}') and getsize(f'{personnal_dir}/{full_file_name}') > 0:
+                #    if file_type != 'fonts':
+                #        self.logs.log("DEBUG", f"Return {theme_dir}/{full_file_name} from 2")
+                #    return f'{personnal_dir}/{full_file_name}'
+
+                # Else, in official folder
+                #if file_type != 'fonts':
+                #    self.logs.log("DEBUG", f"Search for {official_dir}/{full_file_name}")
+                #if isfile(f'{official_dir}/{full_file_name}') and getsize(f'{official_dir}/{full_file_name}') > 0:
+                #    if file_type != 'fonts':
+                #        self.logs.log("DEBUG", f"Return {theme_dir}/{full_file_name} from 3")
+                #    return f'{official_dir}/{full_file_name}'
 
         self.logs.log("DEBUG", "Return None")
         return None

@@ -13,7 +13,14 @@ HEADERS = ['Hour', 'D1', 'D2', 'D3', '-', '-', '-'] # Columns headers - Must be 
 OPTIONS = {'theme': 'default', 'max_round': 7, 'Double': False, 'Triple': False, 'Bull': False, 'Numbers': False, 'Jump': False, 'Time': 0} # Dictionnay of options
 NB_DARTS = 3
 GAME_RECORDS = {'Score':'DESC', 'Reached Score':'DESC', 'Hits':'DESC'}
+VERSION = '1.00'
 
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 1 and nb_players <= 12, VERSION, 12
+    
 class CPlayerExtended(cplayer.Player):
     '''
     Extended Player class
@@ -285,6 +292,17 @@ class Game(cgame.Game):
                 return_code = 2
         return return_code
 
+    def miss_button(self, players, actual_player, actual_round, player_launch):
+        '''
+        Miss button
+        '''
+        print('miss')
+        #players[actual_player].columns[6] = (self.moyenne, 'int')
+        players[actual_player].columns[player_launch] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        players[actual_player].darts_thrown += 1
+        # play penality sound
+        self.display.play_sound('penality')
 
     def refresh_stats(self, players, actual_round):
         '''

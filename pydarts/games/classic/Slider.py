@@ -24,7 +24,14 @@ GAME_RECORDS = {'Points Per Round': 'DESC', 'Points Per Dart': 'DESC'}
 NB_DARTS = 3  # Total darts the player has to play
 LOGO = 'Slider.png'
 HEADERS = ["D1", "D2", "D3", "", "Rnd", "", "JOUE"] # Columns headers - Must be a string
+VERSION = '1.00'
 
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 1 and nb_players <= 12, VERSION, 12
+    
 class CPlayerExtended(cplayer.Player):
     """
     Exetended player class
@@ -489,53 +496,22 @@ class Game(cgame.Game):
 
 
 
-    '''
-    def find_deads(self, players):
-        """
-        Sudden death option :
-        After each round, the lowest score (if alone) is killed
-        """
-        min_score = None
-        nb_min = 0
-        for i in range(0, len(players)):
-            if not players[i].alive:
-                continue
-
-            if min_score is None:
-                min_score = players[i].score
-                dead = i
-                nb_min = 1
-            elif players[i].score == min_score:
-                nb_min += 1
-            elif players[i].score < min_score:
-                min_score = players[i].score
-                dead = i
-                nb_min = 1
-
-        if nb_min == 1:
-            players[dead].lives -= 1
-            #players[dead].columns[3] = (players[dead].lives, 'int')
-            if players[dead].lives < 1:
-                return dead
-            return None
-        return None
-
-
-    def get_winner(self, players):
-        """
-        Sudden death option :
-        After each round, the winner is the last alive player
-        """
-        nb_winner = 0
-        for i in range(0, len(players)):
-            if players[i].alive:
-                winner = i
-                nb_winner += 1
-
-        if nb_winner == 1:
-            return winner
-        return None
-    '''   
+    def miss_button(self, players, actual_player, actual_round, player_launch):
+        '''
+        Miss button
+        '''
+        print('miss')
+        #players[actual_player].columns[6] = (self.moyenne, 'int')
+        players[actual_player].columns[player_launch-1] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        players[actual_player].darts_thrown += 1
+        self.rate += 1
+        if self.rate == 3 :
+                print('rate est a 0 - descend de 1 car rien touche')
+                a = int(players[actual_player].leds)
+                b = a - 1 
+                players[actual_player].leds = str(b)
+                players[actual_player].columns[6] = (players[actual_player].leds, 'int')  
      
     def get_score(self, player):
         """

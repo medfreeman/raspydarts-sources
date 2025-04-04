@@ -9,6 +9,10 @@
 # -*- coding: utf-8 -*-
 # Game by ... LaDite
 ########
+
+# Versions
+# 1.00
+
 import random
 from include import cplayer
 from include import cgame
@@ -17,12 +21,19 @@ from include import cgame
 ############
 # Game Variables
 ############
+VERSION = '1.00'
 OPTIONS = {'theme': 'default', 'max_round': 10, 'master': False}
 GAME_RECORDS = {'Points Per Round': 'DESC', 'Points Per Dart': 'DESC'}
 NB_DARTS = 3  # Total darts the player has to play
 LOGO = 'Bowling.png'
 HEADERS = ['PIST', '1', '2', '', 'Rnd', 'SPAR', 'STRK'] # Columns headers - Must be a string
 
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players <= 12, VERSION, 12
+    
 class CPlayerExtended(cplayer.Player):
     """
     Exetended player class
@@ -873,6 +884,14 @@ class Game(cgame.Game):
 
         self.display.message([self.display.lang.translate('Bowling-miss')], 1000, None, 'middle', 'big')
         return 1
+        
+    def miss_button(self, players, actual_player, actual_round, player_launch):
+        '''
+        Miss button
+        '''
+        players[actual_player].columns[player_launch+1] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        players[actual_player].darts_thrown += 1       
 
     def post_round_check(self, players, actual_round, actual_player):
         """

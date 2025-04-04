@@ -4,18 +4,30 @@
 import random
 from include import cplayer
 from include import cgame
-#
+#Versions
+# 1.01
+# Correction plantage du jeu au coup suivant l'appuye du bouton missdart
+# Ajout option first_dart:
+#	- True : Prend les points de la première flechette comme référence
+#	- False: Prend les plus haut points comme référence
+# Montre les suggestions des points possibles sur la cible (segment de couleur) après la 1ere fléchette
 
 ############
 # Game Variables
 ############
-
-OPTIONS = {'theme': 'default', 'max_round': 10, 'simple50' : False, 'penality': 10}
+VERSION = '1.01'
+OPTIONS = {'theme': 'default', 'max_round': 10, 'first_dart' : False, 'simple50' : False, 'penality': 10, 'colorised': False}
 GAME_RECORDS = {'Points Per Round': 'DESC', 'Points Per Dart': 'DESC'}
 NB_DARTS = 3  # Total darts the player has to play
 LOGO = 'Batard.png'
 HEADERS = ['D1', 'D2', 'D3', '', 'Rnd', 'PPD', 'PPR'] # Columns headers - Must be a string
 
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 1 and nb_players <= 12, VERSION, 12
+    
 class CPlayerExtended(cplayer.Player):
     '''
     Exetended player class
@@ -38,10 +50,13 @@ class Game(cgame.Game):
         self.logo = LOGO
         self.headers = HEADERS
         self.options = options
+        self.game_is_ok_for_color = options['colorised']
         #  Get the maximum round number
         self.max_round = int(options['max_round'])
         self.simple = options['simple50']
-
+        self.first_dart = options['first_dart']
+        self.rpi = rpi
+        
         if self.simple:
             self.score_map.update({'SB': 50})
         else:
@@ -78,7 +93,7 @@ class Game(cgame.Game):
         if player_launch == 1:
             players[actual_player].round_points = 0
             players[actual_player].pre_play_score = players[actual_player].score
-
+            self.dart = 0
             #Reset display Table
             players[actual_player].columns = []
             # Clean all next boxes
@@ -98,6 +113,11 @@ class Game(cgame.Game):
         # Clean next boxes
         for i in range(player_launch - 1, self.nb_darts):
             players[actual_player].columns[i] = ('', 'int')
+            
+            
+        leds = self.suggestions_cible(players,actual_player, player_launch)
+        print(f"Suggestions_cible  = {leds}")
+        self.rpi.set_target_leds(('|'.join(leds)))
 
         # Print debug output
         self.logs.log('DEBUG', self.infos)
@@ -128,6 +148,35 @@ class Game(cgame.Game):
             return best_player
         return -1
 
+    def suggestions_cible(self,players,actual_player,player_launch):
+        # Get Playing Suggestions
+        # Double IN or Master IN
+        leds = []
+        if player_launch > 1:
+            for i in range (1,21):
+                if i >= self.dart:
+                    leds.extend(f'S{j}#{self.colors[0]}' for j in [i])
+                if i*2 >= self.dart:
+                    leds.extend(f'D{j}#{self.colors[0]}' for j in [i])
+                if i*3 >= self.dart:
+                    leds.extend(f'T{j}#{self.colors[0]}' for j in [i])
+            if self.dart <= 25:    
+                leds.extend(f'S{l}#{self.colors[0]}' for l in ['B'])
+            if self.dart <= 50:    
+                leds.extend(f'D{l}#{self.colors[0]}' for l in ['B'])
+        else:
+            #cible pour 1er lancer
+            leds.extend(f'S{l}#white' for l in [1,4,5,6,9,11,15,16,17,19])
+            leds.extend(f'S{l}#blue' for l in [2,3,7,8,10,12,13,14,18,20])
+            leds.extend(f'D{l}#blue' for l in [1,4,5,6,9,11,15,16,17,19])
+            leds.extend(f'D{l}#red' for l in [2,3,7,8,10,12,13,14,18,20])
+            leds.extend(f'T{l}#blue' for l in [1,4,5,6,9,11,15,16,17,19])
+            leds.extend(f'T{l}#red' for l in [2,3,7,8,10,12,13,14,18,20])
+            leds.extend(f'S{l}#blue' for l in ['B'])
+            leds.extend(f'D{l}#red' for l in ['B'])
+                        
+        return leds
+
     def post_dart_check(self, hit, players, actual_round, actual_player, player_launch):
         '''
         Function run after each dart throw - for example, add points to player
@@ -140,14 +189,17 @@ class Game(cgame.Game):
         score = self.score_map[hit]
 
 ### DETERMINE LA VALEUR DE LA PREMIERE FLECHE
-        self.dart = players[actual_player].columns[0]
-
-        if player_launch >= 2 and score < self.dart[0]:
+        if player_launch >= 2 and score < self.dart:
             self.logs.log('DEBUG', f'score fleche {player_launch} inferieur a fleche 1 : {score}')
             score = -score
             handler['sound'] = 'penality'
         else:
-            score = score
+            if not self.first_dart: #on prend les plus haut points
+                if self.dart < score:
+                    self.dart = score
+            else:
+                if player_launch == 1: #on prend les points de la première fléchette comme référence
+                    self.dart = score
 
         players[actual_player].add_dart(actual_round, player_launch, hit, score=score)
 
@@ -189,6 +241,7 @@ class Game(cgame.Game):
         '''
         players[actual_player].score -= self.penality
         players[actual_player].columns[player_launch-1] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
         players[actual_player].darts_thrown += 1
         # Refresh stats
         players[actual_player].columns[5] = (players[actual_player].show_ppd(), 'int')
@@ -238,11 +291,10 @@ class Game(cgame.Game):
         When PLAYER BUTTON is pressed on last round of last player
         '''
         if actual_round >= self.max_round:
-            winner = self.check_winner(players)
-            if winner is not None:
-                self.winner = winner
+            self.winner = self.check_winner(players)
+            if self.winner is not None:
                 self.logs.log('DEBUG', f'winner is {winner}')
-                return winner
+                return self.winner
             elif actual_round >= self.max_round:
                 # Last round, last player
                 return self.best_score(players)
@@ -250,6 +302,7 @@ class Game(cgame.Game):
 
     def check_winner(self, players):
         nb_winner = 0
+        winner = None
         for i in range(0, len(players)):
             if players[i].alive:
                 winner = i

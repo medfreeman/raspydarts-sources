@@ -7,6 +7,7 @@
 # Game by ... LaDite
 ########
 import random
+from include import craspberry
 from include import cplayer
 from include import cgame
 #
@@ -14,7 +15,8 @@ from include import cgame
 ############
 # Game Variables
 ############
-OPTIONS = {'theme': 'default', 'max_round': 20, 'rouge': 6, 'table1': True, 'alea': True}
+VERSION = '1.00'
+OPTIONS = {'theme': 'default', 'max_round': 20, 'rouge': 6, 'table1': True, 'alea': True, 'colorised': False}
 GAME_RECORDS = {'Points Per Round': 'DESC', 'Points Per Dart': 'DESC'}
 NB_DARTS = 99  # Total darts the player has to play
 LOGO = 'Snooker.png'
@@ -22,10 +24,10 @@ HEADERS = ['D1', 'D2', 'D3', '', 'Rnd', 'PPD', 'PPR'] # Columns headers - Must b
 COLORS = {'2': 'yellow', '3': 'green', '4': 'orange', '5': 'blue', '6': 'purple', '7': 'white'}
 
 def check_players_allowed(nb_players):
-   '''
-   Return the player number max for a game.
-   '''
-   return nb_players < 6
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players <= 6, VERSION, 6
 
 class CPlayerExtended(cplayer.Player):
     """
@@ -38,8 +40,7 @@ class CPlayerExtended(cplayer.Player):
         for record in GAME_RECORDS:
             self.stats[record] = '0'
 
-        self.columns[6] = ['Snooker-rouge', 'image']
-        self.character = 0
+        self.character = 0 #ne sert a rien  ici
 
 
 class Game(cgame.Game):
@@ -49,7 +50,8 @@ class Game(cgame.Game):
     def __init__(self, display, game, nb_players, options, config, logs, rpi, dmd, video_player):
         super().__init__(display, game, nb_players, options, config, logs, rpi, dmd, video_player)
         self.game_records = GAME_RECORDS
-        self.nb_darts = NB_DARTS
+#        self.nb_darts = NB_DARTS #nooooon
+        
         self.logo = LOGO
         self.headers = HEADERS
         self.options = options
@@ -57,13 +59,17 @@ class Game(cgame.Game):
         self.max_round = int(options['max_round'])
         self.winner = None
         self.video_player = video_player
+        self.game_is_ok_for_color = options['colorised']
+        self.played_video = None
+        
 
 ### declaration variable
         self.leds = True
         self.couleur = False
         self.next = 0
         self.rouge = int(options['rouge'])
-
+        #nombre de bille rouge  + 6 couleurs + 1 = nombre total de bille pour fermer un tapis de snooker
+        self.nb_darts = self.rouge + 7 # les billes de couleur sont remises tant qu'il y a des rouges 
         self.liste_triee = ['2']
 
         self.headers[6] = 'CLR'
@@ -76,6 +82,9 @@ class Game(cgame.Game):
         self.table1 = options['table1']
         self.show_segment = False
         self.show_dmd = False
+        
+        ### pour contrer la double penalite
+        self.missdarts = True
 
     def penalite(self, players, actual_player):
         self.logs.log('WARNING', 'ajout points aux advs car penalite (couelur) - boucle FOR')
@@ -84,6 +93,7 @@ class Game(cgame.Game):
         for player in players:
             if player.ident != actual_player:
                 player.score += 4
+        self.next = 1
 
     def pre_dart_check(self, players, actual_round, actual_player, player_launch):
         """
@@ -152,6 +162,7 @@ class Game(cgame.Game):
                 players[actual_player].targets = self.TTT
                 players[actual_player].targets_rouge = self.TTT_rouge
                 players[actual_player].targets_couleur = self.TTT_couleur
+                self.nb_darts = self.rouge + 7
 
         # Set score at startup
         if actual_round == 1 and player_launch == 1 and actual_player == 0:
@@ -168,7 +179,7 @@ class Game(cgame.Game):
                 player.couleur = False
                 player.allcouleur = False
                 player.test = False
-
+                player.columns[6] = ['Snooker-rouge', 'image']
         # Each new player
         if player_launch == 1:
 
@@ -399,7 +410,7 @@ class Game(cgame.Game):
 
                             self.TTT = players[actual_player].targets
                             self.TTT_rouge = players[actual_player].targets_rouge
-
+                            players[actual_player].columns[0] = [hit, 'str']
                             ### active la couleur
                             self.couleur = True
                             ### ajoute le score
@@ -408,14 +419,17 @@ class Game(cgame.Game):
                             self.next = 0
 
                             #joue video bille rouge
-                            self.video_player.play_video(self.display.file_class.get_full_filename('snooker/rouge', 'videos'))
+                            self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/rouge', 'videos'))
 
                         elif (hit+'#yellow') in players[actual_player].targets or (hit+'#green') in players[actual_player].targets or (hit+'#orange') in players[actual_player].targets or (hit+'#blue') in players[actual_player].targets or (hit+'#purple') in players[actual_player].targets or (hit+'#white') in players[actual_player].targets:
 
                             score = 0
+                            players[actual_player].columns[0] = ['cross_mark', 'image']
                             self.penalite(players, actual_player)
+                            
                         else:
                             ### NE TOUCHE PAS UNE BILLE ROUGE
+                            players[actual_player].columns[0] = ['cross_mark', 'image']
                             print('dans else touche pas de bille rouge et couleur')
                             self.penalite(players, actual_player)
 
@@ -434,7 +448,9 @@ class Game(cgame.Game):
                         if (hit+'#yellow') in players[actual_player].targets or (hit+'#green') in players[actual_player].targets or (hit+'#orange') in players[actual_player].targets or (hit+'#blue') in players[actual_player].targets or (hit+'#purple') in players[actual_player].targets or (hit+'#white') in players[actual_player].targets:
 
                                 score = int(hit[1:])
-
+                                
+                                players[actual_player].columns[0] = [hit, 'str']
+                                
                                 ### desactive/active la couleur
                                 if len(players[actual_player].targets) == 18:
                                         self.couleur = True
@@ -453,19 +469,20 @@ class Game(cgame.Game):
                                 #player_launch -= 1
                                 #joue video bille couleur
                                 if int(hit[1:]) == 2:
-                                    self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/jaune', 'videos'))
+                                    self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/jaune', 'videos'))
                                 elif int(hit[1:]) == 3:
-                                    self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/vert', 'videos'))
+                                    self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/vert', 'videos'))
                                 elif int(hit[1:]) == 4:
-                                    self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/marron', 'videos'))
+                                    self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/marron', 'videos'))
                                 elif int(hit[1:]) == 5:
-                                    self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/bleu', 'videos'))
+                                    self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/bleu', 'videos'))
                                 elif int(hit[1:]) == 6:
-                                    self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/rose', 'videos'))
+                                    self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/rose', 'videos'))
                                 elif int(hit[1:]) == 7:
-                                    self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/noir', 'videos'))
+                                    self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/noir', 'videos'))
 
                         else:
+                            players[actual_player].columns[0] = ['cross_mark', 'image']
                             ### NE TOUCHE PAS UNE BILLE DE COULEUR
                             self.penalite(players, actual_player)
 
@@ -542,6 +559,8 @@ class Game(cgame.Game):
                     score = int(liste_triee[0])
                     self.video = score
                     
+                    players[actual_player].columns[0] = [hit, 'str']
+                    
                     try:
                         while True:
                             players[actual_player].targets.remove(f'S{hit[1:]}#{color}')
@@ -565,17 +584,17 @@ class Game(cgame.Game):
 
                     ### joue la video
                     if self.video == 2:
-                        self.video_player.play_video(self.display.file_class.get_full_filename('snooker/jaune', 'videos'))
+                        self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/jaune', 'videos'))
                     elif self.video == 3:
-                        self.video_player.play_video(self.display.file_class.get_full_filename('snooker/vert', 'videos'))
+                        self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/vert', 'videos'))
                     elif self.video == 4:
-                        self.video_player.play_video(self.display.file_class.get_full_filename('snooker/marron', 'videos'))
+                        self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/marron', 'videos'))
                     elif self.video == 5:
-                        self.video_player.play_video(self.display.file_class.get_full_filename('snooker/bleu', 'videos'))
+                        self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/bleu', 'videos'))
                     elif self.video == 6:
-                        self.video_player.play_video(self.display.file_class.get_full_filename('snooker/rose', 'videos'))
+                        self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/rose', 'videos'))
                     elif self.video == 7:
-                        self.video_player.play_video(self.display.file_class.get_full_filename('snooker/noir', 'videos'))
+                        self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/noir', 'videos'))
 
                     self.video = 0
 
@@ -584,11 +603,13 @@ class Game(cgame.Game):
                     self.display.message([self.display.lang.translate('Snooker-break')], 1000, None, 'middle', 'big')
                     print('BREAK - ajout points aux advs car SB ou DB TOUCHE -  boucle FOR')
                     self.dmd.send_text("BREAK", sens=None, iteration=None)
+                    players[actual_player].columns[0] = ['SNOOK', 'str']
                     score = 4
 
                 else:
                     ### NE TOUCHE PAS LA BILLE DE COULEUR LA PLUS PETITE
                     score = 0
+                    players[actual_player].columns[0] = ['cross_mark', 'image']
                     self.penalite(players, actual_player)
                     self.next = 1
 
@@ -658,6 +679,9 @@ class Game(cgame.Game):
         if (self.next == 1 or player_launch == self.nb_darts) and actual_round >= self.max_round \
                 and actual_player == len(players) - 1:
             winner = self.best_score(players)
+            if self.played_video is not None:
+                craspberry.wake_up(self.played_video)
+
             if winner >= 0:
                 self.winner = winner
                 return_code = 3
@@ -668,6 +692,10 @@ class Game(cgame.Game):
         ### GAGNE SI JOUEUR N A PLUS DE CIBLE A TOUCHER --- NE MARCHE PAS SI J1 A TERMINER ET PAS J2 --- 'mettre or avec condition'
         if len(players[actual_player].targets) == 0:
             winner = self.best_score(players)
+            
+#supprimer car bug 
+            #if self.played_video is not None:
+            #    craspberry.wake_up(self.played_video)
             if winner >= 0:
                 self.winner = winner
                 return_code = 3
@@ -679,8 +707,13 @@ class Game(cgame.Game):
 
     def early_player_button(self, players, actual_player, actual_round):
         #SI LE JOUEUR N A PAS NETTOYE LA TABLE ALORS PENALITE SI APPUI SUR NEXTPLAYER
-        #if (len(players[actual_player].targets)) != 0:
-        self.penalite(players, actual_player)
+        print('self.missdarts')
+        print(self.missdarts)
+        if not self.missdarts :
+            self.penalite(players, actual_player)
+        else :
+            print('ne compte pas de penalite car deja mise avec missdarts')
+            self.missdarts = False
 
     def post_round_check(self, players, actual_round, actual_player):
         """
@@ -757,3 +790,16 @@ class Game(cgame.Game):
         for player in players:
             player.stats['Points Per Round'] = player.avg(actual_round)
             player.stats['Points Per Dart'] = player.show_ppd()
+            
+    def miss_button(self, players, actual_player, actual_round, player_launch):
+        '''
+        Miss button
+        '''
+        players[actual_player].columns[0] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        self.penalite(players, actual_player)
+        players[actual_player].couleur = False
+        self.missdarts = True
+        self.nb_darts = 1
+        
+

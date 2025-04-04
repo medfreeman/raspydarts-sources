@@ -9,11 +9,18 @@ from include import cgame
 
 #
 LOGO = 'Shanghai.png'
-HEADERS = ['HIT', 'MAX', '-', '-', '-', '-', '-']
-OPTIONS = {'theme': 'default', 'max_round': 7, 'Master': False, 'Points': False}
+HEADERS = ['HIT', 'MAX', '-', 'D1', 'D2', 'D3', '-']
+OPTIONS = {'theme': 'default', 'max_round': 7, 'maitre': False, 'Points': True,'colorised': False}
 NB_DARTS = 3
 GAME_RECORDS = {'Score': 'DESC', 'Reached Score': 'DESC', 'Hits': 'DESC'}
+VERSION = '1.00'
 
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 1 and nb_players <= 12, VERSION, 12
+    
 class CPlayerExtended(cplayer.Player):
     '''
     Extend the basic player
@@ -21,15 +28,15 @@ class CPlayerExtended(cplayer.Player):
     def __init__(self, ident, nb_columns, interior=False):
         super().__init__(ident, nb_columns, interior)
         #The score the player has to hit
-        self.actual_hit = 0
+        self.actual_hit = 1 
         self.targets_list = []
         # Init Player Records to zero
         for game_record in GAME_RECORDS:
             self.stats[game_record] = '0'
-
+            
 class Game(cgame.Game):
     '''
-    Shangai game clsas
+    Shangai game class
     '''
     def __init__(self, display, game, nb_players, options, config, logs, rpi, dmd, video_player):
         super().__init__(display, game, nb_players, options, config, logs, rpi, dmd, video_player)
@@ -42,8 +49,9 @@ class Game(cgame.Game):
         # For Raspberry
         self.rpi = rpi
         self.options = options
-        self.master = options['Master']
+        self.master = options['maitre']
         self.points = options['Points']
+        self.game_is_ok_for_color = options['colorised']
 
         self.m_list = []
 
@@ -65,15 +73,19 @@ class Game(cgame.Game):
     def check_shangai(self, darts):
         '''
         Check Shangai
+        D'après la regle faire un S T D dans n'importe quelle ordre
+        sachant que lorsque l'on touche le segment allumé, le segment change à la flechette suivante
+        On ne peut donc faire qu'une suite ex S1 T2 D3 mais S1 D1 T1 est impossible
         '''
+        
         if self.master:
             return [darts[0][0], darts[1][0], darts[2][0]] == ['S', 'D', 'T'] \
-                and darts[0][1:] == darts[1][1:] \
-                and darts[0][1:] == darts[2][1:]
+                and darts[0][1:] < darts[1][1:] \
+                and darts[1][1:] < darts[2][1:]
         else:
             return sorted([darts[0][0], darts[1][0], darts[2][0]]) == ['D', 'S', 'T'] \
-                and darts[0][1:] == darts[1][1] \
-                and darts[0][1:] == darts[2][1:]
+                and darts[0][1:] < darts[1][1] \
+                and darts[1][1:] < darts[2][1:]
 
     def post_dart_check(self, hit, players, actual_round, actual_player, player_launch):
         '''
@@ -95,13 +107,32 @@ class Game(cgame.Game):
             self.infos += f"    hit a {players[actual_player].get_touch_type(hit)}{self.lf}"
             self.infos += f"    your score is now {players[actual_player].score}"
             self.infos += f"    you have now to hit {players[actual_player].actual_hit}{self.lf}"
+            # Now update hit for next dart
+            players[actual_player].actual_hit += 1
 
         elif self.master:
             # Missed and ( master or not points )
             # => next player
             handler['return_code'] = 1
-
+        
+        
+        players[actual_player].columns[player_launch+2] = (hit, 'txt')
+        
+        
         players[actual_player].add_dart(actual_round, player_launch, hit, check=check, score=score)
+        if players[actual_player].actual_hit == 21:
+            players[actual_player].actual_hit = 'B'
+        self.infos += f"now {players[actual_player].actual_hit}"
+
+        # Update Score, darts count and Max score possible
+        max_score = self.check_max(player_launch + 1, actual_round, \
+                players[actual_player].actual_hit, players[actual_player].score)
+        if players[actual_player].actual_hit == 'B':
+            players[actual_player].columns[0] = (players[actual_player].actual_hit, 'str')
+        else:    
+            players[actual_player].columns[0] = (players[actual_player].actual_hit, 'int')
+        players[actual_player].columns[1] = (max_score, 'int', 'game-green')
+        
 
         if player_launch == 3 and self.check_shangai(players[actual_player].darts):
             self.infos += f"Victory of player {players[actual_player].ident} !{self.lf}"
@@ -142,19 +173,20 @@ class Game(cgame.Game):
                 self.infos += "No winner"
                 handler['return_code'] = 2
 
-        # Update Score, darts count and Max score possible
-        max_score = self.check_max(player_launch + 1, actual_round, \
-                players[actual_player].actual_hit, players[actual_player].score)
-        players[actual_player].columns[0] = (players[actual_player].actual_hit, 'int')
-        players[actual_player].columns[1] = (max_score, 'int', 'game-green')
-
         # You may want to count darts played
         players[actual_player].darts_thrown += 1
 
         # It is recommanded to update stats every dart thrown
         self.refresh_stats(players, actual_round)
 
-        # Print debug infos
+        # Update hit
+        if player_launch != 3:
+            if players[actual_player].actual_hit == 'B':
+                players[actual_player].columns[0] = (players[actual_player].actual_hit, 'str')
+            else:
+                players[actual_player].columns[0] = (players[actual_player].actual_hit, 'int')
+
+# Print debug infos
         self.logs.log("DEBUG", self.infos)
 
         return handler
@@ -167,20 +199,13 @@ class Game(cgame.Game):
 
         if player_launch == 1:
             players[actual_player].reset_darts()
-
-            if players[actual_player].actual_hit == 20:
-                players[actual_player].actual_hit = 'B'
-                self.infos += "now B"
-            else:
-                players[actual_player].actual_hit += 1
-                self.infos += f"now {players[actual_player].actual_hit}"
-
-            self.save_turn(players)
-
             # Update Score
-            for player in players:
-                player.columns[0] = (player.actual_hit, 'int')
-                player.reset_rounds(self.max_round)
+            if players[actual_player].actual_hit == 'B':
+                players[actual_player].columns[0] = (players[actual_player].actual_hit, 'str')
+            else:
+                players[actual_player].columns[0] = (players[actual_player].actual_hit, 'int')
+            players[actual_player].reset_rounds(self.max_round)
+            self.save_turn(players)
 
             if self.master:
                 self.m_list = ['S']
@@ -202,62 +227,42 @@ class Game(cgame.Game):
         max_score = self.check_max(player_launch, actual_round, \
                 players[actual_player].actual_hit, players[actual_player].score)
         players[actual_player].columns[1] = (max_score, 'int', 'game-green')
-
         self.rpi.set_target_leds('|'.join([f'{key}#{self.colors[0]}' \
                 for key in self.targets_list]))
+
 
         # For further code cleaning
         # Return 18$|D18$
         return (self.targets_list, None, None)
+    
+    def refresh_game_screen(self, players, actual_round, max_round, rem_darts, nb_darts, logo, headers, actual_player, TxtOnLogo=False, Wait=False, OnScreenButtons=None, showScores=True, end_of_game=False, endOfSet=None, Set=None, MaxSet=None):
+        
+        result = self.display.refresh_game_screen(players, actual_round, max_round, rem_darts, \
+                          nb_darts, logo, headers, actual_player, TxtOnLogo, Wait, OnScreenButtons, \
+                          showScores, end_of_game, endOfSet, Set, MaxSet)
+    
+        # Game qrcode
+        self.qr_x = int(self.display.res['x']) - (self.qrcode_icon.get_width() + 12)
+        self.qr_y = self.qrcode_icon.get_height() + 30
+        self.display.blit(self.qrcode_icon, (self.qr_x, self.qr_y ))
+        self.display.update_screen()
 
-    def check_winner(self, players):
-        '''
-        Method to check WHO is the winnner
-        '''
-        deuce = False
-        best_score = -1
-        best_player = -1
-        for player in players:
-            self.logs.log("DEBUG", f"{player.name} : {player.score}")
-            if player.score > best_score:
-                best_score = player.score
-                deuce = False #necessary to reset deuce if there is a deuce with a higher score !
-                best_player = player.ident
-            elif player.score == best_score:
-                deuce = True
-                best_player = -1
-        self.logs.log("DEBUG", f"best player is {best_player}")
-        self.logs.log("DEBUG", f"deuce is {deuce}")
-
-        if deuce:
-            self.infos += f"There is a score deuce ! Two people have {best_score}{self.lf}"
-            higher_hit = -1
-            best_player = -1
-            for player in players:
-                if player.score == best_score:
-                    if player.actual_hit > higher_hit:
-                        best_player = player.ident
-                        higher_hit = player.actual_hit
-                    elif player.actual_hit == higher_hit:
-                        self.infos += f"There is also a hit deuce ! Two people have {higher_hit}"
-                        higher_hit = player.actual_hit
-                        best_player = -1
-        return best_player
-
+        return result
+    
     def check_max(self, player_launch, actual_round, actual_hit, actual_score):
         '''
         Search MAX possible score for this player
         '''
         max_score = actual_score
-        darts_left = 25 - actual_round * 3 - player_launch
+        darts_left =  (self.nb_darts - (player_launch-1))
         # Bull special case
         if actual_hit == 'B':
             actual_hit = 21
         for i in range(0, darts_left):
-            if actual_hit + i == 21:
+            if actual_hit  == 21:
                 max_score += 50
             else:
-                max_score += (actual_hit + i) * 3
+                max_score += (actual_hit + i) * 3 
         return max_score
 
     def early_player_button(self, players, actual_player, actual_round):
@@ -271,6 +276,18 @@ class Game(cgame.Game):
                 return 3
             return 2
         return 1
+
+    def miss_button(self, players, actual_player, actual_round, player_launch):
+        '''
+        Miss button
+        '''
+        print('miss')
+        #players[actual_player].columns[6] = (self.moyenne, 'int')
+        players[actual_player].columns[player_launch+2] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        players[actual_player].darts_thrown += 1
+        # play penality sound
+        self.display.play_sound('penality')
 
     def refresh_stats(self, players, actual_round):
         '''

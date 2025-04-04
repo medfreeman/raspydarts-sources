@@ -11,14 +11,20 @@ import random
 ############
 #options = {'max_round': '7'}
 #MODE AVEC OPTIONS
-OPTIONS = {'theme': 'default', 'max_round': 7, 'nb_bonus_darts': 1}
+OPTIONS = {'theme': 'default', 'nb_segment': 5, 'max_round': 7, 'nb_bonus_darts': 1} # by Manu script.
 # Dictionary of stats and display order (For example : Points Per Darts and avg are displayed in descending order)
 GAME_RECORDS = {'Points Per Round': 'DESC', 'Points Per Dart': 'DESC'}
 # background image - relative to images folder - Name it like the game itself
 LOGO = 'Simon.png'
 # Columns headers - Better as a string
 HEADERS = ['1', '2', '3', '4', '5', '6', '7']
+VERSION = '1.00'
 
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 1 and nb_players <= 12, VERSION, 12
 class CPlayerExtended(cplayer.Player):
     """
     Extend the basic player
@@ -49,13 +55,14 @@ class Game(cgame.Game):
         # background image - relative to images folder - Name it like the game itself
         self.logo = LOGO
         # allow the game to stop raspydart color target
-        self.game_is_ok_for_color = False #by Manu script.
+        self.game_is_ok_for_color = False  
         # Columns headers - Better as a string
         self.headers = HEADERS
         # self.score_map.update({'SB':50})
         #  Get the maximum round number
         self.max_round = int(options['max_round'])
         self.nb_bonus_darts = int(self.options['nb_bonus_darts'])
+        self.nb_segment = int(self.options['nb_segment'])  
 
         # For rpi
         self.rpi = rpi
@@ -66,6 +73,28 @@ class Game(cgame.Game):
             (3, 19, 7, 16, 8),
             (11, 14, 9, 12, 5)
         )
+# Added by Manu script.
+        if self.nb_segment == 1:
+            self.segments = (
+                (20),(6),
+                (3),(11)
+            )
+        elif self.nb_segment == 2:
+            self.segments = (
+                (20, 1),(6, 10),
+                (3, 19),(11, 14)
+            )
+        elif self.nb_segment == 3:
+            self.segments = (
+                (20, 1, 18),(6, 10, 15),
+                (3, 19, 7),(11, 14, 9)
+            )
+        elif self.nb_segment == 4:
+            self.segments = (
+                (20, 1, 18, 4),(6, 10, 15, 2),
+                (3, 19, 7, 16),(11, 14, 9, 12)
+            )
+# End added by Manu script.
 
         self.Colors = ('red', 'green', 'blue', 'yellow')
 
@@ -217,3 +246,13 @@ class Game(cgame.Game):
             ret = 3
 
         return ret
+
+    def miss_button(self, players, actual_player, actual_round, player_launch):
+        '''
+        Miss button
+        '''
+        print('miss')
+        #players[actual_player].columns[6] = (self.moyenne, 'int')
+        #players[actual_player].columns[player_launch-1] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        players[actual_player].darts_thrown += 1

@@ -3,11 +3,16 @@
 game by LaDite : Golf
 """
 #######
+
+# Versions
+# 1.00
+
 import time
 from include import cplayer
 from include import cgame
 #
 #
+VERSION = '1.00'
 LOGO = 'Golf.png' # Background image
 HEADERS = ['*', 'D1', 'D2', 'D3', '', 'MRQ', 'PAR'] # Columns headers - Must be a string
 OPTIONS = {'theme': 'default', 'nine_holes': False, 'bulls': True, 'master': False}
@@ -15,7 +20,12 @@ NB_DARTS = 3
 ### voir avec olivier ce que je dois mettre pour afficher le PAR dans les statistiques
 GAME_RECORDS = {'Score': 'DESC', 'Par': 'DESC'}
 
-
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players <= 12, VERSION, 12
+ 
 class CPlayerExtended(cplayer.Player):
     """
     Extend the basic player
@@ -102,6 +112,7 @@ class Game(cgame.Game):
 
         multiplier, value = self.split_key(hit)
         score = self.score_map.get(hit)
+        hits = hit
 
         if multiplier == 'D':
             led_color = self.colors[0]
@@ -119,7 +130,7 @@ class Game(cgame.Game):
         hit = 'double_bogey'
         points = 5
 
-        if value == str(actual_round) and not hit in ['SB', 'DB']:
+        if value == str(actual_round) and not hits in ['SB', 'DB']:
             if multiplier == 'D':
                 hit = 'eagle'
                 points = 1
@@ -130,8 +141,8 @@ class Game(cgame.Game):
                 hit = 'bogey'
                 points = 4
 
-        elif hit in ['SB', 'DB']:
-            if self.master and hit == 'DB':
+        elif hits in ['SB', 'DB']:
+            if self.master and hits == 'DB':
                 hit = 'condor'
                 points = - 1
             elif self.bulls and not self.master:
@@ -246,6 +257,16 @@ class Game(cgame.Game):
         self.logs.log('DEBUG', self.infos)
         return 4
 
+    def miss_button(self, players, actual_player, actual_round, player_launch):
+        '''
+        Miss button
+        '''
+        players[actual_player].columns[player_launch] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        players[actual_player].darts_thrown += 1
+        players[actual_player].marque = 5
+        pass
+        
     def display_segment(self):
        """
        Set if a message is shown to indicate the segment hitted !

@@ -12,7 +12,14 @@ HEADERS = ['D1', 'D2', 'D3', '', '', '', '']
 OPTIONS = {'theme': 'default', 'max_round': 10, 'advanced': True, 'master': False}
 NB_DARTS = 3  # How many darts the player is allowed to throw
 GAME_RECORDS = {'Zlips': 'DESC', 'Zlipped': 'ASC', 'Points Per Round': 'DESC'}
+VERSION = '1.00'
 
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 2 and nb_players <= 12, VERSION, 12
+    
 # Extend the basic player
 class CPlayerExtended(cplayer.Player):
     def __init__(self, ident, nb_columns, interior=False):
@@ -295,6 +302,16 @@ class Game(cgame.Game):
                                     return_value = [hit.upper(), hit3.upper(), hit4.upper()]
                                     return return_value
         return return_value
+
+    def miss_button(self, players, actual_player, actual_round, player_launch):
+        '''
+        Miss button
+        '''
+        print('miss')
+        #players[actual_player].columns[6] = (self.moyenne, 'int')
+        players[actual_player].columns[player_launch-1] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        players[actual_player].darts_thrown += 1
 
     ###############
     # Method to frefresh player.stat - Adapt to the stats you want.

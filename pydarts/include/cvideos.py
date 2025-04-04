@@ -7,6 +7,7 @@ Class used to play videos
 from math import log as math_log
 import subprocess as subp
 
+
 class Videos():
     """
     Module used to play videos
@@ -19,6 +20,7 @@ class Videos():
         self.file = c_file
         self.multiplier = multiplier
         self.set_volume(volume)
+        self.played_video = None
 
     def set_level(self, level):
         """
@@ -43,17 +45,16 @@ class Videos():
         if video is None:
             return False
 
-        self.logs.log("DEBUG", f"Play {video}")
+        self.logs.log("DEBUG", f"Play {video} wait={wait}")
         msg = f'omxplayer --vol {self.volume} -o alsa "{video}"'
 
         self.logs.log("DEBUG", f"{msg}")
         if wait:
             with subp.Popen(['omxplayer', '--vol', f'{self.volume}', '-o', 'alsa', f'{video}'], stdout=subp.DEVNULL, stderr=subp.DEVNULL) as process :
                 process.wait()
+                return True
         else:
-            with subp.Popen(['omxplayer', '--vol', f'{self.volume}', '-o', 'alsa', f'{video}'], stdout=subp.DEVNULL, stderr=subp.DEVNULL):
-                pass
-        return True
+            return subp.Popen(['omxplayer', '--vol', f'{self.volume}', '-o', 'alsa', f'{video}'], stdin=subp.PIPE, stdout=subp.DEVNULL, stderr=subp.DEVNULL)
 
     ################################################################
     ### Methode pour lire un plusieurs videos
@@ -72,16 +73,22 @@ class Videos():
         """
         Identify the special move, find the video and play it
         """
-
         if self.level < 1:
-            return False
-
+            return None
+        if self.played_video is not None:
+            try:
+                self.played_video.stdin.write(b'q')
+                self.played_video.stdin.flush()
+                self.played_video.stdin.close()
+                self.played_video = None
+            except Exception as error:
+                print(f"exception is {error}")            
         video = None
         if 'X' not in darts and None not in darts:
             video = self.special_move(darts[0], darts[1], darts[2], play_special)
             if video is not None:
-                self.play_video(self.file.get_full_filename(video, 'videos'), wait=True)
-                return True
+                self.played_video = self.play_video(self.file.get_full_filename(video, 'videos'), wait=False)
+                return self.played_video
 
         if video is None:   # and hit in ('SB', 'DB'):
             video = self.file.get_full_filename(file_name=hit, file_type='videos')
@@ -90,10 +97,10 @@ class Videos():
             video = self.file.get_full_filename(file_name='big_score', file_type='videos')
 
         if video is not None:
-            self.play_video(video, wait=True)
-            return True
+            self.played_video = self.play_video(video, wait=False)
+            return self.played_video
 
-        return False
+        return None
 
     def dart_value(self, dart, mult=False):
         """
@@ -118,7 +125,6 @@ class Videos():
         """
         Is ther any special video according to special move ?
         """
-
         special_move = None
         darts = [dart1.upper(), dart2.upper(), dart3.upper()]
         try:

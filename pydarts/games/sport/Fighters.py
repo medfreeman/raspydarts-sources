@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
 # Game by David !
 ######
+
+# Versions
+# 1.00
+
 from include import cplayer
 from include import cgame
 import random
-
+#
+VERSION = '1.00'
+DEBUG = {'debug-extra_info': True} #je le force  à True pour le moment
 # Dictionnay of options - Text format only
-OPTIONS = {'theme': 'default', 'max_round': 20, 'number_of_lives': 15, 'points':False}
+OPTIONS = {'theme': 'default', 'max_round': 20, 'number_of_lives': 15, 'points':False, 'colorised': False}
 # background image - relative to images folder - Name it like the game itself
 LOGO = 'Fighters.png' # background image
 # Columns headers - Better as a string
@@ -20,7 +26,7 @@ def check_players_allowed(nb_players):
    """
    Return the player number max for a game.
    """
-   return nb_players in (2, 3, 4, 5)
+   return nb_players in (2, 3, 4, 5), VERSION, 5
 
 class CPlayerExtended(cplayer.Player):
    """
@@ -51,6 +57,8 @@ class Game(cgame.Game):
       self.nb_darts = NB_DARTS
       self.nb_players = nb_players
 
+      self.game_is_ok_for_color = options['colorised']
+      self.debug_info = False 
       self.options = options
       self.points = options['points']
       #  Get the maximum round number
@@ -60,10 +68,23 @@ class Game(cgame.Game):
       #  Get the maxiumum round number
       self.lives = int(options['number_of_lives'])
 
+      # DEBUG dictionnary special for developer
+      self.debuglevel = int(config.get_value('SectionGlobals', 'debuglevel', 0))
+      if self.debuglevel == 2: #Ajouter les options du dictionnaire DEBUG
+          #on charge les options (le dictionnaire DEBUG est inclus dans OPTIONS lorsque l'on est en debuglevel 2
+          self.debug_info = options['debug-extra_info']
+          #overwrite max_round to 2 for my test
+          self.max_round = 2
+
    def pre_dart_check(self, players, actual_round, actual_player, player_launch):
         """
         Actions done before each dart throw - for example, check if the player is allowed to play
         """
+        if self.debug_info:
+            info1=f"pre_dart_check players: actual_round, actual_player, player_launch"
+            info2=f"pre_dart_check players: {actual_round: ^12}, {actual_player: ^13}, {player_launch: ^13}"
+            self.affiche_info(info1, info2)
+            
         return_code = 0
 
         # gestion de l'affichage du segment
@@ -170,6 +191,11 @@ class Game(cgame.Game):
         """
         Post dart actions
         """
+        if self.debug_info:
+            info1=f"post_dart_check : hit, players, actual_round, actual_player, player_launch"
+            info2=f"post_dart_check : {hit: ^3}, players, {actual_round: ^12}, {actual_player: ^13}, {player_launch: ^13}"
+            self.affiche_info(info1, info2)
+                  
         return_code = 0
 
         # Record total dart thrown, total hits (S=1, D=2, T=3) and refresh players stats
@@ -183,35 +209,21 @@ class Game(cgame.Game):
         multi = self.get_hit_unit(hit)
 
         # test SB ou DB
-        if hit == 'SB' :
+        if hit == 'SB' or hit == 'DB' :
             for player in players :
                 if player.ident != actual_player and player.lives > 0:
                     if self.points :
                          player.lives -= self.score_map[hit] ###multi
                     else: 
-                         player.lives -= 1
+                         player.lives -= multi
             if self.points :
                 players[actual_player].score += self.score_map[hit]  ###(len(players))*5 
             else: 
-                players[actual_player].score+=(len(players))*1
+                players[actual_player].score+=(len(players))* multi
                 
             self.video_player.play_video(self.display.file_class.get_full_filename('fighters/fighters_bull', 'videos'))
             self.show_hit = False
-        elif hit == 'DB' :
-            for player in players :
-                if player.ident!=actual_player and player.lives > 0:
-                    if self.points :
-                         player.lives -= self.score_map[hit] ###multi
-                    else: 
-                         player.lives -= 2
-                         
-            if self.points :
-                players[actual_player].score += self.score_map[hit]    ####(len((players))*5) *2
-            else: 
-                players[actual_player].score+=(len(players))*2
-                
-            self.video_player.play_video(self.display.file_class.get_full_filename('fighters/fighters_bull', 'videos'))
-            self.show_hit = False
+            
         else :
             # check d'un segment medic
             if int(hit[1:]) in players[actual_player].targets :
@@ -251,6 +263,7 @@ class Game(cgame.Game):
         for player in players:
             if player.lives <= 0 and player.alive:
                 player.alive = False
+                player.targets.clear()
                 if self.points :
                          players[actual_player].lives += 30   ### test : ajout 1/10 des points de vies du depart a la place d augmenter le score
                 else: 
@@ -265,6 +278,11 @@ class Game(cgame.Game):
         return return_code
 
    def post_round_check(self, players, actual_round, actual_player):
+        if self.debug_info:
+            info1=f"Post_round_check : players, actual_round, actual_player"
+            info2=f"Post_round_check : players, {actual_round: ^12}, {actual_player: ^13}"
+            self.affiche_info(info1, info2)
+            
         check_winner = self.check_winner(players, actual_round, 3, actual_player)
         if check_winner >= 0:
             return check_winner
@@ -275,6 +293,11 @@ class Game(cgame.Game):
 
    def check_winner(self, players, actual_round, player_launch, actual_player):
         # test for a winner
+        if self.debug_info:
+            info1=f"check_winner : players, actual_round, player_launch, actual_player"
+            info2=f"check_winner : players, {actual_round: ^12}, {player_launch: ^13}, {actual_player: ^13}"
+            self.affiche_info(info1, info2)
+            
         alive_players = []
         for player in players :
             if player.alive :
@@ -292,9 +315,12 @@ class Game(cgame.Game):
             bestscoreid = -1
             bestscore = 0
             for player in players:
-                if player.score > bestscore:
-                    bestscore = player.score
-                    bestscoreid = player.ident
+                if player.score >= bestscore:
+                    if player.score != bestscore:
+                        bestscore = player.score
+                        bestscoreid = player.ident
+                    else:
+                        bestscoreid =  -1 # égalité
             return bestscoreid
         return -1
 
@@ -315,6 +341,10 @@ class Game(cgame.Game):
       """
       Refresh In-game screen
       """
+      if self.debug_info:
+          info1 = f"refresh_game_screen : players, actual_round, max_round, RemDarts, nb_darts, logo, headers, actual_player,TxtOnlogo=False, Wait=False, OnScreenButtons=None, showScores=True, end_of_game=False, endOfSet=None, Set=None, MaxSet=None"
+          info2 = f"refresh_game_screen : players, {actual_round: ^12}, {max_round: ^9}, {RemDarts: ^8}, {nb_darts: ^8}, logo, headers, {actual_player: ^13}, {TxtOnlogo: ^15}, {Wait: ^10}, {str(OnScreenButtons): ^20}, {showScores: ^15}, {end_of_game: ^17}, {str(endOfSet): ^13}, {str(Set): ^8}, {str(MaxSet): ^11}"
+          self.affiche_info(info1, info2, 110) # coupe à 110
       # do not show the table scores
       ClickZones = {}
 
@@ -322,8 +352,75 @@ class Game(cgame.Game):
       self.display.screen.fill( (0, 0, 0) )
       # background image
       self.display.display_background('bg_fighters')
-      colorset = self.display.colorset
+      
+      self.affichage_players(players, actual_player, actual_round, max_round, end_of_game)
 
+      if end_of_game :
+          ClickZones = self.display.end_of_game_menu(logo, stat_button=False)
+#          return ClickZones
+
+      self.display.update_screen()
+
+      return ClickZones
+      
+   def early_player_button(self, players, actual_player, actual_round):
+       """
+       Run when player push PLAYERBUTTON before last dart
+       return code :
+           0. To use miss_button instead early_player_button
+           1. Next player
+           2. Last round reach
+           3. Winner is
+       """
+       if self.debug_info:
+           info1=f"early_player_button : players, actual_player, actual_round"
+           info2=f"early_player_button : players, {actual_player: ^13}, {actual_round: ^12}"
+           self.affiche_info(info1, info2)
+           
+       return_code = 1
+       win = self.check_winner(players, actual_round, self.nb_darts, actual_player)
+       if win != -1:
+           self.winner = win
+           return_code = 3
+       else :
+           last_player = False
+           if actual_player == self.nb_players - 1:
+               last_player = True
+           else:
+               k = self.nb_players - 1
+               while k > actual_player:
+                   if not players[k].alive :
+                       last_player = True
+                   else:
+                       last_player = False
+                   k -=1
+                   
+           if (actual_round >= self.max_round and last_player):            
+               return_code = 2
+       return return_code
+    
+   def miss_button(self, players, actual_player, actual_round, player_launch):
+       """
+       MISSED BUTTON
+       """
+       if self.debug_info:
+           info1="miss_button : players, actual_player, actual_round, player_launch"
+           info2=f"miss_button : players, {actual_player: ^13}, {actual_round: ^12}, {player_launch: ^13}"
+           self.affiche_info(info1, info2)
+           
+       players[actual_player].segments[player_launch - 1] = ('MISS') 
+       self.display.play_sound('treasure_crane_jaune')   
+       return_code = 0
+       return return_code
+
+### eclaircissement du code
+   def affichage_players(self, players, actual_player, actual_round, max_round, fin):
+      if self.debug_info:
+          info1=f"affichage_players : players, actual_player, actual_round, max_round, fin"
+          info2=f"affichage_players : players, {actual_player: ^13}, {actual_round: ^12}, {max_round: ^9}, {fin: ^3}"
+          self.affiche_info(info1, info2)
+      # show players pictures and state
+      colorset = self.display.colorset
       # show players pictures and state
       #scale img 368 * 670
       scalex = 368 * self.display.res['x'] / 1920
@@ -376,10 +473,13 @@ class Game(cgame.Game):
       # show segments hitted on the round
       self.display.blit_text(" / ".join(players[actual_player].segments) ,self.display.res['x']/8 - scalex/2,y/3,scalex,y/3, color=colorset['fighters-darts'])
 
-      if end_of_game :
-          ClickZones = self.display.end_of_game_menu(logo, stat_button=False)
-          return ClickZones
-
-      self.display.update_screen()
-
-      return [ClickZones]
+   def affiche_info(self, info1, info2, split = 0, car = ','):
+       if split > 0 and len(info1) > split :
+           while (info1[split] != car) and (split > 0): #on va couper avant la variable
+               split -= 1
+           split += 1 #on saute car   
+           info = info1[:split] + '\n' + info2[:split]
+           info2 = info1[split:] + '\n' + info2[split:]
+           info1 = info
+       print(info1)
+       print(info2)

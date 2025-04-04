@@ -14,7 +14,14 @@ GAME_RECORDS = {'Points Per Round': 'DESC', 'Points Per Dart': 'DESC'}
 NB_DARTS = 3  # Total darts the player has to play
 LOGO = 'Color.png'
 HEADERS = ['D1', 'D2', 'D3', '', '', '', ''] # Columns headers - Must be a string
+VERSION = '1.00'
 
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 1 and nb_players <= 12, VERSION, 12
+    
 class CPlayerExtended(cplayer.Player):
     """
     Exetended player class
@@ -55,7 +62,8 @@ class Game(cgame.Game):
         self.video_player = video_player
         self.targets = ''
         self.leds = True
-
+        #  Penality points for a missing dart
+        self.penality = 20
   
     def pre_dart_check(self, players, actual_round, actual_player, player_launch):
         """
@@ -67,7 +75,6 @@ class Game(cgame.Game):
             players[actual_player].reset_darts()
    
         if actual_round in (1, 3, 5, 7, 9) : 
-                
                 Sbull = [f'SB#green']
                 Dbull = [f'DB#green']
                 hits_blancS = [20,18,13,10,2,3,7,8,14,12]
@@ -82,33 +89,9 @@ class Game(cgame.Game):
                 hits_j2DT = [f'{mult}{hit}#red' for hit in hits_bleuDT for mult in ['D', 'T']]
             
                 led = hits_j1S + hits_j1DT + hits_j2S + hits_j2DT + Sbull + Dbull
-                #leds = '|'.join(led)
-                
-                '''
-                Sbull = [f'SB#green']
-                Dbull = [f'DB#green']
-                               
-                hits_j1 = [20,18,13,10,2,3,7,8,14,12]
-                hits_j2 = [1,4,6,15,17,19,16,11,9,5]
-                
-                hits_j1 = [f'{mult}{hit}#{self.colors[0]}' for hit in hits_j1 for mult in ['S', 'D', 'T']]
-                hits_j2 = [f'{mult}{hit}#{self.colors[1]}' for hit in hits_j2 for mult in ['S', 'D', 'T']]
-                '''
-                #self.targets =  hits_j1 + hits_j2 + Sbull + Dbull
+
                 self.targets = led
         else:
-                '''
-                Sbull = [f'SB#green']
-                Dbull = [f'DB#green']
-                               
-                hits_j2 = [20,18,13,10,2,3,7,8,14,12]
-                hits_j1 = [1,4,6,15,17,19,16,11,9,5]
-                
-                hits_j1 = [f'{mult}{hit}#{self.colors[0]}' for hit in hits_j1 for mult in ['S', 'D', 'T']]
-                hits_j2 = [f'{mult}{hit}#{self.colors[1]}' for hit in hits_j2 for mult in ['S', 'D', 'T']]
-                                
-                self.targets =  hits_j1 + hits_j2 + Sbull + Dbull
-                '''
                 Sbull = [f'SB#green']
                 Dbull = [f'DB#green']
                 hits_blancS = [20,18,13,10,2,3,7,8,14,12]
@@ -135,19 +118,17 @@ class Game(cgame.Game):
             for player in players:
                 # Init score
                 player.score = 0
-                player.bouclier = False
-                # Lives
 
         # Each new player
         if player_launch == 1:
             players[actual_player].round_points = 0
             players[actual_player].pre_play_score = players[actual_player].score
 
-            for player in players :
-                    player.columns = []
+            #for player in players :
+            #        player.columns = []
                     # clean all box
-                    for i in range(0,7):
-                            player.columns.append(['', 'int'])
+            #        for i in range(0,7):
+            #                player.columns.append(['', 'int'])
             
             # Clean all next boxes
             for i in range(0,7):
@@ -220,14 +201,12 @@ class Game(cgame.Game):
             multi = 2
         if hit[:1] == 'T':
             multi = 3
-                
-                     
+          
         if (hit+'#green') in self.targets :
                 if self.points :
                         score = 10 * multi
                 else :
                         score = self.score_map[hit] 
-                        
         else :
                 if self.points_advs and not self.penalite :
                         # points pour l advs
@@ -282,27 +261,14 @@ class Game(cgame.Game):
         players[actual_player].darts_thrown += 1
         players[actual_player].increment_hits(hit)
         self.refresh_stats(players, actual_round)
-        '''
-        # Check for end of game (no more rounds to play)
-        if player_launch == self.nb_darts and actual_round >= self.max_round \
-                and actual_player == len(players) - 1:
-            winner = self.best_score(players)
-            if winner >= 0:
-                self.winner = winner
-                return_code = 3
-            else:
-                # No winner : last round reached
-                return_code = 2
-        '''
-        #return return_code
         
-                # Check last round
+        # Check last round
         if actual_round >= self.max_round and actual_player == self.nb_players - 1 \
                 and (player_launch == self.nb_darts or return_code == 1):
             self.infos += f"Last round reached ({actual_round}){self.lf}"
             return_code = 2
-        # Check winner
-        self.check_winner(players, actual_player, player_launch)
+
+        self.winner = self.check_winner(players)
         if self.winner is not None:
             return_code = 3
 
@@ -310,17 +276,66 @@ class Game(cgame.Game):
         
         return return_code
 
-    def check_winner(self, players, actual_player, player_launch):
+    def miss_button(self, players, actual_player, actual_round, player_launch):
         '''
-        Function to check winner
+        Miss button
         '''
-        self.winner = None
-        # Check winner if no master option
-        if players[actual_player].score >= self.winscore :
-            self.winner = players[actual_player].ident
+        players[actual_player].score -= self.penality
+        players[actual_player].columns[player_launch-1] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        players[actual_player].darts_thrown += 1
+        #self.refresh_stats(players, actual_round)
         
-        
-        
+        if player_launch == 1:
+                penality = 60
+        elif player_launch == 2:
+                penality = 40
+        elif player_launch == 3:
+                penality = 20
+                
+
+        if penality > 0:
+            # add penality points
+            #players[actual_player].score -= penality
+            players[actual_player].round_points -= penality # Keep total for this round
+            #players[actual_player].points -= penality #for ppd,ppr
+                    
+            # play penality sound
+            self.display.play_sound('penality')
+
+            # anim leds for the penality
+            #Event.Publish('penalty')
+        self.display.message([self.display.lang.translate('Color-miss')], 1000, None, 'middle', 'big')
+            
+
+    def early_player_button(self, players, actual_player, actual_round):
+        '''
+        Function launched when the  put player button before having launched all his darts
+        '''
+        # Jump to next player by default
+        return_code = 1
+        '''
+        #penalite de 20 points par fleche MISS
+        if player_launch == 1:
+                penality = 60
+        elif player_launch == 2:
+                penality = 40
+        elif player_launch == 3:
+                penality = 20
+                
+
+        if penality > 0:
+            # add penality points
+            players[actual_player].score -= penality
+            players[actual_player].round_points -= penality # Keep total for this round
+            #players[actual_player].points -= penality #for ppd,ppr
+                    
+            # play penality sound
+            self.display.play_sound('penality')
+
+            # anim leds for the penality
+            #Event.Publish('penalty')
+        '''
 
     def post_round_check(self, players, actual_round, actual_player):
         """

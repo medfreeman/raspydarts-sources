@@ -20,7 +20,13 @@ OPTIONS = {'theme': 'default', 'max_round': 10, 'master': False, 'bulls': False,
 
 GAME_RECORDS = {'Hits per round': 'DESC', 'MPR': 'DESC'} # Dictionnary of stats (For exemple, avg is displayed in descending order)
 NB_DARTS = 3
+VERSION = '1.00'
 
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 1 and nb_players <= 12, VERSION, 12
 
 class CPlayerExtended(cplayer.Player):
     """
@@ -431,7 +437,10 @@ class Game(cgame.Game):
                         bestscore = player.score
                         bestscoreid = player.ident
                 self.winner = bestscoreid
-                pourcent = int((bestscore / 3))
+                if not self.triple and not self.double and not self.threeonthebed and not self.suite and not self.voisin :
+                    pourcent = bestscore 
+                else : 
+                    pourcent = int((bestscore / 3))
                 self.display.message([self.display.lang.translate('Practice-pourcent')+ str(pourcent) + ' fois '], 5000, None, 'middle', 'big')
                 return_code = 3
     
@@ -447,9 +456,15 @@ class Game(cgame.Game):
         """
         Whan missed button pressed
         """
-        self.logs.log("DEBUG", f"MissButtonPressed : {player_launch}")
-        players[actual_player].columns[player_launch - 1] = ('tyre', 'image')
+        #self.logs.log("DEBUG", f"MissButtonPressed : {player_launch}")
+        #players[actual_player].columns[player_launch - 1] = ('MISS', 'image')
+        players[actual_player].columns[player_launch] = ('MISS', 'txt')
+        self.display.play_sound('treasure_crane_jaune')
         players[actual_player].darts_thrown += 1
+        hitcoeff = 0
+        players[actual_player].score += hitcoeff
+        # play penality sound
+        #self.display.play_sound('penality')
         # Refresh stats
         players[actual_player].columns[5] = (players[actual_player].show_ppd(), 'int')
         players[actual_player].columns[6] = (players[actual_player].avg(actual_round), 'int')

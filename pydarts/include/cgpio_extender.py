@@ -10,6 +10,9 @@ import busio
 from digitalio import Direction, Pull
 from adafruit_mcp230xx.mcp23017 import MCP23017
 
+LAST_BUTTON = None
+COUNT_BUTTON = 0
+
 DEFAULTS = {
     'EXTENDED_GPIO': '1',
     'PIN_UP': 'A0',
@@ -27,7 +30,7 @@ DEFAULTS = {
     'PIN_VOLUME_DOWN':'B4',
     'PIN_VOLUME_MUTE':'B5',
     'PIN_CPTPLAYER':'B6',
-    'PIN_DEMOLED':'B7',
+    'PIN_MISSDART':'B7',
     'LIGHT_NEXTPLAYER':'',
     'LIGHT_BACK':'',
     'LIGHT_NAVIGATE':'',
@@ -72,6 +75,7 @@ class Gpio_extender:
         self.light_list = []
         self.pull_up = Pull.UP
         self.all_io = [f"{chr}{num}" for chr in ['A', 'B'] for num in [0, 1, 2, 3, 4, 5, 6, 7]]
+        self.banned_button = None
 
     def decode(self, value):
         """
@@ -131,16 +135,34 @@ class Gpio_extender:
         """
         Read self.mcp
         """
+        global LAST_BUTTON
+        global COUNT_BUTTON
         # False/0 si appuie sur le bouton
         value = hex(self.mcp.gpio)
         return_value = None
+        ban_value = None
 
         for button in self.buttons_list:
-            if not int(value, 16) & 2**button:
-                key = chr(65 + int(button / 8)) + chr(48 + button % 8)    # Compute A0..B7
-                return_value = self.pin_switcher.get(key, "")
+            key = chr(65 + int(button / 8)) + chr(48 + button % 8)    # Compute A0..B7
+            p_value = self.pin_switcher.get(key, "")
+            if ((not int(value, 16) & 2**button and p_value != 'PIN_MISSDART')
+                or (int(value, 16) & 2**button and p_value == 'PIN_MISSDART')):
+                if p_value != self.banned_button:
+                    return_value = p_value
+                else:
+                    ban_value = p_value
 
         self.mcp.clear_ints()
+        if return_value is not None and return_value == LAST_BUTTON:
+            COUNT_BUTTON += 1
+            if COUNT_BUTTON > 30:
+                self.banned_button = return_value
+                print(f"[WARNING] Button {self.banned_button} is banned !")
+        elif ban_value is None:
+            COUNT_BUTTON = 0
+            LAST_BUTTON = return_value
+            self.banned_button = None
+
         return return_value
 
     def test_entries(self):

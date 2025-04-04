@@ -1184,7 +1184,7 @@ class CStrip(object):
         self.AllLeds(OFF)
 
     def TA_Daisy(self, event, wait_time, color, iterations, offset=0):
-        self.Daisy(event, wait_time, color, iterations, offset) #by Manu script.
+        self.Daisy(event, wait_time, color, iterations, offset)  
 
     def Daisy(self, event, wait_time, color, iterations, offset=0):
 

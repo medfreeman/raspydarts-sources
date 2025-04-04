@@ -16,12 +16,15 @@ HEADERS = ['#', 'PTS'] # Columns headers - Must be a string
 NB_DARTS = 3 # How many darts per player and per round
 # Dictionary of stats and display order (For example : Points Per Darts and avg are displayed in ascending order)
 GAME_RECORDS = {'Points Per Round': 'DESC'}
+VERSION = '1.00'
 
 def check_players_allowed(nb_players):
-    '''
-    Check number of players
-    '''
-    return nb_players <= 4
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 2 and nb_players <= 4, VERSION, 4
+    
+
 
 #Extend the basic player
 class CPlayerExtended(cplayer.Player):
@@ -345,3 +348,13 @@ class Game(cgame.Game):
 
         self.display.blit_rect(self.display.margin + self.display.pn_size , y, self.display.box_width - self.display.margin, self.display.line_height - self.display.margin, self.display.colorset['color-black'] )
         self.display.blit_rect(self.display.margin + self.display.pn_size + self.display.box_width, y, self.display.box_width * 1 - self.display.margin, self.display.line_height - self.display.margin, self.display.colorset['color-black'] )
+    
+   def miss_button(self, players, actual_player, actual_round, player_launch):
+        '''
+        Miss button
+        '''
+        print('miss')
+        #players[actual_player].columns[6] = (self.moyenne, 'int')
+        #players[actual_player].columns[player_launch-1] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        players[actual_player].darts_thrown += 1

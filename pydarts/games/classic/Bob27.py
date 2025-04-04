@@ -14,7 +14,14 @@ HEADERS = ['HIT', '-', '-', '-', '-', '-', '-'] # Columns headers - Must be a st
 OPTIONS = {'theme': 'default', 'max_round': 21, 'Bull': True, 'Numbers': True} # Dictionnay of options
 NB_DARTS = 3
 GAME_RECORDS = {'Score': 'DESC', 'Reached Score': 'DESC', 'Hits': 'DESC'}
+VERSION = '1.00'
 
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 1 and nb_players <= 12, VERSION, 12
+    
 class CPlayerExtended(cplayer.Player):
     '''
     Extended Player class
@@ -258,6 +265,7 @@ class Game(cgame.Game):
         '''
         self.logs.log("DEBUG", f"MissButtonPressed : {player_launch}")
         players[actual_player].darts_thrown += 1
+        self.display.play_sound('treasure_crane_jaune')
 
         # Refresh stats
         if self.nb_touche_ok > 0:

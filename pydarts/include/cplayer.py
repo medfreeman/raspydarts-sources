@@ -198,6 +198,7 @@ class Player:
         """
         Add dart to the round
         """
+        print(f"Etat de launch {launch}")
         self.darts[launch - 1] = hit
         self.rounds[actual_round - 1][launch - 1] = hit
         if score is not None:

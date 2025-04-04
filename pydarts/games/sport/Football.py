@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Game by ... @Poilou !
+Game by ... Olivier Lu !
 """
+# Versions
+# 1.00
 
 from include import cplayer
 from include import cgame
-
+VERSION = '1.00'
 LOGO = 'Football.png'
 HEADERS = ['1', '2', '3', 'Drib', '', '', 'Ball']
 OPTIONS = {'theme': 'default', 'max_round': 100, 'master': False, 'goals': 3, 'defense': False}
@@ -16,7 +18,7 @@ def check_players_allowed(nb_players):
     """
     Only 2 players
     """
-    return nb_players == 2
+    return nb_players == 2, VERSION, 2
 
 class CPlayerExtended(cplayer.Player):
     """
@@ -191,7 +193,15 @@ class Game(cgame.Game):
         for player in players:
             player.stats['Score Per Round'] = player.score_per_round(actual_round)
             player.stats['Dribbles'] = player.dribbles
-
+    
+    def miss_button(self, players, actual_player, actual_round, player_launch):
+        '''
+        Miss button
+        '''
+        players[actual_player].columns[player_launch-1] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        players[actual_player].darts_thrown += 1
+        
     def display_segment(self):
         """
         Display or not the hit segment

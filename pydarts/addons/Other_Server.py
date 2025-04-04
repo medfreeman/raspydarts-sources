@@ -23,9 +23,8 @@ def on_message(client, userdata, msg):
 
     print("[DEBUG] Other_Server : received",msg,flush=True)
 
-MQTT_HOST="mosquitto"
-MQTT_HOST="localhost"
-MQTT_TOPIC = "pydarts/StripLeds"
+MQTT_HOST = "localhost"
+MQTT_TOPIC = "raspydarts/other"
 
 client = mqtt.Client()
 client.on_connect = on_connect

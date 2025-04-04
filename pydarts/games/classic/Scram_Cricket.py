@@ -14,12 +14,13 @@ NB_DARTS = 3 # How many darts the player is allowed to throw
 SWITCH_TURNS = False #used to determine if players switched their turns
 SWITCHED = False #used to say the switch happened
 GAME_RECORDS = {'MPR':'DESC','Score':'DESC'}
+VERSION = '1.00'
 
 def check_players_allowed(nb_players):
     '''
     Check if number of players is ok according to options
     '''
-    return nb_players in (2, 4)
+    return nb_players in (2, 4), VERSION, 4
 
 class CPlayerExtended(cplayer.Player):
     '''

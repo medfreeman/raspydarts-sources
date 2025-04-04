@@ -15,12 +15,13 @@ HEADERS = [ "#", "PTS" ] # Columns headers - Must be a string
 NB_DARTS = 3 # How many darts per player and per round
 # Dictionary of stats and display order (For example : Points Per Darts and avg are displayed in ascending order)
 GAME_RECORDS = {'Points Per Round':'DESC'}
+VERSION = '1.00'
 
 def check_players_allowed(nb_players):
-    '''
-    Return the player number max for a game.
-    '''
-    return nb_players <= 6
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 1 and nb_players <= 6, VERSION, 6
 
 #Extend the basic player
 class CPlayerExtended(cplayer.Player):
@@ -96,7 +97,11 @@ class Game(cgame.Game):
             # Clean all next boxes
             for _ in range(0, 2):
                 players[actual_player].columns.append(['', 'int'])
-
+            
+            ## ajout - a chaque premier tour le chiffre du joueur change
+            for _,player in enumerate(players):
+                player.home = random.randint(1, 20)
+           
             # set dragon and flower segments
             hits = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
             hits.pop(players[actual_player].home - 1)
@@ -162,7 +167,17 @@ class Game(cgame.Game):
         self.video_player.play_video(self.display.file_class.get_full_filename('tower/tower_down', 'videos'))
 
         return 4
-
+   
+   def miss_button(self, players, actual_player, actual_round, player_launch):
+        '''
+        Miss button
+        '''
+        print('miss')
+        #players[actual_player].columns[6] = (self.moyenne, 'int')
+        #players[actual_player].columns[player_launch-1] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        players[actual_player].darts_thrown += 1
+        
    def post_dart_check(self, hit, players, actual_round, actual_player, player_launch):
         return_code = 0
 
@@ -309,11 +324,11 @@ class Game(cgame.Game):
           self.display.display_image(self.display.file_class.get_full_filename(f'tower/tower_{player.ident + 1}', 'images'), x, y, scalex, scaley, True, False, False)
 
           if i == actual_player :
-              self.display.blit_text(player.name, x, y + scaley, scalex, txtH, color=(255, 255, 255))
+              self.display.blit_text(player.name+' ('+str(player.score)+'/12)', x, y + scaley, scalex, txtH, color=(255, 255, 255))
               #show tower up segment (home)
               self.display.blit_text(str(players[actual_player].home), x + scalex / 2, y + scaley - txtH * 3 / 2, scalex / 3, txtH * 3 / 2, color=(255, 255, 255))
           else :
-              self.display.blit_text(player.name, x, y + scaley, scalex, txtH, color=(150, 0, 0))
+              self.display.blit_text(player.name+' ('+str(player.score)+'/12)', x, y + scaley, scalex, txtH, color=(150, 0, 0))
 
           #show the knights 137*192, step 109
           step = 105 * scaley / 1978

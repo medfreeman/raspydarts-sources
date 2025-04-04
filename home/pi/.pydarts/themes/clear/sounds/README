@@ -1,0 +1,22 @@
+
+######################################################################################
+####																			   ###
+######################################################################################
+
+Pour créer vos propres sons, inspirez vous de l'arborescence des dossiers se situant
+à l'endroit ci contre -----> /pydarts/sounds
+Si vous ne créez pas les dossiers/fichiers, RaspyDarts lira les fichiers correspondant
+à l'adresse du dessus.
+
+######################################################################################
+####																			   ###
+######################################################################################
+
+To create your own sounds, take inspiration from the folder tree located
+at the location opposite -----> /pydarts/sounds
+If you do not create the folders/files, RaspyDarts will read the files corresponding
+to the address above.
+
+######################################################################################
+####																			   ###
+######################################################################################

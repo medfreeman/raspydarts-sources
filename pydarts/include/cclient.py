@@ -28,7 +28,7 @@ class Client():
         # Socket properties
         self.delimiter='|'
 
-    @debug
+    #@debug
     def connect_host(self,TCP_IP,TCP_PORT):
         """
         Join selected server
@@ -39,7 +39,7 @@ class Client():
         #self.connexion.settimeout(None)
         #self.connexion.setblocking(1)
 
-    @debug
+    #@debug
     def test_host(self,server):
         """
         test host
@@ -54,7 +54,7 @@ class Client():
         self.connexion.close()
         return True
 
-    @debug
+    #@debug
     def play(self,actual_round,actual_player,playerlaunch,Message):
         """
         Player plays
@@ -67,7 +67,7 @@ class Client():
         if ret is not None:
             return ret
 
-    @debug
+    #@debug
     def wait_someone_play(self,actual_round,actual_player,playerlaunch,waitfor=False):
         """
         Wait for someone play
@@ -109,14 +109,14 @@ class Client():
             else:
                 return data['PLAY']
 
-    @debug
+    #@debug
     def send_players(self, names):
         """
         Send Player Names (in one line, comma separated)
         """
         self.send({'GAMENAME': self.gamename, 'REQUEST': 'HEREAREPLAYERNAMES', 'PLAYERNAMES': names})
 
-    @debug
+    #@debug
     def next_set(self, players):
         """
         Send new player's order
@@ -131,7 +131,7 @@ class Client():
         else:
             return 'TIMEOUT'
 
-    @debug
+    #@debug
     def wait_next_set(self, set_number):
         """
         Wait from server new player's order for next set
@@ -151,7 +151,7 @@ class Client():
         else:
             return 'TIMEOUT'
 
-    @debug
+    #@debug
     def get_players(self): # JSON
         """
         Get player names (in one line, comma separated). The Ack is the player names return
@@ -164,7 +164,7 @@ class Client():
         self.logs.log("DEBUG", f"Received players' list : {data['PLAYERSNAMES']}")
         return data["PLAYERNAMES"]
 
-    @debug
+    #@debug
     def send_options(self, options, nb_darts, nb_sets): # JSON
         """
         Send game Options
@@ -172,7 +172,7 @@ class Client():
         data = {'GAMENAME': self.gamename, 'REQUEST': 'HEREAREGAMEOPTS', 'GAMEOPTS': options, 'NBDARTS': nb_darts, 'NBSETS': nb_sets}
         self.send(data)
 
-    @debug
+    #@debug
     def get_options(self): # JSON
         """
         Get game Options
@@ -184,14 +184,14 @@ class Client():
             data = self.receive()
         return data['GAMEOPTS'], data['NBSETS']
 
-    @debug
+    #@debug
     def send_game(self, game):
         """
         Send Choosed Game to server. Wait for an ACK
         """
         self.send({'GAMENAME': self.gamename, 'REQUEST': 'HEREISCHOOSEDGAME', 'CHOOSEDGAME': game})
 
-    @debug
+    #@debug
     def get_game(self):
         """
         Get the game from master server - JSON
@@ -203,7 +203,7 @@ class Client():
             data = self.receive()
         return data["CHOOSEDGAME"]
 
-    @debug
+    #@debug
     def get_random(self, actual_round, actual_player, playerlaunch):
         """
         Get Random values
@@ -220,7 +220,7 @@ class Client():
         self.logs.log("DEBUG","Received acceptables random values {} for player {}".format(data['RANDOMVALUES'],data['ACTUALPLAYER']))
         return data['RANDOMVALUES']
 
-    @debug
+    #@debug
     def send_random(self,rand,actual_round,actual_player,playerlaunch):
         """
         Send Random values
@@ -228,7 +228,7 @@ class Client():
         self.send({'GAMENAME': self.gamename, 'REQUEST': 'HEREARERANDOMVALUES', 'RANDOMVALUES': rand, \
                 'ACTUALPLAYER': actual_player, 'ACTUALROUND': actual_round, 'PLAYERLAUNCH': playerlaunch})
 
-    @debug
+    #@debug
     def get_server_version(self,gamename):
         """
         Request server version
@@ -240,7 +240,7 @@ class Client():
             data = self.receive()
         return data['VERSION']
 
-    @debug
+    #@debug
     def send_local_players(self, players):
         """
         Send list of players
@@ -251,7 +251,7 @@ class Client():
             data = self.receive()
         return data
 
-    @debug
+    #@debug
     def close_host(self):
         """
         Explicitely tell the server we are leaving
@@ -261,7 +261,7 @@ class Client():
         self.send(data)
         self.connexion.close()
 
-    @debug
+    #@debug
     def send(self, message, delimiter='|'):
         """
         Send a message
@@ -281,7 +281,7 @@ class Client():
         except:
             return 'ERROR'
 
-    @debug
+    #@debug
     def receive(self, BUF=False, TIMEOUT=False):
         """
         Wait for a message
@@ -333,7 +333,7 @@ class Client():
                     self.logs.log("ERROR", f"Exception was : {exception}")
                     sys.exit(1)
 
-    @debug
+    #@debug
     def ack(self):
         data = {'REQUEST': None}
         old_timeout = self.connexion.gettimeout() # Save old timeout settings
@@ -360,7 +360,7 @@ class Client():
         self.logs.log("DEBUG","Received : {}".format(data))
         return None
 
-    @debug
+    #@debug
     def join2(self, game):
         """
         Join a game (json version)
@@ -377,7 +377,7 @@ class Client():
         return str(data['NETSTATUS'])
 
 
-    @debug
+    #@debug
     def leave_game(self, game, players, status):
         self.send({'REQUEST': 'LEAVE', 'GAMENAME': game, "NETSTATUS": status, \
                 "PLAYERSNAMES": players})
@@ -392,7 +392,7 @@ class MasterClient():
         self.logs = logs
         self.connexion_timeout = 10
 
-    @debug
+    #@debug
     def connect_master(self, ip, port):
         self.logs.log("DEBUG", f"Connect to master server: {ip}:{port}")
 
@@ -402,7 +402,7 @@ class MasterClient():
         self.connexion.connect((ip, port))
         self.connexion.settimeout(old_timeout)# Restore old timeout
 
-    @debug
+    #@debug
     def wait_list(self,NuPl):
         """
         Wait for Listing
@@ -437,7 +437,7 @@ class MasterClient():
 
         return filtered_serverlist
 
-    @debug
+    #@debug
     def send(self, message): # JSON
         """
         Send a message to the server
@@ -445,7 +445,7 @@ class MasterClient():
         self.logs.log("DEBUG","Sending to master server : {}... ".format(message))
         self.connexion.sendall(json.dumps(message).encode('UTF-8'))
 
-    @debug
+    #@debug
     def send_game_info(self, host, alias, port, game_name, gametype, creator, number_of_players, nb_sets):
         """
         Send game infos
@@ -459,42 +459,42 @@ class MasterClient():
                 'GAMENAME': game_name, 'GAMETYPE': gametype, 'GAMECREATOR': creator, \
                 'PLAYERS': number_of_players, 'NBSETS': nb_sets})
 
-    @debug
+    #@debug
     def join_game(self, game, number_of_players):
         """
         Join a game
         """
         self.send({'REQUEST': 'JOIN', 'GAMENAME': game, 'PLAYERS': number_of_players})
 
-    @debug
+    #@debug
     def leave_game(self, game, number_of_players):
         """
         Send leave game
         """
         self.send({'REQUEST': 'LEAVE', 'GAMENAME': game, 'PLAYERS': number_of_players})
 
-    @debug
+    #@debug
     def launch_game(self, game):
         """
         Send a removal query to server
         """
         self.send({'REQUEST': 'LAUNCH', 'GAMENAME': game})
 
-    @debug
+    #@debug
     def cancel_game(self, game):
         """
         Send a delete query to server
         """
         self.send({'REQUEST': 'CANCEL', 'GAMENAME': game})
 
-    @debug
+    #@debug
     def close_connection(self):
         """
         Explicitely tell the server we are leaving
         """
         self.connexion.close()
 
-    @debug
+    #@debug
     def receive(self, delimiter='|'):
         """
         Receive Data and be sure that the end has been reached, looking for the delimiter

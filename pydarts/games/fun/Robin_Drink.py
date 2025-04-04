@@ -17,6 +17,7 @@ HEADERS = [ "#","PTS" ] # Columns headers - Must be a string
 NB_DARTS = 2 # How many darts per player and per round
 # Dictionary of stats and display order (For example : Points Per Darts and avg are displayed in ascending order)
 GAME_RECORDS = {'Points Per Round':'DESC'}
+VERSION = '1.00'
 
 NbSegmentsForOpponents = 7  # nombre de segments pour faire boire un adversaire en le designant avec la deuxieme flechette
 NbSegmentsForRandom = 5     # nombre de segments pour faire boire un adversaire aléatoire
@@ -37,11 +38,12 @@ segmentsForTarget = [
     ([20, 1], 'tan', 'T')
 ]
 
+
 def check_players_allowed(nb_players):
-    '''
-    Return the player number max for a game.
-    '''
-    return nb_players <= 10
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 1 and nb_players <= 10, VERSION, 10
 
 #Extend the basic player
 class CPlayerExtended(cplayer.Player):
@@ -107,6 +109,9 @@ class Game(cgame.Game):
       # gestion de l'affichage du segment
       self.show_hit = True
       self.firstStart = True
+      
+      ### pour contrer la double penalite
+      self.missdarts = True
 
    # Actions done before each dart throw - for example, check if the player is allowed to play
    def pre_dart_check(self,players,actual_round,actual_player,player_launch):
@@ -176,7 +181,8 @@ class Game(cgame.Game):
                 segments['T'+str(hits[h])]='red'
                 hits.pop(h)
 
-
+            self.nb_darts = 2
+            
         #show opponents choosing targets
         if player_launch == 2 :
             #mode random
@@ -216,13 +222,32 @@ class Game(cgame.Game):
 
    # Function launched when the  put player button before having launched all his darts
    def early_player_button(self,players,actual_player,actual_round):
+        print('self.missdarts')
+        print(self.missdarts)
+        if not self.missdarts :
+            players[actual_player].score+=1
+            self.show_message('player',players[actual_player],1)
+        else :
+            print('ne compte pas de penalite car deja mise avec missdarts')
+            self.missdarts = False
+        
         # Jump to next player by default
         return_code=1
 
+        return return_code
+        
+   def miss_button(self, players, actual_player, actual_round, player_launch):
+        """
+        EMPTY
+        """
+        self.nb_darts = 1
+        return_code=1
+        self.display.play_sound('treasure_crane_jaune')
         players[actual_player].score+=1
         self.show_message('player',players[actual_player],1)
-
-        return return_code
+        self.missdarts = True
+        #pass
+        
 
 
    def post_dart_check(self,hit,players,actual_round,actual_player,player_launch):

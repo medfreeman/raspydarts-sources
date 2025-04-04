@@ -20,13 +20,13 @@ HEADERS = ['#', 'PTS']  # Columns headers - Must be a string
 NB_DARTS = 3  # How many darts per player and per round
 # Dictionary of stats and display order (For example : Points Per Darts and avg are displayed in ascending order)
 GAME_RECORDS = {'Points Per Round': 'DESC'}
-
+VERSION = '1.00'
 
 def check_players_allowed(nb_players):
-    '''
-    Return the player number max for a game.
-    '''
-    return nb_players in (2, 3, 4, 5)
+   """
+   Return the player number max for a game.
+   """
+   return nb_players in (2, 3, 4, 5), VERSION, 5
 
 class CPlayerExtended(cplayer.Player):
     """
@@ -773,7 +773,13 @@ class Game(cgame.Game):
 
     def display_segment(self):
         return False
+        
+    def miss_button(self, players, actual_player, actual_round, player_launch):
 
+        players[actual_player].segments[player_launch-1] = 'MISS'
+        self.display.play_sound('treasure_crane_jaune')
+        players[actual_player].darts_thrown += 1
+        
     def refresh_game_screen(self, Players, actual_round, max_round, RemDarts, nb_darts, logo, headers, actual_player, TxtOnLogo=False, Wait=False, OnScreenButtons=None, showScores=True, end_of_game=False, endOfSet=None, Set=None, MaxSet=None):
         """
         Refresh In-game screen

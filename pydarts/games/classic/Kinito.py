@@ -10,11 +10,18 @@ from include import cplayer
 from include import cgame
 
 LOGO = 'Kinito.png'
-HEADERS = ['Min', 'Total', 'K\'to', '', '', '', '']
-OPTIONS = {'theme': 'default', 'max_round': 10, 'winscore': 221, 'kinito': 21, 'master': False}
+HEADERS = ['Min', 'Total', 'K\'to', '', 'D1', 'D2', 'D3']
+OPTIONS = {'theme': 'default', 'max_round': 10, 'winscore': 221, 'kinito': 21, 'master': False, 'colorised': False}
 NB_DARTS = 3
 GAME_RECORDS = {'Points Per Round' : 'DESC'}
+VERSION = '1.00'
 
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 1 and nb_players <= 12, VERSION, 12
+    
 class CPlayerExtended(cplayer.Player):
     '''
     Extended player class
@@ -28,7 +35,6 @@ class CPlayerExtended(cplayer.Player):
         self.points = 0
         # Score to hit when Kinito occur
         self.kinito_score = ""
-        self.headers = HEADERS
         # Init Player Records to zero
         for record in GAME_RECORDS:
             self.stats[record] = '0'
@@ -58,9 +64,12 @@ class Game(cgame.Game):
         self.kinito = int(options['kinito'])
         # For rpi
         self.rpi = rpi
-
+        self.game_is_ok_for_color = options['colorised']
+        
         self.infos = ''
         self.winner = None
+        self.high_score = 0
+        self.player_score = 0
 
     def pre_dart_check(self, players, actual_round, actual_player, player_launch):
         '''
@@ -71,12 +80,14 @@ class Game(cgame.Game):
 
         if player_launch == 1:
             players[actual_player].reset_darts()
+            players[actual_player].columns[4] = ('', 'str')
+            players[actual_player].columns[5] = ('', 'str')
+            players[actual_player].columns[6] = ('', 'str')
 
         if player_launch == 1 and actual_player == 0 and actual_round == 1:
             for player in players:
                 player.columns[0] = (0, 'int', 'game-green')
                 player.reset_rounds(self.max_round)
-
         # Init first player score to do (first player of first round random)
         if actual_round == 1 and actual_player == 0 and player_launch == 1 \
                 and not self.random_from_net:
@@ -84,6 +95,7 @@ class Game(cgame.Game):
         if players[actual_player].min_score is None:
             players[actual_player].min_score = 0
         self.infos += "You have to reach at least score {players[actual_player].min_score}{self.lf}"
+        
 
         # Reset Per round total and kinito status
         players[actual_player].columns[0] = (players[actual_player].min_score, 'int', None)
@@ -104,6 +116,7 @@ class Game(cgame.Game):
             else:
                 player.columns[2] = (player.kinito_score, 'int', 'game-red')
 
+        self.player_score = players[actual_player].score
         if players[actual_player].kinito:
             possibilities = []
             for player in players:
@@ -124,10 +137,10 @@ class Game(cgame.Game):
             else:
                 self.rpi.set_target_leds('')
 
-        # Check winner
-        self.check_winner(players, actual_player, player_launch)
-        if self.winner is not None:
-            return 3
+        # Check winner ? dans pre_dart_check, pas utile
+#        self.check_winner(players, actual_player, player_launch)
+#        if self.winner is not None:
+#            return 3
 
         self.logs.log("DEBUG", self.infos)
         return return_code
@@ -157,7 +170,7 @@ class Game(cgame.Game):
             players[actual_player].points += self.score_map[hit]
             handler['show'] = (players[actual_player].darts, hit, True)
             handler['sound'] = hit
-
+            players[actual_player].columns[player_launch +3] = (f'{hit}', 'str')
 
         # bad bluff (score is under the min score)
         if self.score_map[hit] < players[actual_player].min_score and \
@@ -168,6 +181,7 @@ class Game(cgame.Game):
             players[actual_player].points -= players[actual_player].get_col_value(1)
             handler['return_code'] = 1 # next player
             handler['sound'] = 'whatamess'
+            players[actual_player].columns[player_launch +3] = (f'{hit}', 'str')
 
         # Kinito Open
         if self.score_map[hit] == self.kinito \
@@ -182,6 +196,7 @@ class Game(cgame.Game):
             players[actual_player].kinito_score = 'K\'to'
             if self.random_from_net is False:
                 self.kinito_score(players)
+           #players[actual_player].columns[player_launch +3] = (f'{hit}', 'str')    
 
         # If Kinito played
         if players[actual_player].kinito:
@@ -191,7 +206,8 @@ class Game(cgame.Game):
                     players[actual_player].points += self.score_map[hit]
                     player.score = int(player.score / 2)
                     self.infos += f"You hit the Kinito score of player {player.ident} !{self.lf}"
-
+            players[actual_player].columns[player_launch +3] = (f'{hit}', 'str')
+            
         # Put score / 2 to min score to next player
         if len(players) > 1:
             self.infos += "Hit : {}".format(hit)
@@ -221,7 +237,7 @@ class Game(cgame.Game):
 
         # You may want to count darts played
         players[actual_player].darts_thrown += 1
-
+        
         # It is recommanded to update stats every dart thrown
         self.refresh_stats(players, actual_round)
 
@@ -231,23 +247,35 @@ class Game(cgame.Game):
             self.infos += f"Last round reached ({actual_round}){self.lf}"
             handler['return_code'] = 2
         # Check winner
-        self.check_winner(players, actual_player, player_launch)
+#        self.check_winner(players, actual_player, player_launch)
+        self.winner = self.check_winner(players, True)
         if self.winner is not None:
             handler['return_code'] = 3
+
+        elif handler['return_code'] == 2:
+            self.high_score = -1
+            for player in players:
+                print(f"Scores : {player.ident} = {player.score}")
+                if (player.score > self.high_score):
+                    self.high_score = player.score
+                    self.winner = player.ident
+                    print(f"High Score : {self.winner} = {self.high_score}")
+                    handler['return_code'] = 3
+
 
         self.logs.log("DEBUG", self.infos)
         return handler
 
-    def check_winner(self, players, actual_player, player_launch):
-        '''
-        Function to check winner
-        '''
-        self.winner = None
-        # Check winner if no master option
-        if players[actual_player].score >= self.winscore and not self.master:
-            self.winner = players[actual_player].ident
-        elif players[actual_player].score == self.winscore and self.master:
-            self.winner = players[actual_player].ident
+#    def check_winner(self, players, actual_player, player_launch):
+#        '''
+#        Function to check winner
+#        '''
+#        self.winner = None
+#        # Check winner if no master option
+#        if players[actual_player].score >= self.winscore and not self.master:
+#            self.winner = players[actual_player].ident
+#        elif players[actual_player].score == self.winscore and self.master:
+#            self.winner = players[actual_player].ident
 
     def save_turn(self, players):
         '''
@@ -265,6 +293,7 @@ class Game(cgame.Game):
         '''
         Get possibilities in ordre to light leds
         '''
+        # modified by Manu to check winscore       
         possibilities = []
         for multiplier in ['S', 'D', 'T']:
             if multiplier == 'S':
@@ -281,14 +310,16 @@ class Game(cgame.Game):
                     i = 25
 
                 if not kinito and i * mult >= target_score:
-                    if i == 25:
-                        i = 'B'
-                    possibilities.append(f'{multiplier}{i}')
+                    if (not self.master) or (i * mult <= self.winscore - self.player_score):
+                        if i == 25:
+                            i = 'B'
+                        possibilities.append(f'{multiplier}{i}')
 
                 if kinito and i * mult == target_score:
-                    if i == 25:
-                        i = 'B'
-                    possibilities.append(f'{multiplier}{i}')
+                    if (not self.master) or (i * mult == self.winscore - self.player_score):
+                        if i == 25:
+                            i = 'B'
+                        possibilities.append(f'{multiplier}{i}')
 
         return possibilities
 
@@ -349,6 +380,27 @@ class Game(cgame.Game):
             ret = {'PLAYERKINITO': player.ident, 'KINITOSCORES': scores}
 
         return ret
+
+    def miss_button(self, players, actual_player, actual_round, player_launch):
+        '''
+        Miss button
+        '''
+        print('miss')
+        #players[actual_player].columns[6] = (self.moyenne, 'int')
+        players[actual_player].columns[player_launch+3] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        players[actual_player].darts_thrown += 1
+        check = False
+        if not check :
+            self.infos += "What a mess. You reached {self.score_map[hit]}{self.lf}"
+            players[actual_player].score -= players[actual_player].get_col_value(1)
+            players[actual_player].points -= players[actual_player].get_col_value(1)
+            players[actual_player].columns[player_launch +3] = (f'{hit}', 'str')
+            
+        
+        
+        
+        
 
     def set_random(self, players, actual_round, actual_player, player_launch, data):
         '''

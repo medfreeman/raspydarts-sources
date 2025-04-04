@@ -9,11 +9,19 @@ from include import cgame
 ############
 # Game Variables
 ############
-OPTIONS = {'theme': 'default', 'win': 11, 'simple50': False}
+VERSION = '1.00'
+OPTIONS = {'theme': 'default', 'win': 6, 'simple50': False}
 GAME_RECORDS = {'Points Per Round': 'DESC', 'Points Per Dart': 'DESC'}
 NB_DARTS = 3  # Total darts the player has to play
 LOGO = 'Ping-Pong.png'
 HEADERS = ['D1', 'D2', 'D3', '', 'Rnd', '', ''] # Columns headers - Must be a string
+
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 2 and nb_players <= 12, VERSION, 12
+ 
 
 class CPlayerExtended(cplayer.Player):
     """
@@ -243,6 +251,11 @@ class Game(cgame.Game):
         EMPTY
         """  
         print('miss boutton - pass')
+        players[actual_player].columns[player_launch-1] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        #self.points = 0
+        players[actual_player].columns[4] = (self.points, 'int')
+        players[actual_player].darts_thrown += 1
         pass
 
     def display_segment(self):

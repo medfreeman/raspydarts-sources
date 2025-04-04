@@ -12,7 +12,9 @@ from include import cplayer
 from include import cgame
 import random
 import time
-
+#
+VERSION = '1.00'
+DEBUG = {'debug-extra_info': False}
 # Dictionnay of options - Text format only
 OPTIONS = {'theme': 'default', 'max_round': '20', 'number_of_lives': '15', 'points':False}
 # background image - relative to images folder - Name it like the game itself
@@ -28,7 +30,7 @@ def check_players_allowed(nb_players):
    """
    Return the player number max for a game.
    """
-   return 1 < nb_players < 8
+   return 1 < nb_players < 8, VERSION, 8
 
 class CPlayerExtended(cplayer.Player):
    """
@@ -58,12 +60,19 @@ class Game(cgame.Game):
       self.headers = HEADERS
       self.nb_darts = NB_DARTS
       self.nb_players = nb_players
-
+      self.debug_info = False
       self.options = options
       #  Get the maximum round number
       self.max_round = int(self.options['max_round'])
       # GameRecords is the dictionnary of stats (see above)
       self.game_records = GAME_RECORDS
+      
+      # DEBUG dictionnary special for developer
+      self.debuglevel = int(config.get_value('SectionGlobals', 'debuglevel', 0))
+      if self.debuglevel == 2: #Ajouter les options du dictionnaire DEBUG
+          #on charge les options (le dictionnaire DEBUG est inclus dans OPTIONS lorsque l'on est en debuglevel 2
+          self.debug_info = options['debug-extra_info']
+      
       self.points = options['points']
       print('self.point ests')
       print(self.points)
@@ -79,13 +88,19 @@ class Game(cgame.Game):
       self.index_joueur_actif = 0    
 
 
-
       
    def pre_dart_check(self, players, actual_round, actual_player, player_launch):
         """
         Actions done before each dart throw - for example, check if the player is allowed to play
         """
+        if self.debug_info:
+            info1=f"pre_dart_check players: actual_round, actual_player, player_launch"
+            info2=f"pre_dart_check players: {actual_round: ^12}, {actual_player: ^13}, {player_launch: ^13}"
+            self.affiche_info(info1, info2)
+            
         return_code = 0
+        if not players[actual_player].alive:
+            return 4
 
         # gestion de l'affichage du segment
         self.show_hit = True
@@ -104,8 +119,6 @@ class Game(cgame.Game):
                 if self.points :
                     print('dans if self.points true')
                     self.lives = 300
-                elif len(players) == 6 :
-                    self.lives = int(self.options['number_of_lives'])
                 elif len(players) == 7 : 
                     self.lives = int(self.options['number_of_lives']) + 3
                 else :
@@ -154,9 +167,7 @@ class Game(cgame.Game):
             players[actual_player].targets.append(medic[h])
 
         # this player is game over
-        if not players[actual_player].alive :
-            return_code  = 4
-        else :
+        if players[actual_player].alive :
             # Display target color of players
             segments = {}
             blinks = {}
@@ -197,7 +208,12 @@ class Game(cgame.Game):
         """
         Post dart actions
         """
-        return_code = 0
+        if self.debug_info:
+            info1 = f"post_dart_check : hit, players, actual_round, actual_player, player_launch"
+            info2 = f"post_dart_check : {hit: ^3}, players, {actual_round: ^12}, {actual_player: ^13}, {player_launch: ^13}"
+            self.affiche_info(info1, info2)
+            
+        return_code = 0 #même joueur
 
         # Record total dart thrown, total hits (S=1, D=2, T=3) and refresh players stats
         players[actual_player].darts_thrown += self.score_map[hit] ###1
@@ -209,22 +225,20 @@ class Game(cgame.Game):
         multi = self.get_hit_unit(hit)
 
         # test SB ou DB
-        if hit == 'SB' :
+        if hit == 'SB' or hit == 'DB' :
             self.display.play_sound('punch-out_bull')
             liste = []
 ### BOUCLE pour determiner les joueur touches et le joueur qui frappe
             for index, player in enumerate(players):
                 
 ### JOUEURS QUI ONT ETE TOUCHES
-                if index != actual_player :
-                    print ('Index du joueur touche PAR SB - self.num_joueur')
+                if index != actual_player and players[index].alive:
                     self.num_joueur = index
-                    print (self.num_joueur)
-                    print ('nom joueur touche PAR SB - self.nom_joueur')
                     self.nom_joueur = player.character ###player.name
-                    print (self.nom_joueur)
-                    
-                    
+                    if self.debug_info:
+                        info1=f'Index du joueur touche par {hit} - {self.num_joueur}'
+                        info2=f'nom joueur touche par {hit} - {self.nom_joueur}'
+                        self.affiche_info(info1, info2)
   
 ### AJOUT des joueurs touches dans la liste
                     liste.append(self.num_joueur)
@@ -232,19 +246,18 @@ class Game(cgame.Game):
   
  ### JOUEUR QUI A TOUCHE LE SEGMENT HIT - joueur actuel                    
                 if index == actual_player :
-                    print ('Nom du joueur qui a touche SB - joueur actuel')
                     self.joueur_actif = player.character ### player.name
-                    print(self.joueur_actif)
-                    print ('Index du joueur qui a touche SB - joueur actuel')
                     self.index_joueur_actif = actual_player
-                    print (self.index_joueur_actif)
+                    if self.debug_info:
+                        info1=f'Nom du joueur qui a touche {hit} - {self.joueur_actif}'
+                        info2=f'Index du joueur qui a touche {hit} - {self.index_joueur_actif}'
+                        self.affiche_info(info1, info2)
+
                     
-                    
-                    print ('nom character actif - sb') 
-                    print(player.character)
-                    
-                    
-            multi = 1
+            if hit =='SB':
+                multi = 1
+            else:
+                multi = 2
             playerHitted = True
 
             for player in players :
@@ -252,79 +265,27 @@ class Game(cgame.Game):
                     if self.points :
                          player.lives -= self.score_map[hit] ###multi
                     else: 
-                         player.lives -= 1
-                    #player.lives -= 1
+                         player.lives -= multi
                     
             if self.points :
                 players[actual_player].score += self.score_map[hit]    ####(len(players))*5
             else: 
-                players[actual_player].score+=(len(players))*1
+                players[actual_player].score+=(len(players)) * multi
             self.show_hit = False
             
-        elif hit == 'DB' :
-            self.display.play_sound('punch-out_bull')
-            liste = []
-### BOUCLE pour determiner les joueur touches et le joueur qui frappe
-            for index, player in enumerate(players):
-                
-### JOUEURS QUI ONT ETE TOUCHES
-                if index != actual_player :
-                    print ('Index du joueur touche PAR SB - self.num_joueur')
-                    self.num_joueur = index
-                    print (self.num_joueur)
-                    print ('nom joueur touche PAR SB - self.nom_joueur')
-                    self.nom_joueur = player.character ###player.name
-                    print (self.nom_joueur)
-                    
-                    
-  
-### AJOUT des joueurs touches dans la liste
-                    liste.append(self.num_joueur)
-                    liste.append(self.nom_joueur)            
-  
- ### JOUEUR QUI A TOUCHE LE SEGMENT HIT - joueur actuel                    
-                if index == actual_player :
-                    print ('Nom du joueur qui a touche SB - joueur actuel')
-                    self.joueur_actif = player.character ### player.name
-                    print(self.joueur_actif)
-                    print ('Index du joueur qui a touche SB - joueur actuel')
-                    self.index_joueur_actif = actual_player
-                    print (self.index_joueur_actif)
-                    
-                    
-                    print ('nom character actif - sb') 
-                    print(player.character)
-                    
-            multi = 2
-            playerHitted = True
-                      
-            for player in players :
-                if player.ident!=actual_player and player.lives > 0:
-                    if self.points :
-                         player.lives -= self.score_map[hit] ###multi
-                    else: 
-                         player.lives -= 2
-            
-            
-            if self.points :
-                players[actual_player].score += self.score_map[hit]   ###(len(players))*5 
-            else: 
-                players[actual_player].score+=(len(players))*2
-            #players[actual_player].score+=(len(players))*2
-            self.show_hit = False
-
         else :
             # check d'un segment medic
             if int(hit[1:]) in players[actual_player].targets :
 ### BOUCLE pour determiner le joueur qui touche le segment MEDIC                
                 for index, player in enumerate(players):
                     if index == actual_player :
-                        print ('Nom du joueur qui a touche le segment MEDIC')
                         self.joueur_medic = player.character ###player.name
-                        print(self.joueur_medic)
-                        print ('Index du joueur qui a touche le segment MEDIC')
                         self.index_joueur_medic = actual_player   ###index
-                        print (self.index_joueur_medic)
+                        if self.debug_info:
+                            print ('Nom du joueur qui a touche le segment MEDIC')
+                            print(self.joueur_medic)
+                            print ('Index du joueur qui a touche le segment MEDIC')
+                            print (self.index_joueur_medic)
                             
                     self.show_hit = False
                         
@@ -342,41 +303,11 @@ class Game(cgame.Game):
     
                     y = self.display.res['y'] / 2 - scaley / 2
                     marge = int((self.display.res['x'] - len(players) * scalex) / (len(players) + 1))
-    
-### SI l INDEX du joueur correspond a la CASE 1                      
-                    if self.index_joueur_medic == 0 :
-                        x = marge
-                        index99 = x
-### SI l INDEX du joueur correspond a la CASE 2                               
-                    if self.index_joueur_medic == 1 :
-                        x = marge
-                        x += scalex + marge
-                        index99 = x
-### SI l INDEX du joueur correspond a la CASE 3                               
-                    if self.index_joueur_medic == 2 :
-                        x = marge
-                        x += (scalex + marge) * 2
-                        index99 = x
-### SI l INDEX du joueur correspond a la CASE 4                               
-                    if self.index_joueur_medic == 3 :
-                        x = marge 
-                        x += (scalex + marge) *3
-                        index99 = x
-### SI l INDEX du joueur correspond a la CASE 5                       
-                    if self.index_joueur_medic == 4 :
-                        x = marge
-                        x += (scalex + marge) * 4
-                        index99 = x
-### SI l INDEX du joueur correspond a la CASE 6                       
-                    if self.index_joueur_medic == 5 :
-                        x = marge
-                        x += (scalex + marge) * 5
-                        index99 = x                        
-### SI l INDEX du joueur correspond a la CASE 7                       
-                    if self.index_joueur_medic == 6 :
-                        x = marge
-                        x += (scalex + marge) * 6
-                        index99 = x                        
+                    x = marge
+                    
+                    if self.index_joueur_medic > 0 :
+                        x += (scalex + marge) * int(self.index_joueur_medic)
+                    index99 = x
                         
 ### AJOUTE les points, JOUE le son medic                           
                 self.display.play_sound('punch-out_medic')
@@ -402,25 +333,26 @@ class Game(cgame.Game):
                 
 ### JOUEURS QUI ONT ETE TOUCHES
                 if index != actual_player and int(hit[1:]) in player.targets :
-                    print ('Index du joueur touche - self.num_joueur')
                     self.num_joueur = index
-                    print (self.num_joueur)
-                    print ('nom joueur touche - self.nom_joueur')
                     self.nom_joueur = player.character ###player.name
-                    print (self.nom_joueur)
-      
-### AJOUT des joueurs touches dans la liste
-                    liste.append(self.num_joueur)
-                    liste.append(self.nom_joueur)
-
-### AJOUTE/SUPPRIME les points des joueurs   
+                    if self.debug_info:
+                        print ('Index du joueur touche - self.num_joueur')
+                        print (self.num_joueur)
+                        print ('nom joueur touche - self.nom_joueur')
+                        print (self.nom_joueur)
+                    
+### AJOUT des joueurs touches dans la liste des animations uniquement si score > 0
+                    if player.alive and player.lives > 0:
+                        liste.append(self.num_joueur)
+                        liste.append(self.nom_joueur)
+### AJOUTE/SUPPRIME les points des joueurs 
                     if self.points :
                         players[actual_player].score += self.score_map[hit] ###multi
                         player.lives -= self.score_map[hit] ###multi
                     else: 
-
                         players[actual_player].score += multi
                         player.lives -= multi
+
 
                     players[actual_player].increment_hits(hit)
                     playerHitted = True
@@ -428,476 +360,19 @@ class Game(cgame.Game):
 
 ### JOUEUR QUI A TOUCHE LE SEGMENT HIT - joueur actuel                    
                 if index == actual_player :
-                    print ('Nom du joueur qui a touche le segment HIT - joueur actuel')
                     self.joueur_actif = player.character ###player.name
-                    print(self.joueur_actif)
-                    print ('Index du joueur qui a touche le segment HIT - joueur actuel')
                     self.index_joueur_actif = actual_player
-                    print (self.index_joueur_actif)
+                    if self.debug_info:
+                        print ('Nom du joueur qui a touche le segment HIT - joueur actuel')
+                        print(self.joueur_actif)
+                        print ('Index du joueur qui a touche le segment HIT - joueur actuel')
+                        print (self.index_joueur_actif)
 
-### CONDITIONS si au moins un joueur est touche            
-        if playerHitted :
-
-### definition de la taille des images 
-            if len(players) == 7 :
-                scalex = 268 * self.display.res['x'] / 1920
-                scaley = 488 * self.display.res['y'] / 1080
-            elif len(players) == 6 :
-                scalex = 300 * self.display.res['x'] / 1920
-                scaley = 546 * self.display.res['y'] / 1080
-            else :
-                scalex = 368 * self.display.res['x'] / 1920
-                scaley = 670 * self.display.res['y'] / 1080  
-
-            y = self.display.res['y'] / 2 - scaley / 2
-            marge = int((self.display.res['x'] - len(players) * scalex) / (len(players) + 1))
-            
-### JOUEUR QUI TOUCHE LE SEGMENT HIT                        
-### SI l INDEX du joueur qui touche le segment HIT correspond a la CASE 1                        
-            if self.index_joueur_actif == 0 :
-                x = marge
-                index99 = x
-### SI l INDEX du joueur qui touche le segment HIT correspond a la CASE 2                     
-            if self.index_joueur_actif == 1 :
-                x = marge
-                x += scalex + marge
-                index99 = x
-### SI l INDEX du joueur qui touche le segment HIT correspond a la CASE 3                         
-            if self.index_joueur_actif == 2 :
-                x = marge
-                x += (scalex + marge) * 2
-                index99 = x
-### SI l INDEX du joueur qui touche le segment HIT correspond a la CASE 4                         
-            if self.index_joueur_actif == 3 :
-                x = marge
-                x += (scalex + marge) * 3
-                index99 = x
-### SI l INDEX du joueur qui touche le segment HIT correspond a la CASE 5                         
-            if self.index_joueur_actif == 4 :
-                x = marge
-                x += (scalex + marge) * 4
-                index99 = x    
-
-### SI l INDEX du joueur qui touche le segment HIT correspond a la CASE 6                         
-            if self.index_joueur_actif == 5 :
-                x = marge
-                x += (scalex + marge) * 5
-                index99 = x   
-                
-### SI l INDEX du joueur qui touche le segment HIT correspond a la CASE 7                         
-            if self.index_joueur_actif == 6 :
-                x = marge
-                x += (scalex + marge) * 6
-                index99 = x                   
-
-### TEST AVEC BOUCLE - DETERMINE LES INDEX DES JOUEURS TOUCHES
-            i = 0
-            j = 0
-            liste_index = []
-            for i in range(len(liste)) :
-### SI l INDEX du joueur touche correspond a la CASE 1         
-                if liste[j] == 0:
-                    x = marge
-                    liste_index.append(x) 
-                    
-### SI l INDEX du joueur touche correspond a la CASE 2                         
-                elif liste[j] == 1: 
-                    x = marge
-                    x += scalex + marge
-                    liste_index.append(x) 
-### SI l INDEX du joueur touche correspond a la CASE 3                         
-                elif liste[j] == 2: 
-                    x = marge 
-                    x += (scalex + marge) *2
-                    liste_index.append(x)  
-### SI l INDEX du joueur touche correspond a la CASE 4                         
-                elif liste[j] == 3: 
-                    x = marge 
-                    x += (scalex + marge) *3
-                    liste_index.append(x) 
-### SI l INDEX du joueur touche correspond a la CASE 5                         
-                elif liste[j] == 4: 
-                    x = marge 
-                    x += (scalex + marge) *4
-                    liste_index.append(x) 
-### SI l INDEX du joueur touche correspond a la CASE 6                    
-                elif liste[j] == 5 :
-                    x = marge
-                    x += (scalex + marge) *5
-                    liste_index.append(x)
-### SI l INDEX du joueur touche correspond a la CASE 7                    
-                elif liste[j] == 6 :
-                    x = marge
-                    x += (scalex + marge) *6
-                    liste_index.append(x)
-                                    
-                print ('variable I')
-                print (i) 
-                i += 2
-                print ('variable J')
-                print (j)
-                if j < len(liste) :
-                    j += 2
-                if j >= len(liste) :
-                    j = len(liste)-1
-                    
-                print ('liste_index')
-                print (liste_index)
-            
-### Recuperation des noms des joueurs touches           
-            if len(liste) == 2 :
-                nom_joueur1 = liste[1]
-                nom_joueur2 = ''
-                nom_joueur3 = ''  
-                nom_joueur4 = ''  
-                nom_joueur5 = ''
-###  Recuperation de l index des joueurs              
-                index0 = liste_index[0] 
-            elif len(liste) == 4 :
-                nom_joueur1 = liste[1]
-                nom_joueur2 = liste[3]
-                nom_joueur3 = ''  
-                nom_joueur4 = ''  
-                nom_joueur5 = '' 
-###  Recuperation de l index des joueurs                
-                index0 = liste_index[0]
-                index1 = liste_index[1]
-            elif len(liste) == 6 :
-                nom_joueur1 = liste[1]
-                nom_joueur2 = liste[3]
-                nom_joueur3 = liste[5]  
-                nom_joueur4 = ''  
-                nom_joueur5 = ''
-###  Recuperation de l index des joueurs                
-                index0 = liste_index[0]
-                index1 = liste_index[1]
-                index2 = liste_index[2]                
-            elif len(liste) == 8 :
-                nom_joueur1 = liste[1]
-                nom_joueur2 = liste[3]
-                nom_joueur3 = liste[5]  
-                nom_joueur4 = liste[7]  
-                nom_joueur5 = '' 
-###  Recuperation de l index des joueurs                
-                index0 = liste_index[0]
-                index1 = liste_index[1]
-                index2 = liste_index[2]
-                index3 = liste_index[3]                                
-            elif len(liste) == 10 :
-                nom_joueur1 = liste[1]
-                nom_joueur2 = liste[3]
-                nom_joueur3 = liste[5]  
-                nom_joueur4 = liste[7]  
-                nom_joueur5 = liste[9] 
-###  Recuperation de l index des joueurs               
-                index0 = liste_index[0]
-                index1 = liste_index[1]
-                index2 = liste_index[2]
-                index3 = liste_index[3]   
-                index4 = liste_index[4]
-            elif len(liste) == 12 :
-                nom_joueur1 = liste[1]
-                nom_joueur2 = liste[3]
-                nom_joueur3 = liste[5]  
-                nom_joueur4 = liste[7]  
-                nom_joueur5 = liste[9] 
-                nom_joueur6 = liste[11]
-###  Recuperation de l index des joueurs               
-                index0 = liste_index[0]
-                index1 = liste_index[1]
-                index2 = liste_index[2]
-                index3 = liste_index[3]   
-                index4 = liste_index[4] 
-                index5 = liste_index[5]               
- ### 7 joueurs      
-            elif len(liste) == 14 :
-                nom_joueur1 = liste[1]
-                nom_joueur2 = liste[3]
-                nom_joueur3 = liste[5]  
-                nom_joueur4 = liste[7]  
-                nom_joueur5 = liste[9] 
-                nom_joueur6 = liste[11]
-                nom_joueur7 = liste[13]
-###  Recuperation de l index des joueurs               
-                index0 = liste_index[0]
-                index1 = liste_index[1]
-                index2 = liste_index[2]
-                index3 = liste_index[3]   
-                index4 = liste_index[4] 
-                index5 = liste_index[5] 
-                index6 = liste_index[6]       
-                
-### AFFICHE LES BONNES IMAGES SELON LE NOMBRE DE COUPS RECU (multi) 
-            if multi == 3 :
-                print ('touche 3 fois')
-                self.display.play_sound('punch-out_hit')   
-### 1er coup
-                ### joueur qui frappe
-                self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{self.joueur_actif}-hit1', 'images'),index99, y, scalex, scaley, True, False, False)
-                ### joueur touche
-                if len(liste) == 2 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche1', 'images'),index0, y, scalex, scaley, True, False, False)
-                if len(liste) == 4 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche1', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche1', 'images'),index1, y, scalex, scaley, True, False, False)
-                if len(liste) == 6 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche1', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche1', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche1', 'images'),index2, y, scalex, scaley, True, False, False)
-                if len(liste) == 8 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche1', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche1', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche1', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche1', 'images'),index3, y, scalex, scaley, True, False, False)
-                if len(liste) == 10 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche1', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche1', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche1', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche1', 'images'),index3, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur5}-touche1', 'images'),index4, y, scalex, scaley, True, False, False)
-                if len(liste) == 12 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche1', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche1', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche1', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche1', 'images'),index3, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur5}-touche1', 'images'),index4, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur6}-touche1', 'images'),index5, y, scalex, scaley, True, False, False)
-                if len(liste) == 14 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche1', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche1', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche1', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche1', 'images'),index3, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur5}-touche1', 'images'),index4, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur6}-touche1', 'images'),index5, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur7}-touche1', 'images'),index6, y, scalex, scaley, True, False, False)
-
-                self.display.update_screen()
-                time.sleep(0.3)
-### 2eme coup
-                self.display.play_sound('punch-out_hit')  
-                ### joueur qui frappe
-                self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{self.joueur_actif}-hit2', 'images'),index99, y, scalex, scaley, True, False, False)
-                ### joueur touche
-                if len(liste) == 2 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche2', 'images'),index0, y, scalex, scaley, True, False, False)
-                if len(liste) == 4 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche2', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche2', 'images'),index1, y, scalex, scaley, True, False, False)
-                if len(liste) == 6 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche2', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche2', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche2', 'images'),index2, y, scalex, scaley, True, False, False)
-                if len(liste) == 8 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche2', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche2', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche2', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche2', 'images'),index3, y, scalex, scaley, True, False, False)
-                if len(liste) == 10 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche2', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche2', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche2', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche2', 'images'),index3, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur5}-touche2', 'images'),index4, y, scalex, scaley, True, False, False)
-                if len(liste) == 12 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche2', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche2', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche2', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche2', 'images'),index3, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur5}-touche2', 'images'),index4, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur6}-touche2', 'images'),index5, y, scalex, scaley, True, False, False)
-                if len(liste) == 14 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche2', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche2', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche2', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche2', 'images'),index3, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur5}-touche2', 'images'),index4, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur6}-touche2', 'images'),index5, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur7}-touche2', 'images'),index6, y, scalex, scaley, True, False, False)
-
-                self.display.update_screen()
-                time.sleep(0.3)
-### 3eme coup
-                self.display.play_sound('punch-out_hit')  
-                ### joueur qui frappe
-                self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{self.joueur_actif}-hit3', 'images'),index99, y, scalex, scaley, True, False, False)
-                ### joueur touche
-                if len(liste) == 2 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche3', 'images'),index0, y, scalex, scaley, True, False, False)
-                if len(liste) == 4 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche3', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche3', 'images'),index1, y, scalex, scaley, True, False, False)
-                if len(liste) == 6 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche3', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche3', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche3', 'images'),index2, y, scalex, scaley, True, False, False)
-                if len(liste) == 8 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche3', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche3', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche3', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche3', 'images'),index3, y, scalex, scaley, True, False, False)
-                if len(liste) == 10 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche3', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche3', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche3', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche3', 'images'),index3, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur5}-touche3', 'images'),index4, y, scalex, scaley, True, False, False)
-                if len(liste) == 12 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche3', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche3', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche3', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche3', 'images'),index3, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur5}-touche3', 'images'),index4, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur6}-touche3', 'images'),index5, y, scalex, scaley, True, False, False)
-                if len(liste) == 14 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche3', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche3', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche3', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche3', 'images'),index3, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur5}-touche3', 'images'),index4, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur6}-touche3', 'images'),index5, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur7}-touche3', 'images'),index6, y, scalex, scaley, True, False, False)
-
-                self.display.update_screen()
-                time.sleep(0.3)
-
-            elif multi == 2 :
-                print ('touche 2 fois')
-### 1er coup
-                self.display.play_sound('punch-out_hit')                     
-                ### joueur qui frappe
-                self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{self.joueur_actif}-hit1', 'images'),index99, y, scalex, scaley, True, False, False)
-                ### joueur touche
-                if len(liste) == 2 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche1', 'images'),index0, y, scalex, scaley, True, False, False)
-                if len(liste) == 4 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche1', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche1', 'images'),index1, y, scalex, scaley, True, False, False)
-                if len(liste) == 6 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche1', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche1', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche1', 'images'),index2, y, scalex, scaley, True, False, False)
-                if len(liste) == 8 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche1', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche1', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche1', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche1', 'images'),index3, y, scalex, scaley, True, False, False)
-                if len(liste) == 10 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche1', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche1', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche1', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche1', 'images'),index3, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur5}-touche1', 'images'),index4, y, scalex, scaley, True, False, False)
-                if len(liste) == 12 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche1', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche1', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche1', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche1', 'images'),index3, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur5}-touche1', 'images'),index4, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur6}-touche1', 'images'),index5, y, scalex, scaley, True, False, False)
-                if len(liste) == 14 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche1', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche1', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche1', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche1', 'images'),index3, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur5}-touche1', 'images'),index4, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur6}-touche1', 'images'),index5, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur7}-touche1', 'images'),index6, y, scalex, scaley, True, False, False)
-
-                self.display.update_screen()
-                time.sleep(0.3)
-### 2eme coup
-                self.display.play_sound('punch-out_hit')  
-                ### joueur qui frappe
-                self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{self.joueur_actif}-hit2', 'images'),index99, y, scalex, scaley, True, False, False)
-                ### joueur touche
-                if len(liste) == 2 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche2', 'images'),index0, y, scalex, scaley, True, False, False)
-                if len(liste) == 4 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche2', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche2', 'images'),index1, y, scalex, scaley, True, False, False)
-                if len(liste) == 6 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche2', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche2', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche2', 'images'),index2, y, scalex, scaley, True, False, False)
-                if len(liste) == 8 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche2', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche2', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche2', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche2', 'images'),index3, y, scalex, scaley, True, False, False)
-                if len(liste) == 10 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche2', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche2', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche2', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche2', 'images'),index3, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur5}-touche2', 'images'),index4, y, scalex, scaley, True, False, False)
-                if len(liste) == 12 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche2', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche2', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche2', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche2', 'images'),index3, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur5}-touche2', 'images'),index4, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur6}-touche2', 'images'),index5, y, scalex, scaley, True, False, False)
-                if len(liste) == 14 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche2', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche2', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche2', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche2', 'images'),index3, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur5}-touche2', 'images'),index4, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur6}-touche2', 'images'),index5, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur7}-touche2', 'images'),index6, y, scalex, scaley, True, False, False)
-
-                self.display.update_screen()
-                time.sleep(0.3)
-                
-            elif multi == 1 :
-                print ('touche 1 fois')
-### 1er coup
-                self.display.play_sound('punch-out_hit')                      
-                ### joueur qui frappe
-                self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{self.joueur_actif}-hit1', 'images'),index99, y, scalex, scaley, True, False, False)
-                ### joueur touche
-                if len(liste) == 2 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche1', 'images'),index0, y, scalex, scaley, True, False, False)
-                if len(liste) == 4 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche1', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche1', 'images'),index1, y, scalex, scaley, True, False, False)
-                if len(liste) == 6 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche1', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche1', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche1', 'images'),index2, y, scalex, scaley, True, False, False)
-                if len(liste) == 8 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche1', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche1', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche1', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche1', 'images'),index3, y, scalex, scaley, True, False, False)
-                if len(liste) == 10 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche1', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche1', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche1', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche1', 'images'),index3, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur5}-touche1', 'images'),index4, y, scalex, scaley, True, False, False)
-                if len(liste) == 12 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche1', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche1', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche1', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche1', 'images'),index3, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur5}-touche1', 'images'),index4, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur6}-touche1', 'images'),index5, y, scalex, scaley, True, False, False)
-                if len(liste) == 14 :
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur1}-touche1', 'images'),index0, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur2}-touche1', 'images'),index1, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur3}-touche1', 'images'),index2, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur4}-touche1', 'images'),index3, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur5}-touche1', 'images'),index4, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur6}-touche1', 'images'),index5, y, scalex, scaley, True, False, False)
-                    self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{nom_joueur7}-touche1', 'images'),index6, y, scalex, scaley, True, False, False)
-
-                self.display.update_screen()
-                time.sleep(0.3)
 
         # test for a player KO
         for player in players:
             if player.lives <= 0 and player.alive:
+                player.targets.clear()
                 player.alive = False
                 if self.points :
                          players[actual_player].lives += 30   ### test : ajout 1/10 des points de vies du depart a la place d augmenter le score
@@ -905,6 +380,10 @@ class Game(cgame.Game):
                          players[actual_player].score += 5
                 self.display.play_sound('punch-out_ko')
 
+### CONDITIONS si au moins un joueur est touche            
+        if playerHitted :
+            self.animation(multi, liste, len(players)) # by Manu to simplify code
+            
         winner = self.check_winner(players, actual_round, player_launch, actual_player)
         if winner > -1:
             self.winner = winner
@@ -912,6 +391,11 @@ class Game(cgame.Game):
         return return_code
 
    def post_round_check(self, players, actual_round, actual_player):
+        if self.debug_info:
+            info1=f"Post_round_check : players, actual_round, actual_player"
+            info2=f"Post_round_check : players, {actual_round: ^12}, {actual_player: ^13}"
+            self.affiche_info(info1, info2)
+            
         check_winner = self.check_winner(players, actual_round, 3, actual_player)
         if check_winner >= 0:
             return check_winner
@@ -922,6 +406,11 @@ class Game(cgame.Game):
 
    def check_winner(self, players, actual_round, player_launch, actual_player):
         # test for a winner
+        if self.debug_info:
+            info1=f"check_winner : players, actual_round, player_launch, actual_player"
+            info2=f"check_winner : players, {actual_round: ^12}, {player_launch: ^13}, {actual_player: ^13}"
+            self.affiche_info(info1, info2)
+            
         alive_players = []
         for player in players :
             if player.alive :
@@ -932,16 +421,19 @@ class Game(cgame.Game):
             self.winner =  alive_players[0]
             players[self.winner].score += 100
             return self.winner
-
+        
         elif len(alive_players) == 0 or (player_launch == self.nb_darts and \
                 actual_round >= self.max_round and actual_player == self.nb_players - 1):
             # victory by points if all are ko or its the last turn
             bestscoreid = -1
             bestscore = 0
             for player in players:
-                if player.score > bestscore:
-                    bestscore = player.score
-                    bestscoreid = player.ident
+                if player.score >= bestscore:
+                    if player.score != bestscore:
+                        bestscore = player.score
+                        bestscoreid = player.ident
+                    else:
+                        bestscoreid =  -1 # égalité
             return bestscoreid
         return -1
 
@@ -962,16 +454,85 @@ class Game(cgame.Game):
       """
       Refresh In-game screen
       """
+      if self.debug_info:
+          info1 = f"refresh_game_screen : players, actual_round, max_round, RemDarts, nb_darts, logo, headers, actual_player,TxtOnlogo=False, Wait=False, OnScreenButtons=None, showScores=True, end_of_game=False, endOfSet=None, Set=None, MaxSet=None"
+          info2 = f"refresh_game_screen : players, {actual_round: ^12}, {max_round: ^9}, {RemDarts: ^8}, {nb_darts: ^8}, logo, headers, {actual_player: ^13}, {TxtOnlogo: ^15}, {Wait: ^10}, {str(OnScreenButtons): ^20}, {showScores: ^15}, {end_of_game: ^17}, {str(endOfSet): ^13}, {str(Set): ^8}, {str(MaxSet): ^11}"
+          self.affiche_info(info1, info2, 110) # 
       # do not show the table scores
       ClickZones = {}
-
       # Clear
       self.display.screen.fill( (0, 0, 0) )
       # background image
       self.display.display_background('bg_fighters')
-      colorset = self.display.colorset
 
+      self.affichage_players(players, actual_player, actual_round, max_round, end_of_game)
+      
+      if end_of_game :
+          ClickZones = self.display.end_of_game_menu(logo, stat_button=False)
+
+          
+      self.display.update_screen()
+
+      return ClickZones
+    
+   def early_player_button(self, players, actual_player, actual_round):
+       """
+       Run when player push PLAYERBUTTON before last dart
+       return code :
+           0. To use miss_button instead early_player_button
+           1. Next player
+           2. Last round reach
+           3. Winner is
+       """
+       if self.debug_info:
+           info1=f"early_player_button : players, actual_player, actual_round"
+           info2=f"early_player_button : players, {actual_player: ^13}, {actual_round: ^12}"
+           self.affiche_info(info1, info2)
+           
+       return_code = 1
+       win = self.check_winner(players, actual_round, self.nb_darts, actual_player)
+       if win != -1:
+           self.winner = win
+           return_code = 3
+       else :
+           last_player = False
+           if actual_player == self.nb_players - 1:
+               last_player = True
+           else:
+               k = self.nb_players - 1
+               while k > actual_player:
+                   if not players[k].alive :
+                       last_player = True
+                   else:
+                       last_player = False
+                   k -=1
+                   
+           if (actual_round >= self.max_round and last_player):            
+               return_code = 2
+       return return_code
+    
+   def miss_button(self, players, actual_player, actual_round, player_launch):
+       """
+       MISSED BUTTON
+       """
+       if self.debug_info:
+           info1=f"miss_button : players, actual_player, actual_round, player_launch"
+           info2=f"miss_button : players, {actual_player: ^13}, {actual_round: ^12}, {player_launch: ^13}"
+           self.affiche_info(info1, info2)
+       
+       players[actual_player].segments[player_launch - 1] = ('MISS')   
+       self.display.play_sound('treasure_crane_jaune')  
+       return_code = 0
+       return return_code
+
+### eclaircissement du code
+   def affichage_players(self, players, actual_player, actual_round, max_round, fin):
+      if self.debug_info:
+          info1=f"affichage_players : players, actual_player, actual_round, max_round, fin"
+          info2=f"affichage_players : players, {actual_player: ^13}, {actual_round: ^12}, {max_round: ^9}, {fin: ^3}"
+          self.affiche_info(info1, info2)
       # show players pictures and state
+      colorset = self.display.colorset
       #scale img 368 * 670
       if len(players) == 7 :
           scalex = 268 * self.display.res['x'] / 1920
@@ -986,10 +547,8 @@ class Game(cgame.Game):
       y = self.display.res['y'] / 2 - scaley / 2
       marge = int((self.display.res['x'] - len(players) * scalex) / (len(players) + 1))
 
-      x = marge
-      alive_players = []
-
-### Determine qui est le gagant pour afficher une image WINNER          
+### Determine qui est le gagant pour afficher une image WINNER
+      
       alive_players = []
       for player in players:
         if player.lives <= 0 and player.alive:
@@ -1000,50 +559,50 @@ class Game(cgame.Game):
               alive_players.append(player.ident)
               alive_players.append(player.character)
               
-### SI l INDEX du joueur correspond a la CASE 1 - index88 = position de l image a afficher               
-      if len(alive_players) == 2 and alive_players[0] == 0:
-          index88 = marge
-### SI l INDEX du joueur correspond a la CASE 2 - index88 = position de l image a afficher           
-      if len(alive_players) == 2 and alive_players[0] == 1:
-          x = marge 
-          index88 = (scalex + marge) 
-### SI l INDEX du joueur correspond a la CASE 3 - index88 = position de l image a afficher                           
-      if len(alive_players) == 2 and alive_players[0] == 2:
-          x = marge 
-          index88 = (scalex + marge) *2
-### SI l INDEX du joueur correspond a la CASE 4 - index88 = position de l image a afficher                         
-      if len(alive_players) == 2 and alive_players[0] == 3:
-          x = marge 
-          index88 = (scalex + marge) *3
-### SI l INDEX du joueur correspond a la CASE 5 - index88 = position de l image a afficher                         
-      if len(alive_players) == 2 and alive_players[0] == 4:
-          x = marge 
-          index88 = (scalex + marge) *4
-### SI l INDEX du joueur correspond a la CASE 6 - index88 = position de l image a afficher                         
-      if len(alive_players) == 2 and alive_players[0] == 5:
-          x = marge 
-          index88 =  (scalex + marge) *5
-### SI l INDEX du joueur correspond a la CASE 7 - index88 = position de l image a afficher           
-      if len(alive_players) == 2 and alive_players[0] == 6:
-          x = marge 
-          index88 = (scalex + marge) *6
-                         
+### SI l INDEX du joueur correspond a la CASE 1 - index88 = position de l image a afficher
+      x = marge
+      index88 = x
+      if len(alive_players) == 2 and alive_players[0] > 0:
+          index88 = (scalex + marge) * int(alive_players[0])
+
       for i,p in enumerate(players):
           # find the good character picture to show
-          if actual_player == p.ident :
-              level = 5
-          elif p.lives > self.lives - (self.lives / 4) :
-              level = 1
-### affiche une nouvelle image pour le ko
-          elif p.lives <= 0 :
-              level = 6
+          ### New
+          if not p.alive:
+              level = 6 # Si on est ko on prend la 6
           else :
-              level = int(5 - ((p.lives // (self.lives / 5)) + 1))
-
+              #dans le cas ou on aurait des  images 1 à 5 différentes
+              # 1 bonne santé --> 5 = défiguré --> 6 = KO 
+              '''
+              level = int(5 - (p.lives // (self.lives // 5)))
+              print('level')
+              print(level)
+              if level < 1 :
+                  level = 1
+              elif level > 5:
+                  level = 5
+              '''    
+              if actual_player == p.ident :
+                  level = 5
+              elif p.lives>self.lives-(self.lives / 4) :
+                  level = 1
+              else :
+                  level = int(5 - ((p.lives // (self.lives / 5) )+1))        
+                  
+                  
+                  
+          
           self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{p.character}-{level}', 'images'),x, y, scalex, scaley, True, False, False)
           self.logs.log("DEBUG", f"character img loaded : {p.character}-{level}.png")
+          
+          if self.debug_info:
+              print(f"level = {level}")
+              if fin: #special pour tracer le programme
+                  fin = True
+                  print(f"DEBUG - character img loaded : {p.character}-{level}.png")
+                  print(f"{p.name} - {p.alive} - {p.targets} - {len(p.targets)}")
 
-          if i == actual_player :
+          if (i == actual_player and len(p.targets) == 1) or len(p.targets) == 1 :
               self.display.blit_text(p.name, x, y + scaley, scalex, scaley / 4, color=colorset['fighters-actual-player'])
               self.display.display_image(self.display.file_class.get_full_filename('punch-out/fighters_medic', 'images'),x + scalex / 2 - scalex / 6, y + scaley * 2 / 3, scalex / 3, scalex / 3, False, False, False)
               self.display.blit_text(str(p.targets[0]),x + scalex / 2 - scalex / 6, y + scaley * 2 / 3 + 20, scalex / 3, scalex / 3, color=colorset['fighters-medic'])
@@ -1055,35 +614,154 @@ class Game(cgame.Game):
               self.display.blit_text(str(p.targets[1]),x + scalex - scalex / 3, y, scalex / 3, scalex / 4, color=colorset['fighters-targets'])
               self.display.display_image(self.display.file_class.get_full_filename('punch-out/hit', 'images'),x + scalex / 2 - scalex / 6, y, scalex / 3, scalex / 3, True, False, False)
               self.display.blit_text(str(p.targets[2]),x + scalex / 2 - scalex / 6, y, scalex / 3,scalex / 4, color=colorset['fighters-targets'])
-          elif colorset['fighters-dead-player'] is not None:
+#          elif colorset['fighters-dead-player'] is not None:
+          elif len(p.targets) == 0 and not p.alive:
               self.display.blit_text(p.name, x, y + scaley, scalex ,scaley / 4, color=colorset['fighters-dead-player'])
 
           # show lives and score
           self.display.blit_text(str(p.lives),x + scalex / 5, y + scaley - scalex / 4, scalex / 3, scalex / 4, color=colorset['fighters-scores'])
           self.display.blit_text(str(p.score),x + scalex - scalex / 3, y + scaley - scalex / 4, scalex / 3, scalex / 4, color=colorset['fighters-scores'])
 
-          if not p.alive :
+          #if not p.alive :
               #self.display.display_image(self.display.file_class.get_full_filename('punch-out/fighters_ko', 'images'),x, y, scalex, scaley, True, False, False)
-              print ('n affiche pas la croix')
-
+              #print ('n affiche pas la croix')
+          if self.winner >=0 and self.winner == i:
+              self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{players[self.winner].character}-win', 'images'),x, y, scalex, scaley, True, False, False)
+              print (f'punch-out/vainqueur')
           x += scalex + marge
 
-### Affiche l'image du vainqueur 
-      if len(alive_players) == 2 :
-          self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{alive_players[1]}-win', 'images'),index88, y, scalex, scaley, True, False, False)
-          print (f'punch-out/vainqueur') 
-
+### Affiche l'image du vainqueur
+      #if len(alive_players) == 2 :
+#          self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{alive_players[1]}-win', 'images'),index88, y, scalex, scaley, True, False, False)
+#          print (f'punch-out/vainqueur') 
       # show round state
       self.display.blit_rect(self.display.res['x']/8 - scalex/2, 0, scalex,y*2/3, (0, 0, 0), Alpha=150)
       self.display.blit_text(f"{self.display.lang.translate('round')} {actual_round} / {max_round}" ,self.display.res['x']/8 - scalex/2,0,scalex, y/3, color=colorset['fighters-round'])
-
+   
       # show segments hitted on the round
       self.display.blit_text(" / ".join(players[actual_player].segments) ,self.display.res['x']/8 - scalex/2,y/3,scalex,y/3, color=colorset['fighters-darts'])
 
-      if end_of_game :
-          ClickZones = self.display.end_of_game_menu(logo, stat_button=False)
-          return ClickZones
 
-      self.display.update_screen()
+   def build_liste_index(self, liste, marge, scalex):
+### TEST AVEC BOUCLE - DETERMINE LES INDEX DES JOUEURS TOUCHES
+       i = 0
+       j = 0
+       list_index = []
+       for i in range(len(liste)) :
+### SI l INDEX du joueur touche correspond a la CASE 1         
+            x = marge
+            if int(liste[j]) > 0:
+                x += (scalex + marge ) * int(liste[j])
+            list_index.append(x)
+#            print ('variable I')
+#            print (i) 
+            i += 2
+#            print ('variable J')
+#            print (j)
+            if j < len(liste) :
+                j += 2
+            if j >= len(liste) :
+                j = len(liste)-2
+#            print ('liste_index')
+#            print (liste_index)
+            
+       return list_index
+       
+   def animation(self, nb_coups, liste, len_players):
+       if self.debug_info:
+           info1=f"animation : nb_coups, liste, len_players"
+           info2=f"animation : {nb_coups: ^8}, {liste}, {len_players: ^11}"
+           self.affiche_info(info1, info2)
+           
+       coups = 0
+       len_liste = len(liste)
+### definition de la taille des images 
+       if len_players == 7 :
+           scalex = 268 * self.display.res['x'] / 1920
+           scaley = 488 * self.display.res['y'] / 1080
+       elif len_players == 6 :
+           scalex = 300 * self.display.res['x'] / 1920
+           scaley = 546 * self.display.res['y'] / 1080
+       else :
+           scalex = 368 * self.display.res['x'] / 1920
+           scaley = 670 * self.display.res['y'] / 1080  
 
-      return [ClickZones]
+       y = self.display.res['y'] / 2 - scaley / 2
+       marge = int((self.display.res['x'] - len_players * scalex) / (len_players + 1))
+       
+       x = marge
+       x += (scalex + marge) * int(self.index_joueur_actif)
+       index99 = x       
+       liste_index = []
+       liste_index = self.build_liste_index(liste, marge, scalex)
+       print (f'touche {nb_coups} fois')
+#       if len_liste == 14 :
+#                nom_joueur1 = liste[1]
+#                nom_joueur2 = liste[3]
+#                nom_joueur7 = liste[13]
+       
+       while coups < nb_coups:
+           coups += 1
+           image_hit = f'hit{coups}'
+           image_touche = f'touche{coups}'
+           if self.debug_info:
+               print(f"image_hit = {image_hit}")
+               print(f"image_touche = {image_touche}")
+               test = f'punch-out/{self.joueur_actif}-{image_hit}'
+               print(f" test = {test}")
+           self.display.play_sound('punch-out_hit')                      
+           ### joueur qui frappe
+           self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{self.joueur_actif}-{image_hit}', 'images'),index99, y, scalex, scaley, True, False, False)
+           ### joueur touche
+           if len_liste == 2 :
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[1]}-{image_touche}', 'images'),liste_index[0], y, scalex, scaley, True, False, False)
+           if len_liste == 4 :
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[1]}-{image_touche}', 'images'),liste_index[0], y, scalex, scaley, True, False, False)
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[3]}-{image_touche}', 'images'),liste_index[1], y, scalex, scaley, True, False, False)
+           if len_liste == 6 :
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[1]}-{image_touche}', 'images'),liste_index[0], y, scalex, scaley, True, False, False)
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[3]}-{image_touche}', 'images'),liste_index[1], y, scalex, scaley, True, False, False)
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[5]}-{image_touche}', 'images'),liste_index[2], y, scalex, scaley, True, False, False)
+           if len_liste == 8 :
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[1]}-{image_touche}', 'images'),liste_index[0], y, scalex, scaley, True, False, False)
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[3]}-{image_touche}', 'images'),liste_index[1], y, scalex, scaley, True, False, False)
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[5]}-{image_touche}', 'images'),liste_index[2], y, scalex, scaley, True, False, False)
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[7]}-{image_touche}', 'images'),liste_index[3], y, scalex, scaley, True, False, False)
+           if len_liste == 10 :
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[1]}-{image_touche}', 'images'),liste_index[0], y, scalex, scaley, True, False, False)
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[3]}-{image_touche}', 'images'),liste_index[1], y, scalex, scaley, True, False, False)
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[5]}-{image_touche}', 'images'),liste_index[2], y, scalex, scaley, True, False, False)
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[7]}-{image_touche}', 'images'),liste_index[3], y, scalex, scaley, True, False, False)
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[9]}-{image_touche}', 'images'),liste_index[4], y, scalex, scaley, True, False, False)
+           if len_liste == 12 :
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[1]}-{image_touche}', 'images'),liste_index[0], y, scalex, scaley, True, False, False)
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[3]}-{image_touche}', 'images'),liste_index[1], y, scalex, scaley, True, False, False)
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[5]}-{image_touche}', 'images'),liste_index[2], y, scalex, scaley, True, False, False)
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[7]}-{image_touche}', 'images'),liste_index[3], y, scalex, scaley, True, False, False)
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[9]}-{image_touche}', 'images'),liste_index[4], y, scalex, scaley, True, False, False)
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[11]}-{image_touche}', 'images'),liste_index[5], y, scalex, scaley, True, False, False)
+           if len_liste == 14 :
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[1]}-{image_touche}', 'images'),liste_index[0], y, scalex, scaley, True, False, False)
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[3]}-{image_touche}', 'images'),liste_index[1], y, scalex, scaley, True, False, False)
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[5]}-{image_touche}', 'images'),liste_index[2], y, scalex, scaley, True, False, False)
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[7]}-{image_touche}', 'images'),liste_index[3], y, scalex, scaley, True, False, False)
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[9]}-{image_touche}', 'images'),liste_index[4], y, scalex, scaley, True, False, False)
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[11]}-{image_touche}', 'images'),liste_index[5], y, scalex, scaley, True, False, False)
+               self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{liste[13]}-{image_touche}', 'images'),liste_index[6], y, scalex, scaley, True, False, False)
+               
+           self.display.update_screen()
+           time.sleep(0.3)
+           
+   def affiche_info(self, info1, info2, split = 0, car = ','):
+       if split > 0 and len(info1) > split :
+           while (info1[split] != car) and (split > 0): #on va couper avant la variable
+               split -= 1
+           split += 1 #on saute car   
+           info = info1[:split] + '\n' + info2[:split]
+           info2 = info1[split:] + '\n' + info2[split:]
+           info1 = info
+       print(info1)
+       print(info2)
+       
+       
+        

@@ -19,6 +19,8 @@ NB_DARTS = 3  # Total darts the player has to play
 LOGO = 'Pursuit.png'
 # Columns headers - Better as a string
 HEADERS = ['D1', 'D2', 'D3', '', '', '', 'SPR' ] # Columns headers - Must be a string
+VERSION = '1.00'
+
 # couleur des joueurs
 Colors = ["green","red","blue","orange"]
 # sequences for the race order
@@ -47,12 +49,14 @@ positions = [ # (posX,posY)
     (681,978) #20
     ]
 
+VERSION = '1.00'
 
 def check_players_allowed(nb_players):
-    '''
-    Return the player number max for a game.
-    '''
-    return nb_players <= 4
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 2 and nb_players <= 4, VERSION, 4
+
 
 ############
 # Extend the basic player
@@ -307,7 +311,17 @@ class Game(cgame.Game):
                     self.video_player.play_video(self.display.file_class.get_full_filename('pursuit/pursuit_win', 'videos'))
 
         return return_code
-
+        
+    def miss_button(self, players, actual_player, actual_round, player_launch):
+        '''
+        Miss button
+        '''
+        print('miss')
+        #players[actual_player].columns[6] = (self.moyenne, 'int')
+        players[actual_player].columns[player_launch-1] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        players[actual_player].darts_thrown += 1
+    
     def early_player_button(self,players,actual_player,actual_round):
         # Jump to next player by default
         return_code=1

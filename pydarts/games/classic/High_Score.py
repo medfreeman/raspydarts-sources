@@ -14,7 +14,17 @@ GAME_RECORDS = {'Points Per Round': 'DESC', 'Points Per Dart': 'DESC'}
 NB_DARTS = 3  # Total darts the player has to play
 LOGO = 'High_Score.png'
 HEADERS = ['D1', 'D2', 'D3', '', 'Rnd', 'PPD', 'PPR'] # Columns headers - Must be a string
+VERSION = '1.00'
 
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 1 and nb_players <= 12, VERSION, 12 
+    
+    #return True 
+
+    
 class CPlayerExtended(cplayer.Player):
     """
     Exetended player class
@@ -48,7 +58,9 @@ class Game(cgame.Game):
         self.multix123 = options['multix123']
         # In order to display dead players at bottom of score's table
         self.position = nb_players
-
+        if nb_players == 1:
+            self.sudden_death = False
+            
         if self.sudden_death:
             self.headers[3] = 'Vies'
 
@@ -213,6 +225,10 @@ class Game(cgame.Game):
                 self.headers[0] = 'X1'
                 self.headers[1] = 'X2'
                 self.headers[2] = 'X3'
+        elif not self.multix123 :
+                self.headers[0] = 'D1'
+                self.headers[1] = 'D2'
+                self.headers[2] = 'D3'
 
         if self.sudden_death:
             players[actual_player].columns[3] = (players[actual_player].lives, 'int')
@@ -233,31 +249,6 @@ class Game(cgame.Game):
         if bull > 95:
             return 'DB'
         return f'{multi}{value}'
-
-    def best_score(self, players):
-        """
-        Find the winner
-        Only one player with best score
-        """
-        best_player = None
-        best_score = None
-        best_count = 0
-        for player in players:
-            if best_score is None or player.score > best_score:
-                best_score = player.score
-                best_player = player.ident
-                best_count = 1
-                self.logs.log("DEBUG", \
-                        f"Best found : {best_score} / Count={best_count} / player = {best_player}")
-            elif player.score == best_score:
-                best_count += 1
-
-        self.logs.log("DEBUG", \
-                f"Best score : {best_score} / Count={best_count} / Player = {best_player}")
-
-        if best_count == 1:
-            return best_player
-        return -1
 
     def post_dart_check(self, hit, players, actual_round, actual_player, player_launch):
         """
@@ -283,6 +274,10 @@ class Game(cgame.Game):
             if self.super_shoot_out:
                 self.super_multiplicateur = players[actual_player].super_multiplicateur
                 players[actual_player].super_multiplicateur += 1
+            self.calcul = True
+            
+        if hit == 'SB' and self.multix123 or hit == 'DB' and self.multix123 :
+            score = self.score_map[hit]
             self.calcul = True
 
 ### QD ON TOUCHE UN SEGMENT ALLUME, ON LE SUPPRIME
@@ -386,9 +381,8 @@ class Game(cgame.Game):
         # Check for end of game (no more rounds to play)
         if player_launch == self.nb_darts and actual_round >= self.max_round \
                 and actual_player == len(players) - 1:
-            winner = self.best_score(players)
-            if winner >= 0:
-                self.winner = winner
+            self.winner = self.check_winner(players)
+            if self.winner is not None:
                 handler['return_code'] = 3
             else:
                 # No winner : last round reached
@@ -419,7 +413,7 @@ class Game(cgame.Game):
                     handler['announcement'] = f'{players[dead].name} est éliminé'
         elif actual_round >= self.max_round and actual_player == len(players) - 1:
             # Last round, last player
-            handler['return_code'] = self.best_score(players)
+            handler['return_code'] = self.check_winner(players)
         return handler
 
     def find_deads(self, players):
@@ -473,6 +467,20 @@ class Game(cgame.Game):
         """
         return player.score
 
+    def miss_button(self, players, actual_player, actual_round, player_launch):
+        '''
+        Miss button
+        '''
+        print('miss')
+        #players[actual_player].columns[6] = (self.moyenne, 'int')
+        players[actual_player].columns[player_launch-1] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        players[actual_player].darts_thrown += 1
+        self.super_multiplicateur = 1
+        players[actual_player].super_multiplicateur = 1
+        if self.super_shoot_out:
+            players[actual_player].columns[6] = (players[actual_player].super_multiplicateur, 'int')
+        
     def next_set_order(self, players):
         """
         Sort players for next set
@@ -486,3 +494,6 @@ class Game(cgame.Game):
         for player in players:
             player.stats['Points Per Round'] = player.avg(actual_round)
             player.stats['Points Per Dart'] = player.show_ppd()
+
+
+

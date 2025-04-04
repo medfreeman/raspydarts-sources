@@ -10,7 +10,7 @@ if sys.version[:1] == '2':
 elif sys.version[:1] == '3':
     import configparser
 # pyDarts running Version
-pyDartsVersion = "4.3.3"
+pyDartsVersion = "4.4.1"
 # pyDarts official running wiki
 wiki="https://www.facebook.com/groups/124845401274184"
 # Official website
@@ -57,9 +57,9 @@ DefaultConfig['SectionGlobals'] = {
     'exhibition_mode': False,
     'competition_mode': False,
     'videosound_multiplier': 1,
-    'sound_multiplier': 100, #by Manu script.
-    'illumination_mode': False, #by Manu script.
-    'illumination_color': 'white' #by Manu script.
+    'sound_multiplier': 100, 
+    'illumination_mode': False, 
+    'illumination_color': 'white'
     }
 #
 DefaultConfig['SectionAdvanced'] = {
@@ -157,7 +157,7 @@ DefaultConfig['Raspberry'] = {
     'PIN_VOLUME_DOWN': '0',
     'PIN_VOLUME_MUTE': '0',
     'PIN_CPTPLAYER': '0',
-    'PIN_DEMOLED': '0',
+    'PIN_MISSDART': '0',
     'LIGHT_NEXTPLAYER':'',
     'LIGHT_NAVIGATE':'',
     'LIGHT_VALIDATE':'',
@@ -168,6 +168,128 @@ DefaultConfig['Raspberry'] = {
     'LIGHT_CELEBRATION':'',
     'LIGHT_CELEBRATION2':'',
     'LIGHT_LIGHT':''
+    }
+# A deplacer dans un fichier yaml
+#
+######### CONFIG NB JOUEURS - 2 choix
+#
+#   nomdujeu : [ min , max ]
+DefaultConfig['NbOfPlayersPerGame'] = {
+    '321_Zlip': [ 2 , 12 , False ], 
+    'Batard' : [ 1 , 12 , False ],
+    'Bermuda_Triangle' : [ 1 , 12 , False ],
+    'Big6' : [ 2 , 12 , False ],
+    'Bob27' : [ 1 , 12 , False ],
+    'By_Fives' : [ 1 , 12 , False ],
+    'Color' : [ 1 , 12 , False ],
+    'Cricket' : [ 1 , 8 , False ], 
+    'High_Score' : [ 1 , 12 , False ],
+    'Ho_One' : [ 1 , 8 , False ],
+    'Kapital' : [ 1 , 12 , False ],
+    'Killer' : [ 2 , 12 , False ],
+    'Kinito' : [ 1 , 12 , False ],
+    'Low_Score' : [ 1 , 12 , False ],
+    'Mickey' : [ 1 , 8 , False ],
+    'Practice' : [ 1 , 12 , False ],
+    'Round_the_clock' : [ 1 , 12 , False ],
+    'Scram_Cricket' : [ 2 , 4 , True ],         #### NOTE : ce jeu ce joue a 2 ou a 4 , on ne peux pas jouer a 3 joueurs (d ailleurs pour moi, ce jeu ne se joue qu a 2, c est tres long commme jeu)
+    'Shanghai' : [ 1 , 12 , False ],
+    'Slider' : [ 1 , 12 , False ],
+    'Up_Down_Count_Up' : [ 1 , 12 , False ],
+    
+    'Bingo' : [ 1 , 4 , False ],
+    'Bulls' : [ 1 , 12 , False ],
+    'Castle' : [ 2 , 4 , False ],
+    'Challenge' : [ 2 , 12 , False ],
+    'Chaos' : [ 1 , 12 , False ],                    #### NOTE : nouveau jeu pas encore sorti, supprime si il faut
+    'Conquer' : [ 2 , 4 , False ],
+    'Dragon' : [ 1 , 12 , False ],                   #### NOTE : nouveau jeu pas encore fait, supprime si il faut
+    'GameOfGoose' : [ 1 , 4 , False ], 
+    'Morpion' : [ 2 , 4 , False ],
+    'Othello' : [ 2 , 4 , True ],                   #### NOTE : ce jeu ce joue a 2 ou a 4 , on ne peux pas jouer a 3 joueurs    
+    'Puissance4' : [ 2 , 4 , True ],                #### NOTE : ce jeu ce joue a 2 ou a 4 , on ne peux pas jouer a 3 joueurs
+    'Pursuit' : [ 2 , 4 , False ],   
+    'Risk' : [ 2 , 5 , False ],
+    'Robin_Drink' : [ 2 , 10 , False ],
+    'Robin_Strip' : [ 2 , 10 , False ],
+    'Sabotage' : [ 2 , 12 , False ],   
+    'Simon' : [ 2 , 12 , False ],
+    'Target' : [ 1 , 12 , False ],
+    'Tower' : [ 1 , 6 , False ],
+    'Treasure' : [ 2 , 12 , False ],
+    'Voleur' : [ 1 , 12 , False ],
+    
+    'Balltrap' : [ 1 , 12 , False ],
+    'Baseball' : [ 2 , 4 , False ],
+    'Bowling' : [ 1 , 12 , False ],   
+    'Fighters' : [ 2 , 5 , False ],
+    'Football' : [ 2 , 2 , False ],                #### NOTE : ce jeu ce joue a 2 uniquement
+    'Golf' : [ 1 , 12 , False ],
+    'Horse' : [ 1 , 4 , False ],
+    'Pingpong' : [ 2 , 12 , False ],    
+    'Punch-Out' : [ 2 , 7 , False ],       
+    'Snooker' : [ 1 , 6 , False ],
+    'Tennis' : [ 2 , 4 , True ]                   #### NOTE : ce jeu ce joue a 2 ou a 4 , on ne peux pas jouer a 3 joueurs    
+    
+    }
+
+#   nom du jeu : categorie
+DefaultConfig['GamePerCategory'] = {
+    '321_Zlip': 'classic', 
+    'Batard' : 'classic',
+    'Bermuda_Triangle' : 'classic',
+    'Big6' : 'classic',
+    'Bob27' : 'classic',
+    'By_Fives' : 'classic',
+    'Color' : 'classic',
+    'Cricket' : 'classic', 
+    'High_Score' : 'classic',
+    'Ho_One' : 'classic',
+    'Kapital' : 'classic',
+    'Killer' : 'classic',
+    'Kinito' : 'classic',
+    'Low_Score' : 'classic',
+    'Mickey' : 'classic',
+    'Practice' : 'classic',
+    'Round_the_clock' : 'classic',
+    'Scram_Cricket' : 'classic',         #### NOTE : ce jeu ce joue a 2 ou a 4 , on ne peux pas jouer a 3 joueurs (d ailleurs pour moi, ce jeu ne se joue qu a 2, c est tres long commme jeu)
+    'Shanghai' : 'classic',
+    'Slider' : 'classic',
+    'Up_Down_Count_Up' : 'classic',
+    
+    'Bingo' : 'fun',
+    'Castle' : 'fun',
+    'Challenge' : 'fun',
+    'Chaos' : 'fun',                    #### NOTE : nouveau jeu pas encore sorti, supprime si il faut
+    'Conquer' : 'fun',
+    'Dragon' : 'fun',                   #### NOTE : nouveau jeu pas encore fait, supprime si il faut
+    'GameOfGoose' : 'fun', 
+    'Morpion' : 'fun',
+    'Othello' : 'fun',                   #### NOTE : ce jeu ce joue a 2 ou a 4 , on ne peux pas jouer a 3 joueurs    
+    'Puissance4' : 'fun',                #### NOTE : ce jeu ce joue a 2 ou a 4 , on ne peux pas jouer a 3 joueurs
+    'Pursuit' : 'fun',   
+    'Risk' : 'fun',
+    'Robin_Drink' : 'fun',
+    'Robin_Strip' : 'fun',
+    'Sabotage' : 'fun',   
+    'Simon' : 'fun',
+    'Target' : 'fun',
+    'Tower' : 'fun',
+    'Treasure' : 'fun',
+    'Voleur' : 'fun',
+    
+    'Balltrap' : 'sport',
+    'Baseball' : 'sport',
+    'Bowling' : 'sport',   
+    'Fighters' : 'sport',
+    'Football' : 'sport',                #### NOTE : ce jeu ce joue a 2 uniquement
+    'Golf' : 'sport',
+    'Horse' : 'sport',
+    'Pingpong' : 'sport',    
+    'Punch-Out' : 'sport',       
+    'Snooker' : 'sport',
+    'Tennis' : 'sport'                   #### NOTE : ce jeu ce joue a 2 ou a 4 , on ne peux pas jouer a 3 joueurs    
+    
     }
 
 AlternateConfig['Raspberry'] = {
@@ -187,7 +309,7 @@ AlternateConfig['Raspberry'] = {
     'PIN_VOLUME_DOWN':'',
     'PIN_VOLUME_MUTE':'',
     'PIN_CPTPLAYER':'',
-    'PIN_DEMOLED':'',
+    'PIN_MISSDART':'',
     'LIGHT_NEXTPLAYER':'',
     'LIGHT_NAVIGATE':'',
     'LIGHT_VALIDATE':'',
@@ -329,14 +451,21 @@ DefaultConfig['Colorset'] = {
     'bob27-red': (124, 84, 87),
     'bob27-hit': (57, 209, 129),
     'bob27-miss': (232, 21, 37),
-    'bob27-text': (255, 255, 255)
+    'bob27-text': (255, 255, 255),
+
+    # Color used for suggestion for all players (for target leds, this color will be used for all players if not None)
+    'suggestion-color-allplayer': None, #(255, 0, 0) - Red
+
+    # Show shortcuts or use a character
+    'shortcuts': None, # None if you want to use 'F1,F2,etc' shortcut; empty -> '' <- for no shortcut; '>' for '> Partie simple' shortcut
+    'center-shortcuts-text': False
 }
 
 EXTENDED_CONFIG = {
         'EXTENDED_GPIO': '1', 'PIN_UP': 'A0', 'PIN_DOWN': 'A1', 'PIN_LEFT': 'A2', 'PIN_RIGHT': 'A3',
         'PIN_MINUS': 'A5', 'PIN_PLUS': 'A4', 'PIN_VALIDATE': 'A6', 'PIN_CANCEL': 'B1', 'PIN_NEXTPLAYER': 'B0',
         'PIN_BACK': 'A7', 'PIN_GAMEBUTTON': '', 'PIN_VOLUME_UP': '', 'PIN_VOLUME_DOWN': '',
-        'PIN_VOLUME_MUTE': '', 'PIN_CPTPLAYER': '', 'PIN_DEMOLED': '', 'LIGHT_NAVIGATE': '',
+        'PIN_VOLUME_MUTE': '', 'PIN_CPTPLAYER': '', 'PIN_MISSDART': '', 'LIGHT_NAVIGATE': '',
         'LIGHT_NEXTPLAYER': '', 'LIGHT_BACK': '', 'LIGHT_PLAYERS': '', 'LIGHT_LASER': '', 'LIGHT_FLASH': '',
         'LIGHT_VALIDATE': '', 'LIGHT_CELEBRATION' :'', 'LIGHT_CELEBRATION2' :'', 'LIGHT_LIGHT': ''
     }
@@ -366,8 +495,7 @@ GBCardConfig = {
         'DB': '1914', 's1': '627', 's2': '1615', 's3': '815', 's4': '1815', 's5': '2615',
         's6': '2314', 's7': '2415', 's8': '2517', 's9': '1627', 's10': '614', 's11': '827',
         's12': '2614', 's13': '1814', 's14': '727', 's15': '1314', 's16': '2414', 's17': '715',
-        's18': '2317', 's19': '2515', 's20': '1327',
-        'PLAYERBUTTON': '', 'GAMEBUTTON': '', 'BACKUPBUTTON': '', 'EXTRABUTTON': ''
+        's18': '2317', 's19': '2515', 's20': '1327'
         },
     'EXTENDED': EXTENDED_CONFIG
     }
@@ -394,13 +522,12 @@ ClkCardConfig = {
         'T3': '815', 'T4': '811', 'T5': '1911', 'T6': '1611', 'T7': '2415', 'T8': '1915',
         'T9': '611', 'T10': '2011', 'T11': '1315', 'T12': '1311', 'T13': '711', 'T14': '615',
         'T15': '2015', 'T16': '2615', 'T17': '715', 'T18': '2511', 'T19': '2515', 'T20': '2611',
-        'SB': '1322', 'DB': '622',
-        'PLAYERBUTTON': '', 'GAMEBUTTON': '', 'BACKUPBUTTON': '', 'EXTRABUTTON': ''
+        'SB': '1322', 'DB': '622'
         },
     'EXTENDED': EXTENDED_CONFIG
     }
 
-JTCardConfig = {
+JtCardConfig = {
     'CARD_NAME': 'Carte de Julien',
     'INPUT': {
         'PIN_1': '17', 'PIN_2': '27', 'PIN_3': '22', 'PIN_4': '10', 'PIN_5': '9',
@@ -624,6 +751,7 @@ class Config:
         self.themes_dir = f'{self.user_dir}/themes'
         self.root_dir = '/pydarts'
         self.fontsDir = f'{self.root_dir}/fonts'
+        self.gamesDir = f'{self.root_dir}/games'
         self.dirs = {'images': ['images', ['png', 'jpg', 'gif']],
                 'sounds': ['sounds', ['ogg']],
                 'videos': ['videos', ['mkv', 'mp4']],
@@ -659,7 +787,7 @@ class Config:
               's3': 3, 'S3': 3, 'D3': 6, 'T3': 9,
               's2': 2, 'S2': 2, 'D2': 4, 'T2': 6,
               's1': 1, 'S1': 1, 'D1': 2, 'T1': 3,
-              'MISSDART': 0
+              'MISSDART': 0, 'MISS': 0
               }
         # pyDarts running Version
         self.pyDartsVersion = self.get_version()
@@ -696,6 +824,12 @@ class Config:
             self.rpi_version = f.readlines()
         f.close()
 
+        # Print version if requested
+        with open('/sys/firmware/devicetree/base/serial-number') as f:
+            self.rpi_serial = f.readlines()
+        f.close()
+
+        self.rpi_serial = self.rpi_serial[0].rstrip('\x00')
         self.rpi_version = self.rpi_version[0].replace('Raspberry ', '').rstrip('\x00')
         self.rpi_model = rpi_versions.get(self.rpi_version.split(' Rev')[0], '0')
         self.file_exists = False
@@ -892,11 +1026,11 @@ class Config:
         self.conf += "### To adjust the volume of videos\n"
         self.conf += f"videosound_multiplier:{Global['videosound_multiplier']}\n"
         self.conf += "### To adjust the volume of sounds (10 - 100)\n"
-        self.conf += f"sound_multiplier:{Global['sound_multiplier']}\n" #by Manu script.
-        self.conf += "### light strip according to illumination mode\n" #by Manu script.
-        self.conf += f"illumination_mode:{Global['illumination_mode']}\n" #by Manu script.
-        self.conf += "### light strip illumination color\n" #by Manu script.
-        self.conf += f"illumination_color:{Global['illumination_color']}\n\n" #by Manu script.
+        self.conf += f"sound_multiplier:{Global['sound_multiplier']}\n" 
+        self.conf += "### light strip according to illumination mode\n" 
+        self.conf += f"illumination_mode:{Global['illumination_mode']}\n" 
+        self.conf += "### light strip illumination color\n" 
+        self.conf += f"illumination_color:{Global['illumination_color']}\n\n" 
 
         Advanced = self.config["SectionAdvanced"]
 
@@ -984,8 +1118,6 @@ class Config:
 
         game_list = [section for section in self.config if section.startswith('game-')]
 
-        #self.print()
-
         for game in game_list:
             self.config_section(game, f"{game.replace('game-', '')}'s options")
 
@@ -1059,7 +1191,7 @@ class Config:
 
     def set_ji_card_config(self):
         """
-        Set Jimmy or Remy's card config
+        Set Jimmy or Remi's card config
         """
         self.set_config('Raspberry_BoardPinsIns', JiCardConfig['INPUT'])
         self.set_config('Raspberry_BoardPinsOuts', JiCardConfig['OUTPUT'])
@@ -1068,7 +1200,7 @@ class Config:
 
     def set_ji2_card_config(self):
         """
-        Set Jimmy or Remy's card config
+        Set Jimmy or Remi's card config
         """
         self.set_config('Raspberry_BoardPinsIns', Ji2CardConfig['INPUT'])
         self.set_config('Raspberry_BoardPinsOuts', Ji2CardConfig['OUTPUT'])
@@ -1077,7 +1209,7 @@ class Config:
 
     def set_jiz_card_config(self):
         """
-        Set Jimmy or Remy's card config
+        Set Jimmy or Remi's card config
         """
         self.set_config('Raspberry_BoardPinsIns', JizCardConfig['INPUT'])
         self.set_config('Raspberry_BoardPinsOuts', JizCardConfig['OUTPUT'])
@@ -1086,7 +1218,7 @@ class Config:
 
     def set_gb_card_config(self):
         """
-        Set Jimmy or Remy's card config
+        Set Jimmy or Remi's card config
         """
         self.set_config('Raspberry_BoardPinsIns', GBCardConfig['INPUT'])
         self.set_config('Raspberry_BoardPinsOuts', GBCardConfig['OUTPUT'])
@@ -1096,7 +1228,7 @@ class Config:
 
     def set_ed900_card_config(self):
         """
-        Set Jimmy or Remy's card config
+        Set Jimmy or Remi's card config
         """
         self.set_config('Raspberry_BoardPinsIns', ED900Config['INPUT'])
         self.set_config('Raspberry_BoardPinsOuts', ED900Config['OUTPUT'])
@@ -1115,7 +1247,7 @@ class Config:
 
     def set_jo_card_config(self):
         """
-        Set Joffrey or Remy's card config
+        Set Joffrey or Remi's card config
         """
         self.set_config('Raspberry_BoardPinsIns', JoCardConfig['INPUT'])
         self.set_config('Raspberry_BoardPinsOuts', JoCardConfig['OUTPUT'])

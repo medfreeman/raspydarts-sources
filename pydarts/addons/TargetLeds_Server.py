@@ -141,7 +141,7 @@ def animation(t_event, msg):
         elif animation == 'Snake':
             CStrip.TA_Snake(t_event, delay, C, iterations)
         elif animation == 'Simone' or animation == 'Daisy':
-            CStrip.TA_Daisy(t_event, delay, C, iterations) #by Manu script.
+            CStrip.TA_Daisy(t_event, delay, C, iterations)  
         elif animation == 'SimpleBull':
             CStrip.TA_SimpleBull(t_event, delay, C, iterations)
         elif animation == 'Sparkle':

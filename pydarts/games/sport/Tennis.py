@@ -9,19 +9,20 @@ from include import cgame
 ############
 # Game Variables
 ############
+VERSION = '1.00'
 OPTIONS = {'set': 2, 'cote': False}
 GAME_RECORDS = {'Points Per Round': 'DESC', 'Points Per Dart': 'DESC'}
-NB_DARTS = 3  # Total darts the player has to play
+NB_DARTS = 7  # Total darts the player has to play
 LOGO = 'Tennis.png'
 HEADERS = ['Zone', 'Pts', '1', '2', '3', '4', '5'] # Columns headers - Must be a string
 
 SCORES = {0: 0, 1: 15, 2: 30, 3: 40, 4:40}
 
 def check_players_allowed(nb_players):
-   '''
+   """
    Return the player number max for a game.
-   '''
-   return nb_players % 2 == 0
+   """
+   return nb_players in (2, 4), VERSION, 4
 
 class CPlayerExtended(cplayer.Player):
     '''
@@ -47,6 +48,8 @@ class Game(cgame.Game):
         self.logo = LOGO
         self.headers = HEADERS
         self.options = options
+        self.game_is_ok_for_color = False
+        self.free_launch = False
 
         self.nb_players = nb_players
 
@@ -91,6 +94,7 @@ class Game(cgame.Game):
         self.num_set = 1
         #test
         self.my_hits = []
+        self.swap = 0 # by Manu swap terrain
 
         if self.nb_players == 4:
             self.display.teaming = True
@@ -113,63 +117,94 @@ class Game(cgame.Game):
             # Haut
             # ----
             # Bas
-            hits_j1 = [8, 16, 7, 19, 17, 2, 15, 10]
-            hits_j2 = [14, 9, 12, 5, 1, 18, 4, 13]
-            net = [11, 6]
-            out = [20, 3]
+            hits_j1 = [8, 16, 7, 19, 17, 2, 15, 10] #bas 
+            hits_j2 = [14, 9, 12, 5, 1, 18, 4, 13] #haut
+            net = [11, 6] # horizontale
+            out = [20, 3] #verticale 
         else:
             # Gauche | Droite
-            hits_j1 = [5, 12, 9, 14, 8, 16, 7, 19]
-            hits_j2 = [1, 18, 4, 13, 10, 15, 2, 17]
-            net = [20, 3]
-            out = [11, 6]
+            hits_j1 = [5, 12, 9, 14, 8, 16, 7, 19] #gauche
+            hits_j2 = [1, 18, 4, 13, 10, 15, 2, 17] #droite
+            net = [20, 3] #verticale
+            out = [11, 6] #horizontale
 
         # Pour fixer le segment à toucher
         if hit is not None:
             hits_j1 = [hit]
             hits_j2 = []
-
-        hits_j1 = [f'{mult}{hit}' for hit in hits_j1 for mult in ['S', 'D', 'T']]
-        hits_j2 = [f'{mult}{hit}' for hit in hits_j2 for mult in ['S', 'D', 'T']]
+        else :
+            hits_j1 = [f'{mult}{hit}' for hit in hits_j1 for mult in ['S', 'D', 'T']]
+            hits_j2 = [f'{mult}{hit}' for hit in hits_j2 for mult in ['S', 'D', 'T']]
 
         ### Le terrain change a chaque jeu impair
-        if int(self.nb_game / 2) % 2 == 0:
-            if hit is None:
-                self.hits = hits_j1
-                self.hits_inv = hits_j2
-                self.my_hits = hits_j1
+        if actual_player in [0,2]:
+            if self.swap == 0:
+                #swap == 0
+                if hit is None:
+                    self.hits = hits_j1
+                    self.hits_inv = hits_j2
+                    self.my_hits = hits_j1
+                else:
+                    self.hits = [f'{mult}{hit}' for mult in ['S', 'D', 'T']]
+                    self.hits_inv = []
+                    self.my_hits = [hit]
+                cote = "terrain 1"
+                leds_j1 = [f'{hit}#{self.colors[0]}' for hit in self.hits]
+                leds_j2 = [f'{hit}#{self.colors[2]}' for hit in self.hits_inv]
             else:
-                self.hits = [f'{mult}{hit}' for mult in ['S', 'D', 'T']]
-                self.hits_inv = []
-                self.my_hits = [hit]
-            cote = "terrain 1"
-        else:
-            if hit is None:
-                self.hits = hits_j2
-                self.hits_inv = hits_j1
-                self.my_hits = hits_j2
+                #swap == 2
+                if hit is None:
+                    self.hits = hits_j2
+                    self.hits_inv = hits_j1
+                    self.my_hits = hits_j2
+                else:
+                    self.hits_inv = []
+                    self.hits = [f'{mult}{hit}' for mult in ['S', 'D', 'T']]
+                    self.my_hits = [hit]
+                cote = "terrain 2"
+                leds_j1 = [f'{hit}#{self.colors[2]}' for hit in self.hits_inv]
+                leds_j2 = [f'{hit}#{self.colors[0]}' for hit in self.hits]
+        else: #joueur 1 et 3
+            if self.swap == 1:
+                #swap == 1
+                if hit is None:
+                    self.hits = hits_j2
+                    self.hits_inv = hits_j1
+                    self.my_hits = hits_j2
+                else:
+                    self.hits = [f'{mult}{hit}' for mult in ['S', 'D', 'T']]
+                    self.hits_inv = []
+                    self.my_hits = [hit]
+                cote = "terrain 1"
+                leds_j1 = [f'{hit}#{self.colors[2]}' for hit in self.hits]
+                leds_j2 = [f'{hit}#{self.colors[0]}' for hit in self.hits_inv]
             else:
-                self.hits = []
-                self.hits_inv = [f'{mult}{hit}' for mult in ['S', 'D', 'T']]
-                self.my_hits = [hit]
-            cote = "terrain 2"
-
-        ### Terrains
-        leds_j1 = [f'{hit}#{self.colors[0]}' for hit in self.hits]
-        leds_j2 = [f'{hit}#{self.colors[2]}' for hit in self.hits_inv]
+                #swap == 3
+                if hit is None:
+                    self.hits = hits_j1
+                    self.hits_inv = hits_j2
+                    self.my_hits = hits_j1
+                else:
+                    self.hits_inv = []
+                    self.hits = [f'{mult}{hit}' for mult in ['S', 'D', 'T']]
+                    self.my_hits = [hit]
+                cote = "terrain 2"
+                leds_j1 = [f'{hit}#{self.colors[0]}' for hit in self.hits_inv]
+                leds_j2 = [f'{hit}#{self.colors[2]}' for hit in self.hits]
+            
 
         #### out et net
         self.hits_net = [f'{mult}{number}' for mult in ['S', 'D', 'T'] for number in net]
         self.hits_out = [f'{mult}{number}' for mult in ['S', 'D', 'T'] for number in out]
 
-        self.leds_net = [f'{hit}#white' for hit in self.hits_net]
+        self.leds_net = [f'{hit}#{(160,160,160)}' for hit in self.hits_net]
         self.leds_out = [f'{hit}#red' for hit in self.hits_out]
 
         ####
         self.logs.log("DEBUG", f"game={self.nb_game} cote={cote} self.my_hits = {self.my_hits}")
         self.logs.log("DEBUG", f"return {leds_j1 + leds_j2 + self.leds_bull + self.leds_out}")
 
-        return leds_j1 + leds_j2 + self.leds_bull + self.leds_out
+        return leds_j1 + leds_j2 + self.leds_bull + self.leds_out + self.leds_net
 
     def pre_dart_check(self, players, actual_round, actual_player, player_launch):
         '''
@@ -177,7 +212,7 @@ class Game(cgame.Game):
         '''
         return_code = 0
         self.early = False
-        
+        self.free_launch = False #compte les flechettes
         #### AJOUT - recupere lID du joueur actif pour dire les score (15 ou 0-15)
         self.p_ident = players[actual_player].ident
         
@@ -225,13 +260,12 @@ class Game(cgame.Game):
             self.dmd.send_text(f"{players[actual_player].name} au Service")
 
             # Init leds
-            self.targets = self.init_leds(players, actual_player, actual_round)
+            players[actual_player].targets = self.init_leds(players, actual_player, actual_round)
 
-        self.rpi.set_target_leds('|'.join(self.targets))
+        self.rpi.set_target_leds('|'.join(players[actual_player].targets))
 
         # gestion fleche
-        if self.points_j1 < 10:
-                self.nb_darts = 99
+        self.nb_darts = 4
 
         #self.calcul_points(players)
         self.update_columns(players)
@@ -257,13 +291,13 @@ class Game(cgame.Game):
 
         if not self.tiebreak:
             # Maximum 5 points
-            self.points_j1 = min(5, self.points_j1)
-            self.points_j2 = min(5, self.points_j2)
+            self.points_j1 = min(6, self.points_j1)
+            self.points_j2 = min(6, self.points_j2)
 
-            if self.points_j1 == 4 and self.points_j2 < 3:
+            if self.points_j1 == 4 and self.points_j2 < 3: # J1 = jeu et J2 < 40
                 # Jeu gagné pour J1
                 self.points_j1 = 5
-            elif self.points_j2 == 4 and self.points_j1 < 3:
+            elif self.points_j2 == 4 and self.points_j1 < 3: # J2 = jeu et j1 < 40
                 # Jeu gagné pour J2
                 self.points_j2 = 5
 
@@ -288,15 +322,25 @@ class Game(cgame.Game):
                         player.columns[1] = [SCORES[self.points_j2], 'int']
 
             ### ADV
-            if self.points_j1 == 4 and self.points_j2 == 3:
+            if (self.points_j1 == 4 and self.points_j2 == 3) or (self.points_j1 == 5 and self.points_j2 == 4):
+                if self.points_j1 == 5:
+                    self.points_j1 -= 1
+                    self.points_j2 -= 1
                 for player in players:
                     if player.ident == 0 or player.ident == 2:
                         player.columns[1] = ['ADV' , 'txt']
+                    elif player.ident in (1, 3):
+                        player.columns[1] = [SCORES[self.points_j2], 'int']
 
-            elif self.points_j2 == 4 and self.points_j1 == 3:
+            elif (self.points_j2 == 4 and self.points_j1 == 3) or (self.points_j2 == 5 and self.points_j1 == 4):
+                if self.points_j2 == 5:
+                    self.points_j1 -= 1
+                    self.points_j2 -= 1
                 for player in players:
                     if player.ident == 1 or player.ident == 3:
                         player.columns[1] = ['ADV' , 'txt']
+                    elif player.ident in (0, 2):
+                        player.columns[1] = [SCORES[self.points_j1], 'int']
         else:
             '''
             Tie break
@@ -335,12 +379,9 @@ class Game(cgame.Game):
                 player.columns[0] = ('', 'str')
             announcement = f'{self.next_player(players, actual_player)} au service'
             return 1, 'TIEBREAK', announcement
+#            return 'TIEBREAK', announcement
 
         self.update_columns(players)
-        print(f"calcul_points : Flechette {self.flecheTB_jouee}")
-        print(f"calcul_points : Joueur 1 : {self.points_j1}/{self.game_j1}/{self.sets_j1} -- {self.pointsTB_j1}")
-        print(f"calcul_points : Joueur 2 : {self.points_j2}/{self.game_j2}/{self.sets_j2} -- {self.pointsTB_j2}")
-        print(f"calcul_points : next_game = {next_game}")
 
         if next_game:
             announcement = f'{self.next_player(players, actual_player)} au service'
@@ -352,6 +393,9 @@ class Game(cgame.Game):
             self.pointsTB_j2 = 0
             self.tiebreak = False
             self.update_columns(players)
+            self.swap += 1
+            if self.swap == 4:
+                self.swap = 0
             for player in players:
                 player.columns[0] = ('', 'str')
             
@@ -374,13 +418,13 @@ class Game(cgame.Game):
                     players[3].score += 1
                 self.sets_j2 += 1
 
-            print(f"next_set = {next_set}")
             if players[0].score >= self.nb_set:
                 message = f'Jeu, Set et Match {players[0].name}'
                 self.display.speech(message, speed=self.speed)
                 self.winner = 0
                 self.logs.log("DEBUG", message)
                 return 3, None, None
+            
             elif players[1].score >= self.nb_set:
                 message = f'Jeu, Set et Match {players[1].name}'
                 self.display.speech(message, speed=self.speed)
@@ -406,7 +450,7 @@ class Game(cgame.Game):
                 message = f'{self.pointsTB_j2} - {self.pointsTB_j1}'
         elif self.points_j1 != self.points_j2:
             if self.points_j1 == 4:
-                message = f'Avantage {self.mate_name(players, 1)}'
+                message = f'Avantage {self.mate_name(players, 0)}'
             elif self.points_j2 == 4:
                 message = f'Avantage {self.mate_name(players, 1)}'
             elif self.points_j1 in (0, 1, 2, 3) and self.points_j2 in (0, 1, 2, 3):
@@ -474,11 +518,13 @@ class Game(cgame.Game):
         '''
         Function run after each dart throw - for example, add points to player
         '''
+        
         handler = self.init_handler()
         handler['speech_speed'] = self.speed
 
         ### test pour early
         self.fleche_jouee = player_launch
+        return_code = 0 #par default même joueur
 
         ### retire le bandeau de ce qu on a touche
         self.show_segment = False
@@ -488,7 +534,6 @@ class Game(cgame.Game):
             self.dmd.send_text("Nouvelle Balle")
             
         #### AJOUT - affiche HIT
-        
         pointsTB = 1
         if hit == 'SB' :
             points123 = 1
@@ -522,22 +567,19 @@ class Game(cgame.Game):
         self.logs.log("DEBUG", f"color is {color} / team = {team}")
 
         #### DMD - TOUCHE LE SEGMENT WHITE / RED
-        if hit in self.hits_bull:
-            self.dmd.send_text("FILET")
-            self.display.speech('Filet', speed=self.speed)
+        if hit in self.hits_bull + self.hits_net:
+            self.dmd.send_text("Faute")
+            self.display.speech('Feaute', speed=self.speed)
 
-        elif hit in self.hits_net + self.hits_out:
+        elif hit in self.hits_out:
             self.dmd.send_text("BALLE OUT")
             self.display.speech('out', speed=self.speed)
 
-        print(f"hit : {hit}#{color}")
-        print(f"targets : {self.targets}")
-        print(f"player_launch = {player_launch}")
-        if f'{hit}#{color}' in self.targets and player_launch == 1:
-            print(f"ok 1ere flechette")
+        
+        if f'{hit}#{color}' in players[actual_player].targets and player_launch == 1:
             # 1ère fléchette : je joueur touche le bon segment
             # On fixe le bon segment
-            self.targets = self.init_leds(players, actual_player, actual_round, hit[1:])
+            players[actual_player].targets = self.init_leds(players, actual_player, actual_round, hit[1:])
 
             if self.tiebreak:
                 if players[actual_player].ident in (0, 2):
@@ -555,7 +597,6 @@ class Game(cgame.Game):
             players[actual_player].columns[0] = (hit[1:], 'int')
 
         elif player_launch == 1:
-            print(f"ko 1ere flechette")
             # 1ère fléchette : je joueur ne touche pas le bon segment
             # On lui affecte un segment de son terrain au hasard
 
@@ -580,7 +621,6 @@ class Game(cgame.Game):
         else:
             # Fléchettes suivantes, le joueur touche le bon segment
             if f'{hit}#{color}' in players[actual_player].targets:
-                print(f"ok 2eme flechette")
                 if self.tiebreak:
                     if players[actual_player].ident in (0, 2):
                         self.pointsTB_j1 += 1
@@ -592,20 +632,20 @@ class Game(cgame.Game):
                 else:
                     self.points_j2 += points123
 
-                #self.display.play_sound('tennis_hit')
+                self.free_launch = True # ne decompte pas la flechette
 
                 players[actual_player].targets = self.init_leds(players, actual_player, actual_round, hit[1:])
                 players[actual_player].columns[0] = (hit[1:], 'int')
 
             else:
-                print(f"ko 2eme flechette")
                 # Fléchettes suivantes, le joueur ne touche pas le segement demandé
-                #self.display.play_sound('tennis_miss')
+                self.free_launch = True # ne decompte pas la flechette
 
+                players[actual_player].targets = self.init_leds(players, actual_player, actual_round)
                 alea = random.choice(self.my_hits)
                 players[actual_player].targets = self.init_leds(players, actual_player, actual_round, alea[1:])
                 players[actual_player].columns[0] = (alea[1:], 'int')
-
+                
                 if players[actual_player].ident in (0, 2):
                     if self.tiebreak:
                         self.pointsTB_j2 += 1
@@ -722,4 +762,30 @@ class Game(cgame.Game):
             player.stats['Points Per Dart'] = player.show_ppd()
 
     def miss_button(self, players, actual_player, actual_round, player_launch):
-        pass
+
+        #players[actual_player].columns[player_launch] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        players[actual_player].darts_thrown += 1
+        if player_launch == 1:
+            # 1ère fléchette : je joueur touche le bon segment
+            # On fixe le bon segment
+            #players[actual_player].targets = self.init_leds(players, actual_player, actual_round, hit[1:])
+
+            if self.tiebreak:
+                if players[actual_player].ident in (0, 2):
+                    self.pointsTB_j1 += 1
+                else:
+                    self.pointsTB_j2 += 1
+                self.flecheTB_jouee += 1
+            elif players[actual_player].ident in (0, 2):
+                self.points_j1 += points135
+            else:
+                # Equipe 2, bon segment touche
+                self.points_j2 += points135
+
+            #self.display.play_sound('tennis_hit')
+            #players[actual_player].columns[0] = (hit[1:], 'int')
+        
+        
+        
+        #pass

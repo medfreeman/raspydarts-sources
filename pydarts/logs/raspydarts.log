@@ -1,0 +1,460 @@
+[DEBUG] 2024-09-30 09:13:13.775724 - Config file /home/pi/.pydarts/pydarts.cfg exists. We use it so...
+[DEBUG] 2024-09-30 09:13:13.776736 - Working on section SectionGlobals of your config file.
+[DEBUG] 2024-09-30 09:13:13.796746 - Config[SectionGlobals]={'locale': 'fr_FR', 'colorset': 'remi', 'font': 'Kamikzon.ttf', 'soundvolume': '100', 'videos': '2', 'blinktime': '500', 'pnj_time': '2000', 'releasedartstime': '0', 'nextplayer_sound_duration': '10000', 'waitevent_time': '15000', 'resx': '1000', 'resy': '700', 'fullscreen': True, 'nbcol': '6', 'onscreenbuttons': False, 'startpercent': '0.4', 'endgamestats': '1', 'keeporder': False, 'play_firstname': True, 'print_dartstroke': True, 'light_target': False, 'light_strip': False, 'netgamecreator': 'Rémi', 'debuglevel': '0', 'exhibition_mode': False, 'competition_mode': False, 'videosound_multiplier': '1', 'sound_multiplier': '100', 'illumination_mode': False, 'illumination_color': 'white'}
+[DEBUG] 2024-09-30 09:13:13.797440 - Working on section SectionAdvanced of your config file.
+[DEBUG] 2024-09-30 09:13:13.816473 - Config[SectionAdvanced]={'bypass-stats': '1', 'selectedgame': False, 'gametype': False, 'netgamename': False, 'servername': 'raspydarts.synology.me', 'serverport': 5005, 'masterserver': 'raspydarts.synology.me', 'masterport': '5006', 'serveralias': False, 'listen': 'eth0', 'clientpolltime': '5', 'masterclientpolltime': 32, 'animationduration': 5, 'clear-local-db': False, 'localplayers': 'Maité,Rémi,Murielle,JeanMarie,Jervé,Myriam,Yves,Anna,AnneLise', 'stats-format': 'old', 'use-matrix': False, 'use-dmd': True, 'use-other': False, 'use-hue': False, 'mqtt-broker': 'localhost', 'interior': False, 'target-bgcolor1': 'blue', 'target-bgcolor2': 'red', 'target-bgcolor3': 'white', 'target-bgbrightness': '10', 'preferedclassicgame': '', 'preferedfungame': '', 'preferedsportgame': '', 'preferedcategory': 'classic', 'nb_sets': '1', 'db-celebration-delay': '10', 'set-celebration-delay': '10', 'victory-celebration-delay': '10', 'launch-game-celebration': False, 'game-options-list': '', 'richard-mode': False}
+[DEBUG] 2024-09-30 09:13:13.817153 - Working on section SectionKeys of your config file.
+[DEBUG] 2024-09-30 09:13:13.839379 - Config[SectionKeys]={'s1': '', 's2': '', 's3': '', 's4': '', 's5': '', 's6': '', 's7': '', 's8': '', 's9': '', 's10': '', 's11': '', 's12': '', 's13': '', 's14': '', 's15': '', 's16': '', 's17': '', 's18': '', 's19': '', 's20': '', 'S1': '2410', 'S2': '1627', 'S3': '827', 'S4': '810', 'S5': '1910', 'S6': '1610', 'S7': '2427', 'S8': '1927', 'S9': '610', 'S10': '2010', 'S11': '1327', 'S12': '1310', 'S13': '710', 'S14': '627', 'S15': '2027', 'S16': '2627', 'S17': '727', 'S18': '2510', 'S19': '2527', 'S20': '2610', 'D1': '249', 'D2': '1617', 'D3': '817', 'D4': '89', 'D5': '199', 'D6': '169', 'D7': '2417', 'D8': '1917', 'D9': '69', 'D10': '209', 'D11': '1317', 'D12': '139', 'D13': '79', 'D14': '617', 'D15': '2017', 'D16': '2617', 'D17': '717', 'D18': '259', 'D19': '2517', 'D20': '269', 'T1': '2411', 'T2': '1615', 'T3': '815', 'T4': '811', 'T5': '1911', 'T6': '1611', 'T7': '2415', 'T8': '1915', 'T9': '611', 'T10': '2011', 'T11': '1315', 'T12': '1311', 'T13': '711', 'T14': '615', 'T15': '2015', 'T16': '2615', 'T17': '715', 'T18': '2511', 'T19': '2515', 'T20': '2611', 'SB': '1322', 'DB': '622'}
+[DEBUG] 2024-09-30 09:13:13.840083 - Working on section Raspberry of your config file.
+[DEBUG] 2024-09-30 09:13:13.859436 - Config[Raspberry]={'EXTENDED_GPIO': '1', 'PIN_UP': 'A0', 'PIN_DOWN': 'A1', 'PIN_LEFT': 'A2', 'PIN_RIGHT': 'A3', 'PIN_MINUS': 'A5', 'PIN_PLUS': 'A4', 'PIN_VALIDATE': 'A6', 'PIN_CANCEL': 'B4', 'PIN_NEXTPLAYER': 'B0', 'PIN_BACK': 'A7', 'PIN_GAMEBUTTON': '', 'PIN_VOLUME_UP': '', 'PIN_VOLUME_DOWN': '', 'PIN_VOLUME_MUTE': '', 'PIN_CPTPLAYER': '', 'PIN_MISSDART': '', 'LIGHT_NEXTPLAYER': 'B1', 'LIGHT_NAVIGATE': 'B2', 'LIGHT_VALIDATE': '', 'LIGHT_BACK': '', 'LIGHT_PLAYERS': '', 'LIGHT_LASER': '', 'LIGHT_FLASH': '', 'LIGHT_CELEBRATION': 'B3', 'LIGHT_CELEBRATION2': '', 'LIGHT_LIGHT': ''}
+[DEBUG] 2024-09-30 09:13:13.860136 - Working on section Raspberry_Leds of your config file.
+[DEBUG] 2024-09-30 09:13:13.878212 - Config[Raspberry_Leds]={'PIN_TARGETLED': '21', 'BRI_TARGETLED': '80', 'PIN_STRIPLED': '12', 'NBR_STRIPLED': '144', 'BRI_STRIPLED': '30'}
+[DEBUG] 2024-09-30 09:13:13.878897 - Working on section LEDTarget of your config file.
+[DEBUG] 2024-09-30 09:13:13.901528 - Config[LEDTarget]={'S1': '99,98,97,95,94,93,92', 'S2': '29,28,27,25,24,23,22', 'S3': '9,8,7,5,4,3,2', 'S4': '79,78,77,75,74,73,72', 'S5': '110,111,112,114,116,115,117', 'S6': '59,58,57,55,54,53,52', 'S7': '180,181,182,184,186,185,187', 'S8': '160,161,162,164,166,165,167', 'S9': '130,131,132,134,136,135,137', 'S10': '49,48,47,45,44,43,42', 'S11': '159,158,157,155,154,153,152', 'S12': '129,128,127,125,124,123,122', 'S13': '60,61,62,64,66,65,67', 'S14': '149,148,147,145,144,143,142', 'S15': '30,31,32,34,36,35,37', 'S16': '179,178,177,175,174,173,172', 'S17': '10,11,12,14,16,15,17', 'S18': '80,81,82,84,86,85,87', 'S19': '199,198,197,195,194,193,192', 'S20': '109,108,107,105,104,103,102', 'D1': '91,90', 'D2': '21,20', 'D3': '1,0', 'D4': '71,70', 'D5': '119,118', 'D6': '51,50', 'D7': '189,188', 'D8': '169,168', 'D9': '139,138', 'D10': '41,40', 'D11': '151,150', 'D12': '121,120', 'D13': '69,68', 'D14': '141,140', 'D15': '39,38', 'D16': '171,170', 'D17': '19,18', 'D18': '89,88', 'D19': '191,190', 'D20': '101,100', 'T1': '96', 'T2': '26', 'T3': '6', 'T4': '76', 'T5': '113', 'T6': '56', 'T7': '183', 'T8': '163', 'T9': '133', 'T10': '46', 'T11': '156', 'T12': '126', 'T13': '63', 'T14': '146', 'T15': '33', 'T16': '176', 'T17': '13', 'T18': '83', 'T19': '196', 'T20': '106', 'E1': '', 'E2': '', 'E3': '', 'E4': '', 'E5': '', 'E6': '', 'E7': '', 'E8': '', 'E9': '', 'E10': '', 'E11': '', 'E12': '', 'E13': '', 'E14': '', 'E15': '', 'E16': '', 'E17': '', 'E18': '', 'E19': '', 'E20': '', 'SB': '200,201,202', 'DB': '203'}
+[DEBUG] 2024-09-30 09:13:13.902244 - Working on section Favorites of your config file.
+[DEBUG] 2024-09-30 09:13:13.919924 - Config[Favorites]={'servers': 'raspydarts.synology.me:5005', 'firstnames': 'Maité,Rémi', 'games': ''}
+[DEBUG] 2024-09-30 09:13:13.920562 - Working on section Events of your config file.
+[DEBUG] 2024-09-30 09:13:13.944553 - Config[Events]={'launch': {'TARGET': ['FadeRGB,1,random,10', 'Snake,100,random,50', 'Sparkle,10,gold,20'], 'STRIP': ['Strobe,5,red,20', 'Strobe,3,blue,50'], 'DMD': [], 'MATRIX': [''], 'OTHER': []}, 'off': {'TARGET': ['off,,,'], 'STRIP': ['off,,,'], 'DMD': ['off,,,'], 'MATRIX': ['off,,,'], 'OTHER': []}, 'menu': {'TARGET': ['Strobe,3,gold,50'], 'STRIP': ['Strobe,3,gold,50'], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'wait': {'TARGET': ['Rainbow,10,random,20'], 'STRIP': ['Fireworks,1,random,1'], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'quit': {'TARGET': ['Rainbow2,50,random,50'], 'STRIP': ['Rainbow,50,random,50'], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'newgame': {'TARGET': [''], 'STRIP': [''], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'ready': {'TARGET': [''], 'STRIP': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'release': {'TARGET': [''], 'STRIP': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'nextplayer': {'TARGET': ['Ring,20,random,50'], 'STRIP': ['Cylon,2,red,1'], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'SB': {'STRIP': [''], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'DB': {'STRIP': [], 'DMD': [''], 'MATRIX': [''], 'OTHER': [], 'TARGET': ['DoubleBull,1,random,10']}, 'winner': {'STRIP': [''], 'TARGET': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'miss': {'STRIP': [''], 'TARGET': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'gameover': {'TARGET': [''], 'STRIP': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'interrupt': {'TARGET': [''], 'STRIP': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'touch': {'STRIP': ['Strobe,2,random,50'], 'TARGET': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'setwinner': {'STRIP': ['Fireworks,1,gold,10'], 'TARGET': ['Wait,15,gold,100', 'Sparkle,10,gold,5'], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'pressure': {'TARGET': ['TheaterChase,10,blue,10'], 'STRIP': ['RunningLights,100,blue,10'], 'DMD': [], 'MATRIX': [], 'OTHER': [',,,']}, 'nopressure': {'TARGET': ['off,,,'], 'STRIP': [''], 'DMD': [], 'MATRIX': [], 'OTHER': [',,,']}}
+[DEBUG] 2024-09-30 09:13:13.945347 - Working on section SectionGlobals of your config file.
+[DEBUG] 2024-09-30 09:13:13.966538 - Config[SectionGlobals]={'locale': 'fr_FR', 'colorset': 'remi', 'font': 'Kamikzon.ttf', 'soundvolume': '100', 'videos': '2', 'blinktime': '500', 'pnj_time': '2000', 'releasedartstime': '0', 'nextplayer_sound_duration': '10000', 'waitevent_time': '15000', 'resx': '1000', 'resy': '700', 'fullscreen': True, 'nbcol': '6', 'onscreenbuttons': False, 'startpercent': '0.4', 'endgamestats': '1', 'keeporder': False, 'play_firstname': True, 'print_dartstroke': True, 'light_target': False, 'light_strip': False, 'netgamecreator': 'Rémi', 'debuglevel': '0', 'exhibition_mode': False, 'competition_mode': False, 'videosound_multiplier': '1', 'sound_multiplier': '100', 'illumination_mode': False, 'illumination_color': 'white'}
+[DEBUG] 2024-09-30 09:13:13.967261 - Working on section SectionAdvanced of your config file.
+[DEBUG] 2024-09-30 09:13:13.986231 - Config[SectionAdvanced]={'bypass-stats': '1', 'selectedgame': False, 'gametype': False, 'netgamename': False, 'servername': 'raspydarts.synology.me', 'serverport': 5005, 'masterserver': 'raspydarts.synology.me', 'masterport': '5006', 'serveralias': False, 'listen': 'eth0', 'clientpolltime': '5', 'masterclientpolltime': 32, 'animationduration': 5, 'clear-local-db': False, 'localplayers': 'Maité,Rémi,Murielle,JeanMarie,Jervé,Myriam,Yves,Anna,AnneLise', 'stats-format': 'old', 'use-matrix': False, 'use-dmd': True, 'use-other': False, 'use-hue': False, 'mqtt-broker': 'localhost', 'interior': False, 'target-bgcolor1': 'blue', 'target-bgcolor2': 'red', 'target-bgcolor3': 'white', 'target-bgbrightness': '10', 'preferedclassicgame': '', 'preferedfungame': '', 'preferedsportgame': '', 'preferedcategory': 'classic', 'nb_sets': '1', 'db-celebration-delay': '10', 'set-celebration-delay': '10', 'victory-celebration-delay': '10', 'launch-game-celebration': False, 'game-options-list': '', 'richard-mode': False}
+[DEBUG] 2024-09-30 09:13:13.986854 - Working on section Raspberry_BoardPinsIns of your config file.
+[DEBUG] 2024-09-30 09:13:14.005378 - Config[Raspberry_BoardPinsIns]={'PIN_1': '24', 'PIN_2': '25', 'PIN_3': '8', 'PIN_4': '7', 'PIN_5': '16', 'PIN_6': '20', 'PIN_7': '26', 'PIN_8': '19', 'PIN_9': '13', 'PIN_10': '6', 'PIN_11': '', 'PIN_12': '', 'PIN_13': '', 'PIN_14': '', 'PIN_15': '', 'PIN_16': ''}
+[DEBUG] 2024-09-30 09:13:14.006073 - Working on section Raspberry_BoardPinsOuts of your config file.
+[DEBUG] 2024-09-30 09:13:14.024280 - Config[Raspberry_BoardPinsOuts]={'PIN_1': '15', 'PIN_2': '17', 'PIN_3': '27', 'PIN_4': '22', 'PIN_5': '10', 'PIN_6': '9', 'PIN_7': '11', 'PIN_8': '', 'PIN_9': '', 'PIN_10': ''}
+[DEBUG] 2024-09-30 09:13:14.024999 - Working on section game- of your config file.
+[WARNING] 2024-09-30 09:13:14.043917 - No default game- section. Use config only
+[DEBUG] 2024-09-30 09:13:14.044126 - Config[game-]={}
+[DEBUG] 2024-09-30 09:13:14.044286 - use-dmd option is set to : True
+[DEBUG] 2024-09-30 09:13:14.044348 - use-matrix option is set to : False
+[DEBUG] 2024-09-30 09:13:14.044404 - use-other option is set to : False
+[DEBUG] 2024-09-30 09:13:14.044459 - mqtt-broker option is set to : localhost
+[DEBUG] 2024-09-30 09:13:14.045004 - self.dispatcher={'launch': {'TARGET': ['FadeRGB,1,random,10', 'Snake,100,random,50', 'Sparkle,10,gold,20'], 'STRIP': ['Strobe,5,red,20', 'Strobe,3,blue,50'], 'DMD': [], 'MATRIX': [''], 'OTHER': []}, 'off': {'TARGET': ['off,,,'], 'STRIP': ['off,,,'], 'DMD': ['off,,,'], 'MATRIX': ['off,,,'], 'OTHER': []}, 'menu': {'TARGET': ['Strobe,3,gold,50'], 'STRIP': ['Strobe,3,gold,50'], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'wait': {'TARGET': ['Rainbow,10,random,20'], 'STRIP': ['Fireworks,1,random,1'], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'quit': {'TARGET': ['Rainbow2,50,random,50'], 'STRIP': ['Rainbow,50,random,50'], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'newgame': {'TARGET': [''], 'STRIP': [''], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'ready': {'TARGET': [''], 'STRIP': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'release': {'TARGET': [''], 'STRIP': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'nextplayer': {'TARGET': ['Ring,20,random,50'], 'STRIP': ['Cylon,2,red,1'], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'SB': {'STRIP': [''], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'DB': {'STRIP': [], 'DMD': [''], 'MATRIX': [''], 'OTHER': [], 'TARGET': ['DoubleBull,1,random,10']}, 'winner': {'STRIP': [''], 'TARGET': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'miss': {'STRIP': [''], 'TARGET': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'gameover': {'TARGET': [''], 'STRIP': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'interrupt': {'TARGET': [''], 'STRIP': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'touch': {'STRIP': ['Strobe,2,random,50'], 'TARGET': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'setwinner': {'STRIP': ['Fireworks,1,gold,10'], 'TARGET': ['Wait,15,gold,100', 'Sparkle,10,gold,5'], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'pressure': {'TARGET': ['TheaterChase,10,blue,10'], 'STRIP': ['RunningLights,100,blue,10'], 'DMD': [], 'MATRIX': [], 'OTHER': [',,,']}, 'nopressure': {'TARGET': ['off,,,'], 'STRIP': [''], 'DMD': [], 'MATRIX': [], 'OTHER': [',,,']}}
+[DEBUG] 2024-09-30 09:13:14.045121 - broker=localhost
+[DEBUG] 2024-09-30 09:13:14.059358 - target-bgcolor1 option is set to : blue
+[DEBUG] 2024-09-30 09:13:14.059520 - target-bgcolor2 option is set to : red
+[DEBUG] 2024-09-30 09:13:14.059583 - target-bgcolor3 option is set to : white
+[DEBUG] 2024-09-30 09:13:14.059640 - target-bgbrightness option is set to : 10
+[DEBUG] 2024-09-30 09:13:14.059695 - Starting Strip Leds Server
+[DEBUG] 2024-09-30 09:13:14.065400 - Launched sudo python3 /pydarts/addons/StripLeds_Server.py -host=localhost 9 raspydarts/stripLeds 12 144 30
+[DEBUG] 2024-09-30 09:13:14.566315 - Starting Target Leds Server
+[DEBUG] 2024-09-30 09:13:14.577151 - Using this configuration : {'S1': '99,98,97,95,94,93,92', 'S2': '29,28,27,25,24,23,22', 'S3': '9,8,7,5,4,3,2', 'S4': '79,78,77,75,74,73,72', 'S5': '110,111,112,114,116,115,117', 'S6': '59,58,57,55,54,53,52', 'S7': '180,181,182,184,186,185,187', 'S8': '160,161,162,164,166,165,167', 'S9': '130,131,132,134,136,135,137', 'S10': '49,48,47,45,44,43,42', 'S11': '159,158,157,155,154,153,152', 'S12': '129,128,127,125,124,123,122', 'S13': '60,61,62,64,66,65,67', 'S14': '149,148,147,145,144,143,142', 'S15': '30,31,32,34,36,35,37', 'S16': '179,178,177,175,174,173,172', 'S17': '10,11,12,14,16,15,17', 'S18': '80,81,82,84,86,85,87', 'S19': '199,198,197,195,194,193,192', 'S20': '109,108,107,105,104,103,102', 'D1': '91,90', 'D2': '21,20', 'D3': '1,0', 'D4': '71,70', 'D5': '119,118', 'D6': '51,50', 'D7': '189,188', 'D8': '169,168', 'D9': '139,138', 'D10': '41,40', 'D11': '151,150', 'D12': '121,120', 'D13': '69,68', 'D14': '141,140', 'D15': '39,38', 'D16': '171,170', 'D17': '19,18', 'D18': '89,88', 'D19': '191,190', 'D20': '101,100', 'T1': '96', 'T2': '26', 'T3': '6', 'T4': '76', 'T5': '113', 'T6': '56', 'T7': '183', 'T8': '163', 'T9': '133', 'T10': '46', 'T11': '156', 'T12': '126', 'T13': '63', 'T14': '146', 'T15': '33', 'T16': '176', 'T17': '13', 'T18': '83', 'T19': '196', 'T20': '106', 'E1': '', 'E2': '', 'E3': '', 'E4': '', 'E5': '', 'E6': '', 'E7': '', 'E8': '', 'E9': '', 'E10': '', 'E11': '', 'E12': '', 'E13': '', 'E14': '', 'E15': '', 'E16': '', 'E17': '', 'E18': '', 'E19': '', 'E20': '', 'SB': '200,201,202', 'DB': '203'}
+[DEBUG] 2024-09-30 09:13:14.583714 - Launched sudo python3 /pydarts/addons/TargetLeds_Server.py -host=localhost -bgcolors=blue,red,white -bgbrightness=10 10 raspydarts/targetLeds {'S1': '99,98,97,95,94,93,92', 'S2': '29,28,27,25,24,23,22', 'S3': '9,8,7,5,4,3,2', 'S4': '79,78,77,75,74,73,72', 'S5': '110,111,112,114,116,115,117', 'S6': '59,58,57,55,54,53,52', 'S7': '180,181,182,184,186,185,187', 'S8': '160,161,162,164,166,165,167', 'S9': '130,131,132,134,136,135,137', 'S10': '49,48,47,45,44,43,42', 'S11': '159,158,157,155,154,153,152', 'S12': '129,128,127,125,124,123,122', 'S13': '60,61,62,64,66,65,67', 'S14': '149,148,147,145,144,143,142', 'S15': '30,31,32,34,36,35,37', 'S16': '179,178,177,175,174,173,172', 'S17': '10,11,12,14,16,15,17', 'S18': '80,81,82,84,86,85,87', 'S19': '199,198,197,195,194,193,192', 'S20': '109,108,107,105,104,103,102', 'D1': '91,90', 'D2': '21,20', 'D3': '1,0', 'D4': '71,70', 'D5': '119,118', 'D6': '51,50', 'D7': '189,188', 'D8': '169,168', 'D9': '139,138', 'D10': '41,40', 'D11': '151,150', 'D12': '121,120', 'D13': '69,68', 'D14': '141,140', 'D15': '39,38', 'D16': '171,170', 'D17': '19,18', 'D18': '89,88', 'D19': '191,190', 'D20': '101,100', 'T1': '96', 'T2': '26', 'T3': '6', 'T4': '76', 'T5': '113', 'T6': '56', 'T7': '183', 'T8': '163', 'T9': '133', 'T10': '46', 'T11': '156', 'T12': '126', 'T13': '63', 'T14': '146', 'T15': '33', 'T16': '176', 'T17': '13', 'T18': '83', 'T19': '196', 'T20': '106', 'E1': '', 'E2': '', 'E3': '', 'E4': '', 'E5': '', 'E6': '', 'E7': '', 'E8': '', 'E9': '', 'E10': '', 'E11': '', 'E12': '', 'E13': '', 'E14': '', 'E15': '', 'E16': '', 'E17': '', 'E18': '', 'E19': '', 'E20': '', 'SB': '200,201,202', 'DB': '203'} 21 80
+[DEBUG] 2024-09-30 09:13:15.084780 - dispatcher.strip_leds is set to True
+[DEBUG] 2024-09-30 09:13:15.085019 - dispatcher.target_leds is set to True
+[DEBUG] 2024-09-30 09:13:15.085104 - subsribers is set to ['StripLeds', 'TargetLeds', 'Dmd']
+############### Welcome to RaspyDarts ########################
+#      A Free, Open-Source and Open-Hardware Darts Game      #
+#             Please check the website to know more          #
+#               https://raspydarts.wordpress.com/               #
+#                     or check the Wiki                      #
+#         https://www.facebook.com/groups/124845401274184         #
+#            or use --help for available options             #
+##############################################################
+pygame 2.0.0 (SDL 2.0.9, python 3.7.3)
+Hello from the pygame community. https://www.pygame.org/contribute.html
+[DEBUG] 2024-09-30 09:13:16.273019 - You requested to load following locale fr_FR
+[DEBUG] 2024-09-30 09:13:16.273241 - Your locale is mapped on locale : "fr_FR.UTF-8".
+[ERROR] No I2C device at address: 0x20
+[DEBUG] 2024-09-30 09:13:16.311337 - self.buttons={'EXTENDED_GPIO': 0, 'PIN_UP': 'A0', 'PIN_DOWN': 'A1', 'PIN_LEFT': 'A2', 'PIN_RIGHT': 'A3', 'PIN_MINUS': 'A5', 'PIN_PLUS': 'A4', 'PIN_VALIDATE': 'A6', 'PIN_CANCEL': 'B4', 'PIN_NEXTPLAYER': 'B0', 'PIN_BACK': 'A7', 'PIN_GAMEBUTTON': '', 'PIN_VOLUME_UP': '', 'PIN_VOLUME_DOWN': '', 'PIN_VOLUME_MUTE': '', 'PIN_CPTPLAYER': '', 'PIN_MISSDART': '', 'LIGHT_NEXTPLAYER': 'B1', 'LIGHT_NAVIGATE': 'B2', 'LIGHT_VALIDATE': '', 'LIGHT_BACK': '', 'LIGHT_PLAYERS': '', 'LIGHT_LASER': '', 'LIGHT_FLASH': '', 'LIGHT_CELEBRATION': 'B3', 'LIGHT_CELEBRATION2': '', 'LIGHT_LIGHT': ''}
+[INFO] 2024-09-30 09:13:16.311824 - Theme dir is /home/pi/.pydarts/themes/remi
+[INFO] 2024-09-30 09:13:16.311891 - Personnal dir is /home/pi/.pydarts
+[INFO] 2024-09-30 09:13:16.311943 - Root dir is /pydarts
+[DEBUG] 2024-09-30 09:13:16.314022 - Return None
+[INFO] 2024-09-30 09:13:16.314177 - Video sound multiplier is set to 1
+[INFO] 2024-09-30 09:13:16.314281 - Sound multiplier is set to 100.0
+[DEBUG] 2024-09-30 09:13:16.314391 - Set volume to -962
+[DEBUG] 2024-09-30 09:13:16.728965 - Ho yeah, going fullscreen : 1920x1080
+[INFO] 2024-09-30 09:13:17.786530 - Use /home/pi/.pydarts/themes/remi/other/Colorset.cfg for color's customization
+[DEBUG] 2024-09-30 09:13:17.788014 - Working on Colorset's section of /home/pi/.pydarts/themes/remi/other/Colorset.cfg
+[INFO] 2024-09-30 09:13:17.808943 - Customization : border-radius is customized to 10
+[INFO] 2024-09-30 09:13:17.809136 - Customization : button-radius is customized to max
+[INFO] 2024-09-30 09:13:17.809200 - Customization : border-size is customized to 3
+[INFO] 2024-09-30 09:13:17.809255 - Customization : padding is customized to 2
+[INFO] 2024-09-30 09:13:17.809321 - Customization : color-black is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:17.809382 - Customization : bg-global is customized to False
+[INFO] 2024-09-30 09:13:17.809442 - Customization : bg-round-nb is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:17.809557 - Customization : bg-round-nb-header is customized to (107, 134, 176)
+[INFO] 2024-09-30 09:13:17.809621 - Customization : bg-LOGO is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:17.809678 - Customization : bg-darts-nb is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:17.809736 - Customization : bg-darts-nb-header is customized to (107, 134, 176)
+[INFO] 2024-09-30 09:13:17.809793 - Customization : bg-optionslist-header is customized to (107, 134, 176)
+[INFO] 2024-09-30 09:13:17.809851 - Customization : bg-optionslist is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:17.809908 - Customization : player1 is customized to (0, 255, 0)
+[INFO] 2024-09-30 09:13:17.809964 - Customization : player2 is customized to (0, 0, 255)
+[INFO] 2024-09-30 09:13:17.810021 - Customization : player3 is customized to (255, 0, 0)
+[INFO] 2024-09-30 09:13:17.810077 - Customization : player4 is customized to (255, 255, 0)
+[INFO] 2024-09-30 09:13:17.810134 - Customization : player5 is customized to (255, 0, 255)
+[INFO] 2024-09-30 09:13:17.810190 - Customization : player6 is customized to (0, 255, 255)
+[INFO] 2024-09-30 09:13:17.810247 - Customization : player7 is customized to (255, 0, 128)
+[INFO] 2024-09-30 09:13:17.810303 - Customization : player8 is customized to (0, 255, 128)
+[INFO] 2024-09-30 09:13:17.810361 - Customization : player9 is customized to (0, 128, 255)
+[INFO] 2024-09-30 09:13:17.810417 - Customization : player10 is customized to (255, 128, 0)
+[INFO] 2024-09-30 09:13:17.810475 - Customization : player11 is customized to (128, 255, 0)
+[INFO] 2024-09-30 09:13:17.810532 - Customization : player12 is customized to (128, 0, 255)
+[INFO] 2024-09-30 09:13:17.810589 - Customization : menu-header is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:17.810645 - Customization : menu-text is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:17.810705 - Customization : menu-selected is customized to (112, 156, 118)
+[INFO] 2024-09-30 09:13:17.810764 - Customization : menu-shortcut is customized to (224, 196, 119)
+[INFO] 2024-09-30 09:13:17.810871 - Customization : menu-alternate is customized to (107, 134, 176)
+[INFO] 2024-09-30 09:13:17.810934 - Customization : menu-ok is customized to (112, 156, 118)
+[INFO] 2024-09-30 09:13:17.810991 - Customization : menu-warning is customized to (205, 144, 110)
+[INFO] 2024-09-30 09:13:17.811049 - Customization : menu-ko is customized to (189, 108, 109)
+[INFO] 2024-09-30 09:13:17.811106 - Customization : menu-item-white is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:17.811162 - Customization : menu-item-black is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:17.811218 - Customization : menu-text-black is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:17.811275 - Customization : menu-text-white is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:17.811331 - Customization : menu-buttons is customized to (232, 232, 232)
+[INFO] 2024-09-30 09:13:17.811390 - Customization : menu-favorite is customized to (255, 215, 0)
+[INFO] 2024-09-30 09:13:17.811446 - Customization : menu-border is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:17.811504 - Customization : menu-inactive is customized to (128, 128, 128)
+[INFO] 2024-09-30 09:13:17.811564 - Customization : description-bg is customized to (213, 206, 186)
+[INFO] 2024-09-30 09:13:17.811622 - Customization : description-text is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:17.811677 - Customization : description-game is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:17.811733 - Customization : game-bg is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:17.811790 - Customization : game-score is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:17.811847 - Customization : game-headers is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:17.811906 - Customization : game-player is customized to (119, 119, 118)
+[INFO] 2024-09-30 09:13:17.811966 - Customization : game-player-name is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:17.812024 - Customization : game-alt-headers is customized to (48, 48, 48)
+[INFO] 2024-09-30 09:13:17.812103 - Customization : game-round is customized to (107, 134, 176)
+[INFO] 2024-09-30 09:13:17.812160 - Customization : game-title1 is customized to (48, 48, 48)
+[INFO] 2024-09-30 09:13:17.812218 - Customization : game-title2 is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:17.812274 - Customization : game-type is customized to (255, 0, 0)
+[INFO] 2024-09-30 09:13:17.812332 - Customization : game-table is customized to (160, 160, 160)
+[INFO] 2024-09-30 09:13:17.812389 - Customization : game-text is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:17.812445 - Customization : game-option is customized to (255, 215, 0)
+[INFO] 2024-09-30 09:13:17.812502 - Customization : game-darts is customized to (160, 160, 160)
+[INFO] 2024-09-30 09:13:17.812559 - Customization : game-inactive is customized to (119, 119, 118)
+[INFO] 2024-09-30 09:13:17.812617 - Customization : game-dead is customized to (48, 48, 48)
+[INFO] 2024-09-30 09:13:17.812681 - Customization : game-grey is customized to (213, 206, 186)
+[INFO] 2024-09-30 09:13:17.812738 - Customization : game-grey2 is customized to (74, 74, 74)
+[INFO] 2024-09-30 09:13:17.812797 - Customization : game-purple is customized to (140, 108, 161)
+[INFO] 2024-09-30 09:13:17.812854 - Customization : game-red is customized to (255, 0, 0)
+[INFO] 2024-09-30 09:13:17.812911 - Customization : game-green is customized to (0, 255, 0)
+[INFO] 2024-09-30 09:13:17.812967 - Customization : game-blue is customized to (0, 0, 255)
+[INFO] 2024-09-30 09:13:17.813024 - Customization : game-gold is customized to (255, 215, 0)
+[INFO] 2024-09-30 09:13:17.813081 - Customization : game-silver is customized to (192, 192, 192)
+[INFO] 2024-09-30 09:13:17.813138 - Customization : game-bronze is customized to (205, 127, 50)
+[INFO] 2024-09-30 09:13:17.813196 - Customization : message-bg is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:17.813255 - Customization : message-text is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:17.813311 - Customization : target-sb is customized to (189, 108, 109)
+[INFO] 2024-09-30 09:13:17.813368 - Customization : target-db is customized to (107, 134, 176)
+[INFO] 2024-09-30 09:13:17.813425 - Customization : target-double1 is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:17.813481 - Customization : target-double2 is customized to (255, 0, 0)
+[INFO] 2024-09-30 09:13:17.813538 - Customization : target-triple1 is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:17.813596 - Customization : target-triple2 is customized to (255, 0, 0)
+[INFO] 2024-09-30 09:13:17.813652 - Customization : target-simple1 is customized to (0, 0, 255)
+[INFO] 2024-09-30 09:13:17.813709 - Customization : target-simple2 is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:17.813765 - Customization : bob27-bg is customized to (45, 78, 99)
+[INFO] 2024-09-30 09:13:17.813821 - Customization : bob27-blue is customized to (46, 64, 76)
+[INFO] 2024-09-30 09:13:17.813879 - Customization : bob27-green is customized to (45, 108, 85)
+[INFO] 2024-09-30 09:13:17.813938 - Customization : bob27-red is customized to (124, 84, 87)
+[INFO] 2024-09-30 09:13:17.813998 - Customization : bob27-hit is customized to (57, 209, 129)
+[INFO] 2024-09-30 09:13:17.814057 - Customization : bob27-miss is customized to (232, 21, 37)
+[INFO] 2024-09-30 09:13:17.814113 - Customization : bob27-text is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:17.814171 - Customization : fighters-medic is customized to (0, 240, 0)
+[INFO] 2024-09-30 09:13:17.814228 - Customization : fighters-actual-player is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:17.814285 - Customization : fighters-alive-player is customized to (150, 0, 0)
+[INFO] 2024-09-30 09:13:17.814342 - Customization : fighters-dead-player is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:17.814399 - Customization : fighters-targets is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:17.814456 - Customization : fighters-scores is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:17.814513 - Customization : fighters-round is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:17.814585 - Customization : fighters-darts is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:17.814647 - Customization : suggestion-color-allplayer is customized to None
+[INFO] 2024-09-30 09:13:17.814697 - Customization : main-sub-menu-shortcuts is customized to 
+[INFO] 2024-09-30 09:13:17.814749 - Customization : main-sub-menu-text-align is customized to Left
+[INFO] 2024-09-30 09:13:17.814800 - Customization : parametrage-menu-shortcuts is customized to 
+[INFO] 2024-09-30 09:13:17.814852 - Customization : parametrage-menu-text-align is customized to Left
+[INFO] 2024-09-30 09:13:17.814902 - Customization : players-menu-shortcuts is customized to 
+[INFO] 2024-09-30 09:13:17.814952 - Customization : players-menu-text-align is customized to Left
+[INFO] 2024-09-30 09:13:17.815003 - Customization : game-options-menu-shortcuts is customized to 
+[INFO] 2024-09-30 09:13:17.815053 - Customization : game-options-menu-text-align is customized to Left
+[DEBUG] 2024-09-30 09:13:17.815722 - Return None
+[DEBUG] 2024-09-30 09:13:17.817427 - Return /home/pi/.pydarts/themes/remi/images/background/background.png from stack
+[DEBUG] 2024-09-30 09:13:17.817537 - Cleaning image cache
+[DEBUG] 2024-09-30 09:13:17.817603 - Background is now /home/pi/.pydarts/themes/remi/images/background/background.png
+[INFO] 2024-09-30 09:13:17.818820 - Font defined in your colorset : /home/pi/.pydarts/themes/remi/font/CompactaBT.ttf
+[DEBUG] 2024-09-30 09:13:17.819412 - sound_multiplier is set to 1.0
+[DEBUG] 2024-09-30 09:13:17.819545 - Inserting image into cache /home/pi/.pydarts/themes/remi/images/background/background.png (/home/pi/.pydarts/themes/remi/images/background/background.png-True-1920-1080)
+[DEBUG] 2024-09-30 09:13:17.898402 - 1 elements in cache
+[DEBUG] 2024-09-30 09:13:19.473523 - Input debug (pyGame) : escape
+[INFO] 2024-09-30 09:13:19.476122 - Use /home/pi/.pydarts/themes/remi/other/Colorset.cfg for color's customization
+[DEBUG] 2024-09-30 09:13:19.477012 - Working on Colorset's section of /home/pi/.pydarts/themes/remi/other/Colorset.cfg
+[INFO] 2024-09-30 09:13:19.496478 - Customization : border-radius is customized to 10
+[INFO] 2024-09-30 09:13:19.496668 - Customization : button-radius is customized to max
+[INFO] 2024-09-30 09:13:19.496735 - Customization : border-size is customized to 3
+[INFO] 2024-09-30 09:13:19.496789 - Customization : padding is customized to 2
+[INFO] 2024-09-30 09:13:19.496851 - Customization : color-black is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:19.496911 - Customization : bg-global is customized to False
+[INFO] 2024-09-30 09:13:19.497038 - Customization : bg-round-nb is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:19.497100 - Customization : bg-round-nb-header is customized to (107, 134, 176)
+[INFO] 2024-09-30 09:13:19.497163 - Customization : bg-LOGO is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:19.497221 - Customization : bg-darts-nb is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:19.497311 - Customization : bg-darts-nb-header is customized to (107, 134, 176)
+[INFO] 2024-09-30 09:13:19.497372 - Customization : bg-optionslist-header is customized to (107, 134, 176)
+[INFO] 2024-09-30 09:13:19.497435 - Customization : bg-optionslist is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:19.497492 - Customization : player1 is customized to (0, 255, 0)
+[INFO] 2024-09-30 09:13:19.497550 - Customization : player2 is customized to (0, 0, 255)
+[INFO] 2024-09-30 09:13:19.497609 - Customization : player3 is customized to (255, 0, 0)
+[INFO] 2024-09-30 09:13:19.497668 - Customization : player4 is customized to (255, 255, 0)
+[INFO] 2024-09-30 09:13:19.497728 - Customization : player5 is customized to (255, 0, 255)
+[INFO] 2024-09-30 09:13:19.497787 - Customization : player6 is customized to (0, 255, 255)
+[INFO] 2024-09-30 09:13:19.497844 - Customization : player7 is customized to (255, 0, 128)
+[INFO] 2024-09-30 09:13:19.497900 - Customization : player8 is customized to (0, 255, 128)
+[INFO] 2024-09-30 09:13:19.497956 - Customization : player9 is customized to (0, 128, 255)
+[INFO] 2024-09-30 09:13:19.498059 - Customization : player10 is customized to (255, 128, 0)
+[INFO] 2024-09-30 09:13:19.498117 - Customization : player11 is customized to (128, 255, 0)
+[INFO] 2024-09-30 09:13:19.498173 - Customization : player12 is customized to (128, 0, 255)
+[INFO] 2024-09-30 09:13:19.498231 - Customization : menu-header is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:19.498286 - Customization : menu-text is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:19.498343 - Customization : menu-selected is customized to (112, 156, 118)
+[INFO] 2024-09-30 09:13:19.498401 - Customization : menu-shortcut is customized to (224, 196, 119)
+[INFO] 2024-09-30 09:13:19.498459 - Customization : menu-alternate is customized to (107, 134, 176)
+[INFO] 2024-09-30 09:13:19.498518 - Customization : menu-ok is customized to (112, 156, 118)
+[INFO] 2024-09-30 09:13:19.498575 - Customization : menu-warning is customized to (205, 144, 110)
+[INFO] 2024-09-30 09:13:19.498634 - Customization : menu-ko is customized to (189, 108, 109)
+[INFO] 2024-09-30 09:13:19.498691 - Customization : menu-item-white is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:19.498747 - Customization : menu-item-black is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:19.498802 - Customization : menu-text-black is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:19.498860 - Customization : menu-text-white is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:19.498916 - Customization : menu-buttons is customized to (232, 232, 232)
+[INFO] 2024-09-30 09:13:19.498973 - Customization : menu-favorite is customized to (255, 215, 0)
+[INFO] 2024-09-30 09:13:19.499028 - Customization : menu-border is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:19.499085 - Customization : menu-inactive is customized to (128, 128, 128)
+[INFO] 2024-09-30 09:13:19.499143 - Customization : description-bg is customized to (213, 206, 186)
+[INFO] 2024-09-30 09:13:19.499200 - Customization : description-text is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:19.499255 - Customization : description-game is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:19.499310 - Customization : game-bg is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:19.499366 - Customization : game-score is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:19.499425 - Customization : game-headers is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:19.499483 - Customization : game-player is customized to (119, 119, 118)
+[INFO] 2024-09-30 09:13:19.499539 - Customization : game-player-name is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:19.499598 - Customization : game-alt-headers is customized to (48, 48, 48)
+[INFO] 2024-09-30 09:13:19.499654 - Customization : game-round is customized to (107, 134, 176)
+[INFO] 2024-09-30 09:13:19.499710 - Customization : game-title1 is customized to (48, 48, 48)
+[INFO] 2024-09-30 09:13:19.499767 - Customization : game-title2 is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:19.499824 - Customization : game-type is customized to (255, 0, 0)
+[INFO] 2024-09-30 09:13:19.499881 - Customization : game-table is customized to (160, 160, 160)
+[INFO] 2024-09-30 09:13:19.499937 - Customization : game-text is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:19.499993 - Customization : game-option is customized to (255, 215, 0)
+[INFO] 2024-09-30 09:13:19.500050 - Customization : game-darts is customized to (160, 160, 160)
+[INFO] 2024-09-30 09:13:19.500108 - Customization : game-inactive is customized to (119, 119, 118)
+[INFO] 2024-09-30 09:13:19.500166 - Customization : game-dead is customized to (48, 48, 48)
+[INFO] 2024-09-30 09:13:19.500225 - Customization : game-grey is customized to (213, 206, 186)
+[INFO] 2024-09-30 09:13:19.500281 - Customization : game-grey2 is customized to (74, 74, 74)
+[INFO] 2024-09-30 09:13:19.500340 - Customization : game-purple is customized to (140, 108, 161)
+[INFO] 2024-09-30 09:13:19.500397 - Customization : game-red is customized to (255, 0, 0)
+[INFO] 2024-09-30 09:13:19.500453 - Customization : game-green is customized to (0, 255, 0)
+[INFO] 2024-09-30 09:13:19.500526 - Customization : game-blue is customized to (0, 0, 255)
+[INFO] 2024-09-30 09:13:19.500582 - Customization : game-gold is customized to (255, 215, 0)
+[INFO] 2024-09-30 09:13:19.500642 - Customization : game-silver is customized to (192, 192, 192)
+[INFO] 2024-09-30 09:13:19.500700 - Customization : game-bronze is customized to (205, 127, 50)
+[INFO] 2024-09-30 09:13:19.500756 - Customization : message-bg is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:19.500859 - Customization : message-text is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:19.500924 - Customization : target-sb is customized to (189, 108, 109)
+[INFO] 2024-09-30 09:13:19.500984 - Customization : target-db is customized to (107, 134, 176)
+[INFO] 2024-09-30 09:13:19.501043 - Customization : target-double1 is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:19.501100 - Customization : target-double2 is customized to (255, 0, 0)
+[INFO] 2024-09-30 09:13:19.501157 - Customization : target-triple1 is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:19.501212 - Customization : target-triple2 is customized to (255, 0, 0)
+[INFO] 2024-09-30 09:13:19.501268 - Customization : target-simple1 is customized to (0, 0, 255)
+[INFO] 2024-09-30 09:13:19.501325 - Customization : target-simple2 is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:19.501382 - Customization : bob27-bg is customized to (45, 78, 99)
+[INFO] 2024-09-30 09:13:19.501441 - Customization : bob27-blue is customized to (46, 64, 76)
+[INFO] 2024-09-30 09:13:19.501498 - Customization : bob27-green is customized to (45, 108, 85)
+[INFO] 2024-09-30 09:13:19.501554 - Customization : bob27-red is customized to (124, 84, 87)
+[INFO] 2024-09-30 09:13:19.501610 - Customization : bob27-hit is customized to (57, 209, 129)
+[INFO] 2024-09-30 09:13:19.501666 - Customization : bob27-miss is customized to (232, 21, 37)
+[INFO] 2024-09-30 09:13:19.501722 - Customization : bob27-text is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:19.501778 - Customization : fighters-medic is customized to (0, 240, 0)
+[INFO] 2024-09-30 09:13:19.501835 - Customization : fighters-actual-player is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:19.501891 - Customization : fighters-alive-player is customized to (150, 0, 0)
+[INFO] 2024-09-30 09:13:19.501948 - Customization : fighters-dead-player is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:19.502006 - Customization : fighters-targets is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:19.502062 - Customization : fighters-scores is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:19.502118 - Customization : fighters-round is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:19.502175 - Customization : fighters-darts is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:19.502230 - Customization : suggestion-color-allplayer is customized to None
+[INFO] 2024-09-30 09:13:19.502281 - Customization : main-sub-menu-shortcuts is customized to 
+[INFO] 2024-09-30 09:13:19.502332 - Customization : main-sub-menu-text-align is customized to Left
+[INFO] 2024-09-30 09:13:19.502382 - Customization : parametrage-menu-shortcuts is customized to 
+[INFO] 2024-09-30 09:13:19.502431 - Customization : parametrage-menu-text-align is customized to Left
+[INFO] 2024-09-30 09:13:19.502481 - Customization : players-menu-shortcuts is customized to 
+[INFO] 2024-09-30 09:13:19.502531 - Customization : players-menu-text-align is customized to Left
+[INFO] 2024-09-30 09:13:19.502582 - Customization : game-options-menu-shortcuts is customized to 
+[INFO] 2024-09-30 09:13:19.502631 - Customization : game-options-menu-text-align is customized to Left
+[DEBUG] 2024-09-30 09:13:19.503137 - Return None
+[DEBUG] 2024-09-30 09:13:19.503551 - Return /home/pi/.pydarts/themes/remi/images/background/background.png from stack
+[DEBUG] 2024-09-30 09:13:19.503617 - Cleaning image cache
+[DEBUG] 2024-09-30 09:13:19.503671 - Background is now /home/pi/.pydarts/themes/remi/images/background/background.png
+[INFO] 2024-09-30 09:13:19.504187 - Font defined in your colorset : /home/pi/.pydarts/themes/remi/font/CompactaBT.ttf
+[INFO] 2024-09-30 09:13:19.504510 - Version of raspydarts is V4.4.2_202409280858
+[DEBUG] 2024-09-30 09:13:20.107250 - Get updates list : {
+    "response": []
+}
+
+[DEBUG] 2024-09-30 09:13:20.107749 - NO availables update or error
+[DEBUG] 2024-09-30 09:13:20.119673 - Publish on raspydarts/targetLeds : off,,,
+[DEBUG] 2024-09-30 09:13:20.120608 - Publish on raspydarts/stripLeds : off,,,
+[DEBUG] 2024-09-30 09:13:20.122047 - Publish on raspydarts/targetLeds : FadeRGB,1,random,10
+[DEBUG] 2024-09-30 09:13:20.122760 - Publish on raspydarts/targetLeds : Snake,100,random,50
+[DEBUG] 2024-09-30 09:13:20.123505 - Publish on raspydarts/targetLeds : Sparkle,10,gold,20
+[DEBUG] 2024-09-30 09:13:20.123983 - Publish on raspydarts/stripLeds : Strobe,5,red,20
+[DEBUG] 2024-09-30 09:13:20.128229 - Publish on raspydarts/stripLeds : Strobe,3,blue,50
+[DEBUG] 2024-09-30 09:13:20.129414 - play_firstname option is set to : True
+[DEBUG] 2024-09-30 09:13:20.129548 - print_dartstroke option is set to : True
+[DEBUG] 2024-09-30 09:13:20.129604 - light_target option is set to : False
+[DEBUG] 2024-09-30 09:13:20.129655 - light_strip option is set to : False
+[DEBUG] 2024-09-30 09:13:20.129706 - illumination_mode option is set to : False
+[DEBUG] 2024-09-30 09:13:20.129766 - illumination color option is set to : white
+[DEBUG] 2024-09-30 09:13:20.129829 - pnj_time option is set to : 2000ms
+[DEBUG] 2024-09-30 09:13:20.129882 - nextplayer_sound_duration option is set to : 10000ms
+[DEBUG] 2024-09-30 09:13:20.129936 - wait_event_time option is set to : 15000ms
+[DEBUG] 2024-09-30 09:13:20.130125 - localplayers option is set to : ['Maité', 'Rémi', 'Murielle', 'JeanMarie', 'Jervé', 'Myriam', 'Yves', 'Anna', 'AnneLise']
+[DEBUG] 2024-09-30 09:13:20.130193 - local_players option is set to : ['Maité', 'Rémi']
+[DEBUG] 2024-09-30 09:13:20.130243 - pref_fun_game option is set to : 
+[DEBUG] 2024-09-30 09:13:20.130291 - pref_sport_game option is set to : 
+[DEBUG] 2024-09-30 09:13:20.130341 - pref_classic_game option is set to : 
+[DEBUG] 2024-09-30 09:13:20.130389 - pref_category option is set to : classic
+[DEBUG] 2024-09-30 09:13:20.146256 - light_buttons : True : ['LIGHT_NAVIGATE', 'LIGHT_VALIDATE']
+[DEBUG] 2024-09-30 09:13:20.146452 - light_buttons : False : ['LIGHT_BACK']
+[DEBUG] 2024-09-30 09:13:20.146561 - Publish on raspydarts/targetLeds : Strobe,3,gold,50
+[DEBUG] 2024-09-30 09:13:20.147966 - Publish on raspydarts/stripLeds : Strobe,3,gold,50
+[DEBUG] 2024-09-30 09:13:20.148689 - Publish on raspydarts/dmd : msg|Raspydarts
+[DEBUG] 2024-09-30 09:13:20.275708 - Event wait initialized every 15000ms
+[DEBUG] 2024-09-30 09:13:23.737907 - Input debug (pyGame) : (1093, 475)
+[DEBUG] 2024-09-30 09:13:23.739211 - light_buttons : True : ['LIGHT_BACK']
+[DEBUG] 2024-09-30 09:13:23.739435 - Publish on raspydarts/targetLeds : Strobe,3,gold,50
+[DEBUG] 2024-09-30 09:13:23.740131 - Publish on raspydarts/stripLeds : Strobe,3,gold,50
+[DEBUG] 2024-09-30 09:13:23.740779 - Publish on raspydarts/dmd : msg|Paramètres
+[DEBUG] 2024-09-30 09:13:29.174731 - Input debug (pyGame) : (376, 1018)
+[DEBUG] 2024-09-30 09:13:29.175182 - light_buttons : True : ['LIGHT_NAVIGATE', 'LIGHT_VALIDATE']
+[DEBUG] 2024-09-30 09:13:29.175339 - light_buttons : False : ['LIGHT_BACK']
+[DEBUG] 2024-09-30 09:13:29.175462 - Publish on raspydarts/targetLeds : Strobe,3,gold,50
+[DEBUG] 2024-09-30 09:13:29.176278 - Publish on raspydarts/stripLeds : Strobe,3,gold,50
+[DEBUG] 2024-09-30 09:13:29.177020 - Publish on raspydarts/dmd : msg|Raspydarts
+[DEBUG] 2024-09-30 09:13:29.287700 - Event wait initialized every 15000ms
+[DEBUG] 2024-09-30 09:13:30.720063 - Input debug (pyGame) : (830, 695)
+[DEBUG] 2024-09-30 09:13:30.720477 - light_buttons : False : ['LIGHT_VALIDATE']
+[INFO] 2024-09-30 09:13:30.725826 - Use /home/pi/.pydarts/themes/remi/other/Colorset.cfg for color's customization
+[DEBUG] 2024-09-30 09:13:30.726557 - Working on Colorset's section of /home/pi/.pydarts/themes/remi/other/Colorset.cfg
+[INFO] 2024-09-30 09:13:30.746994 - Customization : border-radius is customized to 10
+[INFO] 2024-09-30 09:13:30.747189 - Customization : button-radius is customized to max
+[INFO] 2024-09-30 09:13:30.747254 - Customization : border-size is customized to 3
+[INFO] 2024-09-30 09:13:30.747308 - Customization : padding is customized to 2
+[INFO] 2024-09-30 09:13:30.747373 - Customization : color-black is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:30.747428 - Customization : bg-global is customized to False
+[INFO] 2024-09-30 09:13:30.747487 - Customization : bg-round-nb is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:30.747550 - Customization : bg-round-nb-header is customized to (107, 134, 176)
+[INFO] 2024-09-30 09:13:30.747610 - Customization : bg-LOGO is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:30.747670 - Customization : bg-darts-nb is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:30.747726 - Customization : bg-darts-nb-header is customized to (107, 134, 176)
+[INFO] 2024-09-30 09:13:30.747783 - Customization : bg-optionslist-header is customized to (107, 134, 176)
+[INFO] 2024-09-30 09:13:30.747842 - Customization : bg-optionslist is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:30.747899 - Customization : player1 is customized to (0, 255, 0)
+[INFO] 2024-09-30 09:13:30.747957 - Customization : player2 is customized to (0, 0, 255)
+[INFO] 2024-09-30 09:13:30.748013 - Customization : player3 is customized to (255, 0, 0)
+[INFO] 2024-09-30 09:13:30.748069 - Customization : player4 is customized to (255, 255, 0)
+[INFO] 2024-09-30 09:13:30.748126 - Customization : player5 is customized to (255, 0, 255)
+[INFO] 2024-09-30 09:13:30.748183 - Customization : player6 is customized to (0, 255, 255)
+[INFO] 2024-09-30 09:13:30.748239 - Customization : player7 is customized to (255, 0, 128)
+[INFO] 2024-09-30 09:13:30.748296 - Customization : player8 is customized to (0, 255, 128)
+[INFO] 2024-09-30 09:13:30.748352 - Customization : player9 is customized to (0, 128, 255)
+[INFO] 2024-09-30 09:13:30.748411 - Customization : player10 is customized to (255, 128, 0)
+[INFO] 2024-09-30 09:13:30.748517 - Customization : player11 is customized to (128, 255, 0)
+[INFO] 2024-09-30 09:13:30.748574 - Customization : player12 is customized to (128, 0, 255)
+[INFO] 2024-09-30 09:13:30.748634 - Customization : menu-header is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:30.748690 - Customization : menu-text is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:30.748750 - Customization : menu-selected is customized to (112, 156, 118)
+[INFO] 2024-09-30 09:13:30.748807 - Customization : menu-shortcut is customized to (224, 196, 119)
+[INFO] 2024-09-30 09:13:30.748864 - Customization : menu-alternate is customized to (107, 134, 176)
+[INFO] 2024-09-30 09:13:30.748921 - Customization : menu-ok is customized to (112, 156, 118)
+[INFO] 2024-09-30 09:13:30.748978 - Customization : menu-warning is customized to (205, 144, 110)
+[INFO] 2024-09-30 09:13:30.749035 - Customization : menu-ko is customized to (189, 108, 109)
+[INFO] 2024-09-30 09:13:30.749092 - Customization : menu-item-white is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:30.749147 - Customization : menu-item-black is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:30.749203 - Customization : menu-text-black is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:30.749259 - Customization : menu-text-white is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:30.749316 - Customization : menu-buttons is customized to (232, 232, 232)
+[INFO] 2024-09-30 09:13:30.749372 - Customization : menu-favorite is customized to (255, 215, 0)
+[INFO] 2024-09-30 09:13:30.749427 - Customization : menu-border is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:30.749484 - Customization : menu-inactive is customized to (128, 128, 128)
+[INFO] 2024-09-30 09:13:30.749541 - Customization : description-bg is customized to (213, 206, 186)
+[INFO] 2024-09-30 09:13:30.749596 - Customization : description-text is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:30.749652 - Customization : description-game is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:30.749755 - Customization : game-bg is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:30.749813 - Customization : game-score is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:30.749869 - Customization : game-headers is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:30.749927 - Customization : game-player is customized to (119, 119, 118)
+[INFO] 2024-09-30 09:13:30.749985 - Customization : game-player-name is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:30.750042 - Customization : game-alt-headers is customized to (48, 48, 48)
+[INFO] 2024-09-30 09:13:30.750099 - Customization : game-round is customized to (107, 134, 176)
+[INFO] 2024-09-30 09:13:30.750156 - Customization : game-title1 is customized to (48, 48, 48)
+[INFO] 2024-09-30 09:13:30.750213 - Customization : game-title2 is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:30.750269 - Customization : game-type is customized to (255, 0, 0)
+[INFO] 2024-09-30 09:13:30.750326 - Customization : game-table is customized to (160, 160, 160)
+[INFO] 2024-09-30 09:13:30.750384 - Customization : game-text is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:30.750440 - Customization : game-option is customized to (255, 215, 0)
+[INFO] 2024-09-30 09:13:30.750497 - Customization : game-darts is customized to (160, 160, 160)
+[INFO] 2024-09-30 09:13:30.750553 - Customization : game-inactive is customized to (119, 119, 118)
+[INFO] 2024-09-30 09:13:30.750609 - Customization : game-dead is customized to (48, 48, 48)
+[INFO] 2024-09-30 09:13:30.750667 - Customization : game-grey is customized to (213, 206, 186)
+[INFO] 2024-09-30 09:13:30.750723 - Customization : game-grey2 is customized to (74, 74, 74)
+[INFO] 2024-09-30 09:13:30.750781 - Customization : game-purple is customized to (140, 108, 161)
+[INFO] 2024-09-30 09:13:30.750886 - Customization : game-red is customized to (255, 0, 0)
+[INFO] 2024-09-30 09:13:30.750949 - Customization : game-green is customized to (0, 255, 0)
+[INFO] 2024-09-30 09:13:30.751009 - Customization : game-blue is customized to (0, 0, 255)
+[INFO] 2024-09-30 09:13:30.751065 - Customization : game-gold is customized to (255, 215, 0)
+[INFO] 2024-09-30 09:13:30.751122 - Customization : game-silver is customized to (192, 192, 192)
+[INFO] 2024-09-30 09:13:30.751181 - Customization : game-bronze is customized to (205, 127, 50)
+[INFO] 2024-09-30 09:13:30.751238 - Customization : message-bg is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:30.751293 - Customization : message-text is customized to (0, 0, 0)
+[INFO] 2024-09-30 09:13:30.751349 - Customization : target-sb is customized to (189, 108, 109)
+[INFO] 2024-09-30 09:13:30.751406 - Customization : target-db is customized to (107, 134, 176)
+[INFO] 2024-09-30 09:13:30.751462 - Customization : target-double1 is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:30.751518 - Customization : target-double2 is customized to (255, 0, 0)
+[INFO] 2024-09-30 09:13:30.751575 - Customization : target-triple1 is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:30.751632 - Customization : target-triple2 is customized to (255, 0, 0)
+[INFO] 2024-09-30 09:13:30.751689 - Customization : target-simple1 is customized to (0, 0, 255)
+[INFO] 2024-09-30 09:13:30.751746 - Customization : target-simple2 is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:30.751803 - Customization : bob27-bg is customized to (45, 78, 99)
+[INFO] 2024-09-30 09:13:30.751859 - Customization : bob27-blue is customized to (46, 64, 76)
+[INFO] 2024-09-30 09:13:30.751915 - Customization : bob27-green is customized to (45, 108, 85)
+[INFO] 2024-09-30 09:13:30.751973 - Customization : bob27-red is customized to (124, 84, 87)
+[INFO] 2024-09-30 09:13:30.752032 - Customization : bob27-hit is customized to (57, 209, 129)
+[INFO] 2024-09-30 09:13:30.752091 - Customization : bob27-miss is customized to (232, 21, 37)
+[INFO] 2024-09-30 09:13:30.752146 - Customization : bob27-text is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:30.752203 - Customization : fighters-medic is customized to (0, 240, 0)
+[INFO] 2024-09-30 09:13:30.752284 - Customization : fighters-actual-player is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:30.752343 - Customization : fighters-alive-player is customized to (150, 0, 0)
+[INFO] 2024-09-30 09:13:30.752403 - Customization : fighters-dead-player is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:30.752462 - Customization : fighters-targets is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:30.752518 - Customization : fighters-scores is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:30.752575 - Customization : fighters-round is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:30.752632 - Customization : fighters-darts is customized to (255, 255, 255)
+[INFO] 2024-09-30 09:13:30.752686 - Customization : suggestion-color-allplayer is customized to None
+[INFO] 2024-09-30 09:13:30.752737 - Customization : main-sub-menu-shortcuts is customized to 
+[INFO] 2024-09-30 09:13:30.752787 - Customization : main-sub-menu-text-align is customized to Left
+[INFO] 2024-09-30 09:13:30.752837 - Customization : parametrage-menu-shortcuts is customized to 
+[INFO] 2024-09-30 09:13:30.752887 - Customization : parametrage-menu-text-align is customized to Left
+[INFO] 2024-09-30 09:13:30.752937 - Customization : players-menu-shortcuts is customized to 
+[INFO] 2024-09-30 09:13:30.752986 - Customization : players-menu-text-align is customized to Left
+[INFO] 2024-09-30 09:13:30.753036 - Customization : game-options-menu-shortcuts is customized to 
+[INFO] 2024-09-30 09:13:30.753086 - Customization : game-options-menu-text-align is customized to Left
+[DEBUG] 2024-09-30 09:13:30.753567 - Return None
+[DEBUG] 2024-09-30 09:13:30.753972 - Return /home/pi/.pydarts/themes/remi/images/background/background.png from stack
+[DEBUG] 2024-09-30 09:13:30.754032 - Cleaning image cache
+[DEBUG] 2024-09-30 09:13:30.754089 - Background is now /home/pi/.pydarts/themes/remi/images/background/background.png
+[INFO] 2024-09-30 09:13:30.754550 - Font defined in your colorset : /home/pi/.pydarts/themes/remi/font/CompactaBT.ttf
+[DEBUG] 2024-09-30 09:13:30.754709 - light_buttons : False : ['LIGHT_NEXTPLAYER', 'LIGHT_BACK', 'LIGHT_CELEBRATION', 'LIGHT_NAVIGATE']
+[DEBUG] 2024-09-30 09:13:30.816819 - Sending quit signal to external servers
+[DEBUG] 2024-09-30 09:13:30.817476 - Publish on raspydarts/targetLeds : ack:Rainbow2,50,random,50
+[DEBUG] 2024-09-30 09:13:31.321545 - Publish on raspydarts/stripLeds : ack:Rainbow,50,random,50
+[DEBUG] 2024-09-30 09:13:31.824596 - Wait for ack on ['raspydarts/targetLeds-ack', 'raspydarts/stripLeds-ack']
+[DEBUG] 2024-09-30 09:13:35.332611 - Wait for ack on ['raspydarts/stripLeds-ack']
+[DEBUG] 2024-09-30 09:13:35.834031 - Wait for ack on []
+[DEBUG] 2024-09-30 09:13:36.335012 - Ack received
+[DEBUG] 2024-09-30 09:13:37.337501 - Stop TARGETLEDS and STRIPLEDS when EXIT
+[DEBUG] 2024-09-30 09:13:37.337861 - Exit

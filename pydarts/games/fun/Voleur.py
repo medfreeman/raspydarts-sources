@@ -16,7 +16,14 @@ GAME_RECORDS = {'Points Per Round': 'DESC', 'Points Per Dart': 'DESC'}
 NB_DARTS = 3  # Total darts the player has to play
 LOGO = 'Voleur.png'
 HEADERS = ["D1", "D2", "D3", "", "Rnd", "PPD", "PPR"] # Columns headers - Must be a string
+VERSION = '1.00'
 
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 2 and nb_players <= 12, VERSION, 12
+    
 class CPlayerExtended(cplayer.Player):
     """
     Exetended player class
@@ -56,6 +63,13 @@ class Game(cgame.Game):
         
         self.scale = self.display.res['x'] / 1920
         
+###"
+      # tailles des elements
+        self.space = self.display.res['y'] / 20
+        self.bh = self.display.res['y'] / 10
+        self.targetH = self.display.res['y'] - self.bh * 3 - self.space * 3
+###
+        
 ### declaration variable 
         self.chiffre_joue = [0, 0, 0]
         self.leds = True
@@ -83,6 +97,13 @@ class Game(cgame.Game):
         Actions done before each dart throw - for example, check if the player is allowed to play
         """
         return_code = 0
+###
+        ### ajout pour refresh_games
+        self.player_launch = player_launch
+        self.actual_round = actual_round
+        self.actual_player = actual_player
+        
+###
 
 ### INITIALISE LES LEDS DE TOUTES LES LEDS POUR CHAQUE JOUEUR -- player.targets
         if self.leds :
@@ -97,25 +118,17 @@ class Game(cgame.Game):
                         
                         player.targets = hitsS + hitsD + hitsT + Sbull + Dbull
                                    
-                        print('players target')
-                        print (player.targets)
-                       
                         self.leds = False
-                        
                         
                 #### choisi 3 chiffres au hasard pour j1 a enlever lors du premier tour
                 SDT = ['S' , 'D', 'T']
                 lettre1 = random.choice(SDT)
                 lettre2 = random.choice(SDT)
                 lettre3 = random.choice(SDT)
-#### POUR TEST - J1 s20-s5-s1 supprimer et remettre apres test
                 self.chiffre_joue[0] = lettre1 + str(random.randint(1, 19))
                 self.chiffre_joue[1] = lettre2 + str(random.randint(1, 19))
                 self.chiffre_joue[2] = lettre3 + str(random.randint(1, 19))
                 
-                print('contenu de chiffre_joue - CHOIX ALEATOIRE')
-                print (self.chiffre_joue)        
-        
         if player_launch == 1: 
             players[actual_player].reset_darts()
 
@@ -129,10 +142,6 @@ class Game(cgame.Game):
                 # Init score
                 player.score = 0
             
-            print('')
-            print('retire les segments alea de j1 au premier tour - ligne 117') 
-            print('contenu de chiffre_jou - self.led')
-            print (self.chiffre_joue)  
             ### RETIRE LES SEGMENT ALEATOIRE DE J1 AU DEBUT DU PREMIER TOUR
             try :
                     while True :
@@ -142,43 +151,34 @@ class Game(cgame.Game):
             except :
                     pass 
 
-            print('ontenu de target j1 apres suppression')
-            print(players[actual_player].targets)
-
         # Each new player
         if player_launch == 1:
             players[actual_player].round_points = 0
             players[actual_player].pre_play_score = players[actual_player].score
             
-            print('contenu de chiffre_jou - predart - player_launch = 1 - avant while try - ligne 146')
-            print (self.chiffre_joue) 
             ### SUPPRIME les chiffres joue par le joueur precedent (NORMALEMENT DEJA RETIRE QD JOUEUR PRECEDENT A JOUER - verifier et effacer)
             try :
-                    while True :
-                            players[actual_player].targets.remove(self.chiffre_joue[0]+'#green') 
+                while True :
+                    players[actual_player].targets.remove(self.chiffre_joue[0]+'#green') 
             except :
-                    print('condition except [0]')
+                print('condition except [0]')
                     
             try :
-                    while True :
-                            players[actual_player].targets.remove(self.chiffre_joue[1]+'#green') 
+                while True :
+                    players[actual_player].targets.remove(self.chiffre_joue[1]+'#green') 
             except :
-                    print('condition except [1]')
+                print('condition except [1]')
                     
             try :
-                    while True :
-                            players[actual_player].targets.remove(self.chiffre_joue[2]+'#green') 
+                while True :
+                    players[actual_player].targets.remove(self.chiffre_joue[2]+'#green') 
             except :
-                    print('condition except [2]')       
+                print('condition except [2]')       
 
             ### REINITIALISE LES CHIFFRES JOUES
             self.chiffre_joue[0] = 0    
             self.chiffre_joue[1] = 0    
             self.chiffre_joue[2] = 0  
-            
-            print('contenu de chiffre_jou - predart - player_launch = 1 - APRES while try - ligne 167')
-            print (self.chiffre_joue)   
-                        
             
             ### MAJ DES TARGETS DU JOUEUR
             self.rpi.set_target_leds ('')
@@ -204,53 +204,23 @@ class Game(cgame.Game):
         for i in range(player_launch - 1,self.nb_darts):
             players[actual_player].columns[i] = ('', 'int')
             
-        '''
-        if self.nb_players == 2 :
-                if players[actual_player].ident == 0 :
-                        self.p_ident = 0
-                        self.next_player = 1
-                
-                elif players[actual_player].ident == 1 :
-                        self.p_ident = 1
-                        self.next_player = 0        
-        '''
-        print('self.nb_player')
-        print(self.nb_players)
+
         if players[actual_player].ident == 0 :
                 self.p_ident = 0
                 self.next_player = 1
-                print('ident == 0 - ligne 209')
-                print('self.p_ident')
-                print(self.p_ident)
-                print('self.next_player')
-                print(self.next_player)
         elif players[actual_player].ident == self.nb_players -1 :
                 self.p_ident = players[actual_player].ident
                 self.next_player = 0
-                print('ident => self.nb_player - ligne 217')
-                print('self.p_ident')
-                print(self.p_ident)
-                print('self.next_player')
-                print(self.next_player)
         else :
                 self.p_ident = players[actual_player].ident  
                 self.next_player = self.p_ident + 1 
-                print('ident < nb_player - ligne 221')
-                print('self.p_ident')
-                print(self.p_ident)
-                print('self.next_player')
-                print(self.next_player)
-        
-
 
         if actual_player == self.p_ident : ###0 : 
-                print('condition player= 0 ')
                 listeS = []
                 listeD = []
                 listeT = []
                 for player in players :
-                        if player.ident == self.next_player :  ###1 
-                                print('condition player in player - player.ident == self.next_player')
+                        if player.ident == self.next_player :  ### self.next_player = joueur suivant du joueur actif
                                 self.p_name = player.name
                                 for liste in player.targets:
                                         if liste[:1] == 'S':
@@ -259,15 +229,8 @@ class Game(cgame.Game):
                                                 listeD.append(liste)
                                         if liste[:1] == 'T' :
                                                 listeT.append(liste)
-        
-                                print('')
-                                print('listeS')
-                                print(listeS)
-                                print('listeD')
-                                print(listeD)
-                                print('listeT')
-                                print(listeT)
-                                
+                
+                                #modifie les listes "s20#green" en "20"
                                 nvellListeS = []
                                 for val in listeS:
                                         indexDiese = val.find('#')
@@ -282,21 +245,34 @@ class Game(cgame.Game):
                                 for val in listeT:
                                         indexDiese = val.find('#')
                                         nvellListeT.append(val[1:indexDiese])        
-                                        
-                                print('')
-                                print('nvellListeS')
-                                print(nvellListeS)
-                                print('nvellListeD')
-                                print(nvellListeD)
-                                print('nvellListeT')
-                                print(nvellListeT)
                                 
-                                self.listeS = nvellListeS
-                                self.listeD = nvellListeD
-                                self.listeT = nvellListeT
-                                ### supprime le dernier element de la liste ('B')
-                                self.listeS.pop()
-                                self.listeD.pop()
+                                #modifie les listes pour n afficher que les segments a afficher
+                                listeall = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', 'B']
+                                new_listS = []
+                                new_listD = []
+                                new_listT = []
+
+                                for element in listeall:
+                                        if element not in nvellListeS:
+                                                new_listS.append(element)
+                                        
+                                for element in listeall:
+                                        if element not in nvellListeD:
+                                                new_listD.append(element)  
+                                        
+                                for element in listeall:
+                                        if element not in nvellListeT:
+                                                new_listT.append(element)       
+                                        
+                                print('liste pour afficher les segments')
+                                print(new_listS)
+                                print(new_listD)
+                                print(new_listT)
+                                
+                                self.listeS = new_listS   
+                                self.listeD = new_listD   
+                                self.listeT = new_listT   
+
        
         # Print debug output
         self.logs.log("DEBUG",self.infos)
@@ -321,7 +297,9 @@ class Game(cgame.Game):
         """
         Function run after each dart throw - for example, add points to player
         """
-
+        
+        #self.display.sound_for_touch(hit) # Touched !
+        
         # Play DMD animation
         if super().play_show(players[actual_player].darts, hit, play_special=True):
             self.display.sound_for_touch(hit)
@@ -329,8 +307,6 @@ class Game(cgame.Game):
 ### QD ON TOUCHE UN SEGMENT ETEINT, ON NE PREND PAS DE POINTS MAIS ON LE SUPPRIME POUR LE JOUEUR SUIVANT             
         if not (hit+'#green') in players[actual_player].targets:
                 
-                print('SEGMENT NON TOUCHE')
-                
                 if player_launch == 1 :
                         self.chiffre_joue[0] = hit
                         for player in players :
@@ -340,7 +316,6 @@ class Game(cgame.Game):
                                                         player.targets.remove(self.chiffre_joue[0]+'#green') 
                 
                                         except :
-                                                print('condition except [0]')
                                                 pass
                                         
                 elif player_launch == 2 :
@@ -352,7 +327,6 @@ class Game(cgame.Game):
                                                         player.targets.remove(self.chiffre_joue[1]+'#green') 
                 
                                         except :
-                                                print('condition except [1]')
                                                 pass
                 elif player_launch == 3 :
                         self.chiffre_joue[2] = hit
@@ -363,31 +337,19 @@ class Game(cgame.Game):
                                                         player.targets.remove(self.chiffre_joue[2]+'#green') 
                 
                                         except :
-                                                print('condition except [2]')
                                                 pass
-                
-                
-                print ('chiffre a retirer de la liste S-D-T - ligne 409')
-                print(hit)
-                print('')
-                print('postdart contenu de chiffre_joue')
-                print(self.chiffre_joue)   
-                        
+                #message = 'segment volé'
+                #self.display.speech(message, speed=100)
+                self.display.play_sound('plouf')
                 #players[actual_player].darts_thrown += 1
                 score = 0
                 
         if (hit[1:]) == 'B' :
-                print('BULL touche')
-
                 score = self.score_map[hit] 
                 
                 
         ### QD ON TOUCHE UN SEGMENT ALLUME, ON LE SUPPRIME POUR LE JOUEUR SUIVANT SAUF BULL            
         if (hit+'#green') in players[actual_player].targets and (hit[1:]) != 'B':
-                print('')
-                print('player target - dans condition chiffre touche - avant supprssion - ligne 282')
-                print(players[actual_player].targets)
-                
                 if player_launch == 1 :
                         self.chiffre_joue[0] = hit
                         for player in players :
@@ -397,7 +359,6 @@ class Game(cgame.Game):
                                                         player.targets.remove(self.chiffre_joue[0]+'#green') 
                 
                                         except :
-                                                print('condition except [0]')
                                                 pass
                                         
                 elif player_launch == 2 :
@@ -409,7 +370,6 @@ class Game(cgame.Game):
                                                         player.targets.remove(self.chiffre_joue[1]+'#green') 
                 
                                         except :
-                                                print('condition except [1]')
                                                 pass
                 elif player_launch == 3 :
                         self.chiffre_joue[2] = hit
@@ -420,22 +380,20 @@ class Game(cgame.Game):
                                                         player.targets.remove(self.chiffre_joue[2]+'#green') 
                 
                                         except :
-                                                print('condition except [2]')
                                                 pass
                             
                 
-                print ('chiffre a retirer de la liste S-D-T - ligne 466')
-                print(hit)
-                print('')
-                print('postdart contenu de chiffre_joue')
-                print(self.chiffre_joue)   
-                             
                 score = self.score_map[hit] 
                 
                 ### MAJ DES TARGETS DU JOUEUR
                 self.rpi.set_target_leds ('')
                 self.rpi.set_target_leds('|'.join(players[actual_player].targets))
-       
+        
+                #message = 'segment volé a ladversaire'
+                #self.display.speech(message, speed=100)
+                #self.display.play_sound('plouf')
+                self.display.sound_for_touch(hit) # Touched !
+                
         return_code = 0
 
                
@@ -562,8 +520,6 @@ class Game(cgame.Game):
         self.display.display_image(self.dart_icon, pos_x + self.margin, pos_y + heading_height + self.margin, width=dart_icon_size, height=dart_icon_size, UseCache=True)
         self.display.blit_text(name, pos_x, pos_y - self.margin, width, heading_height + self.margin_2, color=self.display.colorset['game-bg'], dafont='Impact', align='Center')
         self.display.blit_text(score, pos_x, pos_y + heading_height, width, height - heading_height, color=self.display.colorset['game-score'], dafont='Impact', align='Right')
-        ###
-        #self.display.blit_text(score, pos_x, pos_y + heading_height, width, height +500, color=self.display.colorset['game-score'], dafont='Impact', align='Right')
 
 
         
@@ -593,6 +549,8 @@ class Game(cgame.Game):
         scores = players[actual_player].rounds
         score = players[actual_player].score
         darts = None
+        #reprendre score via un self par fleche
+        ####self.score_map[dartx]
         
         for dart in players[actual_player].darts:
             if dart is None:
@@ -641,14 +599,7 @@ class Game(cgame.Game):
         hit_w = self.display.res['x'] - (2 * hit_x)   ###self.display.mid_x + 4 * self.margin
         hit_h = self.display.mid_y + 4 * self.margin
 
-        '''
-        # Score - score affiche en gros au centre
-        rect6 = pygame.Rect(hit_x, hit_y, hit_w, hit_h)
-        sub6 = self.display.screen.subsurface(rect6)
-        screenshot6 = pygame.Surface((hit_w, hit_h))
-        screenshot6.blit(sub6, (0, 0))
-        self.display.blit_text(f'{score}', hit_x, hit_y, hit_w, hit_h, color=self.display.colorset['game-score'], dafont='Impact', align='Center')
-        '''
+
         
         # Display players ans scores 
         if not end_of_game:
@@ -715,12 +666,7 @@ class Game(cgame.Game):
                 for dartx in scores[actual_round -  1 - index]:
                     if dartx is not None:
                         score += self.score_map[dartx]
-                
-                #text2 = f'{sum(scores[actual_round - index - 1] if scores[actual_round - index - 1] is not None else 0)}'
-                #text2 = score
-                #self.display.blit_text(text1, right_x, right_y, ppdr_width, right_height, color=self.display.colorset['game-score'], dafont='Impact', align='Left')
-                #self.display.blit_text(text2, right_x + ppdr_width, right_y, ppdr_width, right_height, color=actual_color, dafont='Impact', align='Right', margin=False)
-                # a effacer - self.display.blit_text(f'{score}', right_x + ppdr_width, right_y, ppdr_width, right_height, color=actual_color, dafont='Impact', align='Right', margin=False)
+
             # PPR and PPD
             if index == 1:
                 self.display.blit_text(f'PPR', ppdr_x, right_y, ppdr_width, right_height, color=self.display.colorset['game-score'], dafont='Impact', align='Right')
@@ -772,26 +718,44 @@ class Game(cgame.Game):
 
             self.display.blit_text(darts, mid_x, mid_y, mid_width, mid_height, color=self.display.colorset['game-score'], dafont=None, align='Center')
 
-            
-        ''' 
-        self.display.blit_text(f"VOLE LES SEGMENTS DE " + str(self.p_name) , 50 , 125 , 1000 , 60 , color=(255, 255, 0)) 
-        self.display.blit_text('S : ' + ','.join(self.listeS), 50 , 175 , 1000 , 60 , color=(0, 0, 255))
-        self.display.blit_text('D : ' + ','.join(self.listeD), 50 , 225 , 1000 , 60 , color=(255, 0, 255))
-        self.display.blit_text('T : ' + ','.join(self.listeT), 50 , 275 , 1000 , 60 , color=(255, 0, 0)) 
-        ''' 
+
         
-        image_voleur = self.display.file_class.get_full_filename('voleur', 'images')
+        image_voleur = self.display.file_class.get_full_filename('voleur/voleur', 'images')
         self.display.display_image(image_voleur, 15, int(self.display.res['y'] * 2 / 4) + self.margin , width=320, height=320, UseCache=True)
-        if not end_of_game:
-                self.display.blit_text(f"VOLE LES SEGMENTS DE " + str(self.p_name) , hit_x , hit_y + 50 , hit_w, 60 , color=(255, 255, 0)) 
-                self.display.blit_text('S : ' + ','.join(self.listeS),  hit_x , hit_y + 100 , hit_w , 60 , color=(0, 0, 255))
-                self.display.blit_text('D : ' + ','.join(self.listeD),  hit_x , hit_y + 150 , hit_w , 60 , color=(255, 0, 255))
-                self.display.blit_text('T : ' + ','.join(self.listeT),  hit_x , hit_y + 200 , hit_w , 60 , color=(255, 0, 0))
-                
-                self.display.blit_text(f'{players[actual_player].round_points}', right_x + self.margin, right_y  - self.margin ,  150, 150, color=self.display.colorset['game-score'], dafont='Impact', align='Center')
-                
-        self.display.update_screen()   
+
+ 
+####
         
+        if not end_of_game:
+            rect = (self.display.res['x'] / 2 - self.targetH /2 ,self.display.res['y'] / 2 - self.targetH / 2, self.targetH, self.targetH)
+            self.display.display_image(self.display.file_class.get_full_filename('voleur/voleur_target', 'images'),rect[0], rect[1], rect[2], rect[3], True, False, False)
+
+            #if self.player_launch == 1 and actual_player == 1 and round == 1:
+            self.display.blit_text(f"VOLEZ LES SEGMENTS DE " + str(self.p_name.upper()) , 25, 200 , 300, 60 , color=(255, 255, 0)) 
+               
+            if self.actual_round == 1 and self.player_launch == 1 and self.actual_player == 0:        
+                #for s in range (1,21):
+                #  self.display.display_image(self.display.file_class.get_full_filename(f'voleur/ALL{s}', 'images'), rect[0], rect[1], rect[2], rect[3], True, False, False)
+                #self.display.display_image(self.display.file_class.get_full_filename('voleur/voleur_target', 'images'),rect[0], rect[1], rect[2], rect[3], True, False, False)
+                print('ligne 752 - suppression de la condition car n affiche plus tous les segments mais juste les segments manquants')        
+            else:
+                for player in players:
+                  for s in self.listeS :
+                     self.display.display_image(self.display.file_class.get_full_filename(f'voleur/S{s}', 'images'),rect[0], rect[1], rect[2], rect[3], True, False, False)
+                  for s in self.listeD :
+                     self.display.display_image(self.display.file_class.get_full_filename(f'voleur/D{s}', 'images'),rect[0], rect[1], rect[2], rect[3], True, False, False)
+                  for s in self.listeT :
+                     self.display.display_image(self.display.file_class.get_full_filename(f'voleur/T{s}', 'images'),rect[0], rect[1], rect[2], rect[3], True, False, False)
+            
+            
+            self.display.blit_text(f'{players[actual_player].round_points}', right_x + self.margin, right_y  - self.margin ,  150, 150, color=(255,255,255), dafont='Impact', align='Center')
+                    
+            self.display.update_screen()
+        else :
+            ClickZones = self.display.end_of_game_menu(logo, stat_button=False)
+            return ClickZones
+
+###       
         if end_of_game:
             ClickZones = self.display.end_of_game_menu(logo, stat_button=True)
             return ClickZones

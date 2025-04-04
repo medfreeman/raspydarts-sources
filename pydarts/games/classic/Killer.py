@@ -9,11 +9,18 @@ from include import cplayer
 from include import cgame
 
 LOGO = 'Killer.png'
-HEADERS = ['Hom', 'Hit', 'Kil', '-', '-', '-', '-']
+HEADERS = ['Hom', 'Hit', 'Kil', '-', 'D1', 'D2', 'D3']
 OPTIONS = {'theme': 'default', 'max_round': 100, 'vie': 0, 'killer': 5, 'bulls': False, 'max': False, 'random': True}
 NB_DARTS = 3
 GAME_RECORDS = {'Score': 'DESC', 'Points Per Round': 'DESC', 'Points de Hit': 'DESC'}
+VERSION = '1.00'
 
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 2 and nb_players <= 12, VERSION, 12
+    
 class CPlayerExtended(cplayer.Player):
     '''
     Extended player class
@@ -88,6 +95,7 @@ class Game(cgame.Game):
                     self.hit = int(to_add)
                     players[actual_player].hit += self.hit
                     players[actual_player].columns[1] = (players[actual_player].hit , 'int')
+                    players[actual_player].columns[player_launch +3] = (f'{hit}', 'str')
                 elif to_play is None:
                     to_play = 'whatamess'
                     players[actual_player].score -= to_add
@@ -110,6 +118,7 @@ class Game(cgame.Game):
                         self.hit = int(to_add)
                         players[actual_player].hit += self.hit
                         players[actual_player].columns[1] = (players[actual_player].hit , 'int')
+                        players[actual_player].columns[player_launch +3] = (f'{hit}', 'str')
                 index += 1
   
         index = 0
@@ -134,6 +143,7 @@ class Game(cgame.Game):
                 player.killer = False
                 player.alive = True
                 player.columns[2] = ('', 'txt')
+                players[actual_player].columns[player_launch +3] = (f'{hit}', 'str')
 
             index += 1
 
@@ -192,6 +202,12 @@ class Game(cgame.Game):
                 player.columns[0] = (player.target, 'int', 'game-red')
                 player.columns[1] = (self.hit, 'int')
                 couleur += 1 
+        
+        ### if player_launch
+        if player_launch == 1 :
+            players[actual_player].columns[4] = ('', 'str')
+            players[actual_player].columns[5] = ('', 'str')
+            players[actual_player].columns[6] = ('', 'str')
                 
         ### pour option random
         if player_launch == 1 and self.random :
@@ -301,6 +317,16 @@ class Game(cgame.Game):
         else:
             myrand = None # Means that there is no random
         return myrand
+
+    def miss_button(self, players, actual_player, actual_round, player_launch):
+        '''
+        Miss button
+        '''
+        print('miss')
+        #players[actual_player].columns[6] = (self.moyenne, 'int')
+        players[actual_player].columns[player_launch+3] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        players[actual_player].darts_thrown += 1
 
     def set_random(self, players, actual_round, actual_player, player_launch, data):
         '''

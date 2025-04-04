@@ -19,13 +19,13 @@ HEADERS = ['#', 'PTS']  # Columns headers - Must be a string
 NB_DARTS = 3  # How many darts per player and per round
 # Dictionary of stats and display order (For example : Points Per Darts and avg are displayed in ascending order)
 GAME_RECORDS = {'Points Per Round': 'DESC'}
-
+VERSION = '1.00'
 
 def check_players_allowed(nb_players):
     """
-    Return the player number max for a game.
+    Check if number of players is ok according to options
     """
-    return nb_players <= 4
+    return nb_players >= 2 and nb_players <= 4, VERSION , 4
 
 class CPlayerExtended(cplayer.Player):
     """
@@ -226,7 +226,7 @@ class Game(cgame.Game):
                     handler['sound'] = 'conquer_up'
 
                 self.blink_box(k)
-                self.draw_box(k)
+                self.draw_box(k, refresh=True)
                 #self.display.update_screen()
 
                 if hit[1:] == 'B':
@@ -411,7 +411,7 @@ class Game(cgame.Game):
                 file_path, 0, 0, self.display.res['x'], self.display.res['y'], True, False, False, UseCache=False)
             self.display.update_screen((pos_x, pos_y, width, height))
 
-    def draw_box(self, case):
+    def draw_box(self, case, refresh=False):
         """
         Draw each territory
         """
@@ -430,6 +430,12 @@ class Game(cgame.Game):
         if case < 20:
             self.display.blit_text(str(v[0]), self.pos[case][0] - 40 * self.scale, self.pos[case]
                                    [1] - 40 * self.scale, 90 * self.scale, 90 * self.scale, color=(0, 0, 0))
+        if refresh:
+            pos_x = self.pos[case][0] - 250 * self.scale
+            pos_y = self.pos[case][1] - 250 * self.scale
+            width = 500 * self.scale
+            height = 500 * self.scale
+            self.display.update_screen((pos_x, pos_y, width, height))
 
     def backup_round(self, players, actual_round):
         """
@@ -461,3 +467,10 @@ class Game(cgame.Game):
                     return self.backups[roundtorestore + 1]
                 except:  # pylint: disable=bare-except
                     return None
+
+    def miss_button(self, players, actual_player, actual_round, player_launch):
+
+        players[actual_player].segments[player_launch-1] = 'MISS'
+        self.display.play_sound('treasure_crane_jaune')
+          
+        players[actual_player].darts_thrown += 1

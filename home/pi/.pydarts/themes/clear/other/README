@@ -1,0 +1,21 @@
+
+######################################################################################
+####																			   ###
+######################################################################################
+
+Pour créer vos propres colorset, inspirez vous de du fichier présent dans ce dossiers
+mais aussi via l'adresse
+ -> https://raspydarts.wordpress.com/2023/01/20/personnalisation-avec-les-themes/
+
+######################################################################################
+####																			   ###
+######################################################################################
+
+To create your own sounds, take inspiration from the folder tree located
+at the location opposite -----> /pydarts/sounds
+If you do not create the folders/files, RaspyDarts will read the files corresponding
+to the address above.
+
+######################################################################################
+####																			   ###
+######################################################################################

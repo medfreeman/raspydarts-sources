@@ -13,7 +13,14 @@ GAME_RECORDS = {'Points Per Round': 'DESC', 'Points Per Dart': 'DESC'}
 NB_DARTS = 3  # Total darts the player has to play
 LOGO = 'Challenge.png'
 HEADERS = ['Jeu', 'D1', 'D2', 'D3', 'Pts', '', ''] # Columns headers - Must be a string
+VERSION = '1.00'
 
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players <= 12, VERSION, 4
+    
 class CPlayerExtended(cplayer.Player):
     """
     Exetended player class
@@ -1120,6 +1127,13 @@ class Game(cgame.Game):
         """
         EMPTY
         """  
+        if self.score2 == 0 :
+                players[actual_player].columns[4] = (0, 'int') 
+        else :
+                players[actual_player].columns[4] = (self.score2, 'int') 
+        players[actual_player].columns[player_launch] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        players[actual_player].darts_thrown += 1
         pass
           
     def get_score(self, player):

@@ -18,7 +18,13 @@ HEADERS = ['#', 'PTS'] # Columns headers - Must be a string
 NB_DARTS = 3 # How many darts per player and per round
 # Dictionary of stats and display order (For example : Points Per Darts and avg are displayed in ascending order)
 GAME_RECORDS = {'Points Per Round':'DESC'}
+VERSION = '1.00'
 
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 2 and nb_players <= 4, VERSION, 4
 
 #Extend the basic player
 class CPlayerExtended(cplayer.Player):
@@ -384,9 +390,9 @@ class Game(cgame.Game):
      #### AJOUT CONDITION "si g[7] = 1" - pour segment acquis    
      ### AJOUT actual_player POUR FORCER LA COULEUR DU JOUEUR ACTUAL - si couleur gagnante correspond a un autre joueur aussi  
      if self.variante :
-       if case1[1] == actual_player and case1[7] == 1 and case2[1] == actual_player and case2[7] == 1 and caseWin[1] == -1:
-         if caseWin[0] in self.segmentsLed :
-           self.segmentsLed.remove(caseWin[0])
+       if case1[1] == actual_player and case1[7] == 1 and case2[1] == actual_player and case2[7] == 1 and caseWin[7] < 1:
+         #if caseWin[0] in self.segmentsLed :
+         #  self.segmentsLed.remove(caseWin[0])
          self.segmentsLed.append(caseWin[0])
          
          print('case1')
@@ -854,6 +860,13 @@ class Game(cgame.Game):
            self.grid.append((hits[h], -1, 0, 0, 0, 0, 0, 0)) # segment,joueur,etat, (J1[3], J2[4], J3[5], J4[6]   NB TOUCHE (nouveau))
            hits.pop(h)
 
+   def miss_button(self, players, actual_player, actual_round, player_launch):
+
+      players[actual_player].segments[player_launch-1] = 'MISS'
+      self.display.play_sound('treasure_crane_jaune')    
+      players[actual_player].darts_thrown += 1
+
+
    ###############
    # Method to frefresh player.stat - Adapt to the stats you want. They represent mathematical formulas used to calculate stats. Refreshed after every launch
    def refresh_stats(self, players, actual_round):
@@ -866,10 +879,6 @@ class Game(cgame.Game):
    def display_segment(self):
       return self.show_hit
 
-   ###############
-   # Return the player number max for a game.
-   def check_players_allowed(self, nb_players):
-      return nb_players > 1 and nb_players < 5
 
      ###############
    # Refresh In-game screen
@@ -909,25 +918,25 @@ class Game(cgame.Game):
 
       self.display.display_image(self.display.file_class.get_full_filename('morpion/morpion_name', 'images'),pad, y, pw,pw/4, True, False, False)
       self.display.blit_text(Players[0].name,pad, y, pw,pw/4, color=(255,255,255) if actual_player==0 else (150,0,0) )
-      self.display.blit_text(str(Players[0].score),pad+pw*3/4, y+pw/4, pw/4,pw/4, color=(255,255,255) if actual_player==0 else (150,0,0) )
+      self.display.blit_text(str(Players[0].score),pad+pw*3/4, y+pw/4, pw/3,pw/3, color=(255,255,255) if actual_player==0 else (192,192,192) )
       self.display.display_image(self.display.file_class.get_full_filename('morpion/morpion_j0', 'images'),pad+pw/4,y+pw/4,pw/4,pw/4, True, False, False)
 
       if len(Players) > 1:
         self.display.display_image(self.display.file_class.get_full_filename('morpion/morpion_name', 'images'),x+bw+pad, y, pw,pw/4, True, False, False)
         self.display.blit_text(Players[1].name,x+bw+pad, y, pw,pw/4, color=(255,255,255) if actual_player==1 else(150,0,0))
-        self.display.blit_text(str(Players[1].score),x+bw+pad+pw*3/4,y+pw/4, pw/4,pw/4, color=(255,255,255) if actual_player==1 else(150,0,0))
+        self.display.blit_text(str(Players[1].score),x+bw+pad+pw*3/4,y+pw/4, pw/3,pw/3, color=(255,255,255) if actual_player==1 else (192,192,192) )
         self.display.display_image(self.display.file_class.get_full_filename('morpion/morpion_j1', 'images'),x+bw+pad+pw/4,y+pw/4,pw/4,pw/4, True, False, False)
 
       if len(Players) > 2:
         self.display.display_image(self.display.file_class.get_full_filename('morpion/morpion_name', 'images'),pad, y+bw/2, pw,pw/4, True, False, False)
         self.display.blit_text(Players[2].name,pad, y+bw/2, pw,pw/4, color=(255,255,255) if actual_player==2 else(150,0,0))
-        self.display.blit_text(str(Players[2].score),pad+pw*3/4, y+bw/2+pw/4 , pw/4,pw/4, color=(255,255,255) if actual_player==2 else (150,0,0) )
+        self.display.blit_text(str(Players[2].score),pad+pw*3/4, y+bw/2+pw/4 , pw/3,pw/3, color=(255,255,255) if actual_player==2 else (192,192,192) )
         self.display.display_image(self.display.file_class.get_full_filename('morpion/morpion_j2', 'images'),pad+pw/4,y+bw/2+pw/4,pw/4,pw/4, True, False, False)
 
       if len(Players) > 3:
         self.display.display_image(self.display.file_class.get_full_filename('morpion/morpion_name', 'images'),x+bw+pad, y+bw/2, pw,pw/4, True, False, False)
         self.display.blit_text(Players[3].name,x+bw+pad, y+bw/2, pw,pw/4, color=(255,255,255) if actual_player==3 else(150,0,0))
-        self.display.blit_text(str(Players[3].score),x+bw+pad+pw*3/4, y+bw/2+pw/4, pw/4,pw/4, color=(255,255,255) if actual_player==3 else(150,0,0))
+        self.display.blit_text(str(Players[3].score),x+bw+pad+pw*3/4, y+bw/2+pw/4, pw/3,pw/3, color=(255,255,255) if actual_player==3 else (192,192,192) )
         self.display.display_image(self.display.file_class.get_full_filename('morpion/morpion_j3', 'images'),x+bw+pad+pw/4,y+bw/2+pw/4,pw/4,pw/4, True, False, False)
 
       if end_of_game :

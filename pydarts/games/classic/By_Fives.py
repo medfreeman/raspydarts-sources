@@ -14,7 +14,14 @@ HEADERS = ['D1', 'D2', 'D3', 'Check', '', '', 'Rnd']
 OPTIONS = {'theme': 'default', 'winscore': 5, 'score51': False, 'max_round': 20}
 NB_DARTS = 3
 GAME_RECORDS = {'Score': 'DESC'}
+VERSION = '1.00'
 
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 1 and nb_players <= 12, VERSION, 12
+    
 class CPlayerExtended(cplayer.Player):
     """
     Extended player class
@@ -182,11 +189,10 @@ class Game(cgame.Game):
             handler['return_code'] = 2
 
         #Check if there is a winner
-        winner = self.check_winner(players)
-        self.infos = f"Check winner module was run. Winner reports {winner}{self.lf}"
-        if winner is not None:
-            self.infos += f"player {winner} wins !{self.lf}"
-            self.winner = winner
+        self.winner = self.check_winner(players)
+        #self.infos = f"Check winner module was run. Winner reports {winner}{self.lf}"
+        if self.winner is not None:
+            self.infos += f"player {self.winner} wins !{self.lf}"
             handler['return_code'] = 3
         else:
             handler['show'] = (players[actual_player].darts, hit, False)
@@ -201,6 +207,19 @@ class Game(cgame.Game):
         """
         if self.score51:
             self.valid = False
+            
+        print('miss')
+        
+        players[actual_player].columns[player_launch-1] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        players[actual_player].darts_thrown += 1       
+        # play penality sound
+        #self.display.play_sound('penality')    
+        
+        #si miss a la derniere fleche alors pas de point mm si les 2 premieres fleches est un score divisible par 5
+        if player_launch == 3 :
+            players[actual_player].columns[3] = ('cross-mark', 'image')
+            return 1
 
     def mod_by_5(self,score):
         """
@@ -208,12 +227,3 @@ class Game(cgame.Game):
         """
         return score % 5 == 0
 
-    def check_winner(self, players):
-        """
-        Method to check if there is a winnner
-        """
-        #Find the better score
-        for player in players:
-            if player.score == self.winscore:
-                return player.ident
-        return None

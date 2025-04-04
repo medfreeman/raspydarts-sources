@@ -5,13 +5,21 @@ Game by ... @fragarch!
 
 from include import cplayer
 from include import cgame
+import random
 
 GAME_LOGO = 'GameOfGoose.png'
 HEADERS = "D1","D2","","","","","CASE" 
-OPTIONS = {'theme': 'default' , 'max_round': 20, 'level': 1 , 'master': False} 
+OPTIONS = {'theme': 'default' , 'max_round': 20, 'level': 1 , 'master': False, 'tour': False, 'alea': False} 
 NB_DARTS = 2
 GAME_RECORDS = {'Score Per Round': 'DESC', 'Dribbles': 'DESC'}
+VERSION = '1.00'
 
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players <= 4, VERSION, 4
+    
 class CPlayerExtended(cplayer.Player):
     """
     Extend the basic player
@@ -41,6 +49,8 @@ class Game(cgame.Game):
         self.nb_darts = NB_DARTS
         self.options = options
         
+        self.tour = options['tour']
+        
         # Generic but copied as reminder
         self.colors = ['green', 'red', 'blue', 'gold', 'silver']
         
@@ -49,9 +59,16 @@ class Game(cgame.Game):
         self.totalTurn = 0                                      # to store total of dice
         self.firstDart = 0                                      # to store score of first dart
         self.secondDart = 0                                     # to store score of second dart
-        self.hotel = {'Resident' : '', 'RemainingTurns' : 0}    # to manage players stuck in hotel
-        self.well = {'Victim' : ''}                             # to manage players fallen in the well
-        self.prison = {'Prisoner' : 'Nobody'}                   # to manage players stuck in prison
+        
+        if self.tour:
+            self.hotel = {'Resident' : '', 'RemainingTurns' : 0}    # to manage players stuck in hotel
+            self.well = {'Resident' : '', 'RemainingTurns' : 0}     # to manage players fallen in the well
+            self.prison = {'Resident' : '', 'RemainingTurns' : 0}   # to manage players stuck in prison
+        else:
+            self.hotel = {'Resident' : '', 'RemainingTurns' : 0}    # to manage players stuck in hotel
+            self.well = {'Victim' : ''}                             # to manage players fallen in the well
+            self.prison = {'Prisoner' : 'Nobody'}                   # to manage players stuck in prison
+            
         self.tokens = ['goose_greenCircle', 'goose_redCircle', 'goose_blueCircle', 'goose_yellowCircle'] # Player Tokens
         self.onlyOneDart = False
         self.twoDartsThrown = False
@@ -89,6 +106,8 @@ class Game(cgame.Game):
         self.infos = ''
         self.translate = self.display.lang.translate
         self.show_hit = True
+        
+        self.alea = options['alea']
     
     def advance(self, player, spaces): # player can move
         #self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['advance'], 'videos'))
@@ -100,9 +119,9 @@ class Game(cgame.Game):
         initPos = self.positions[player]
         self.dmd.send_text("BOOST !", sens=None, iteration=None)
         self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['boost'], 'videos'))
-        if (dart1 == 6 and dart2 == 3) or (dart1 == 3 and dart2 == 6) :
+        if (dart1 == 6 and dart2 == 3) or (dart1 == 3 and dart2 == 6):
             self.positions[player] = 26
-        if (dart1 == 5 and dart2 == 4) or (dart1 == 4 and dart2 == 5) :
+        if (dart1 == 5 and dart2 == 4) or (dart1 == 4 and dart2 == 5):
             self.positions[player] = 53
         self.checkPos(player, initPos, self.positions[player])
         
@@ -114,12 +133,12 @@ class Game(cgame.Game):
             self.positions[player] = newPosition
             self.checkPos(player, startPosition, newPosition) # to avoid special cases
         # Square 6 : The bridge - Shortcut to 12
-        if newPosition == 6 :
+        if newPosition == 6:
             self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['6'], 'videos'))
             newPosition = 12
             self.positions[player] = newPosition
         # Square 42 : The maze - Lost, go back to 30
-        if newPosition == 42 :
+        if newPosition == 42:
             self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['42'], 'videos'))
             newPosition = 30
             self.positions[player] = newPosition
@@ -130,31 +149,63 @@ class Game(cgame.Game):
             newPosition += spaces
             self.positions[player] = newPosition
             self.checkPos(player, startPosition, newPosition) # to avoid special cases
-        # Square 19 : The hotel - wait 2 turns there
-        if newPosition == 19 :
-            self.dmd.send_text("A L'HOTEL !", sens=None, iteration=None)
-            self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['19'], 'videos'))
-            self.hotel['Resident'] = player
-            self.hotel['RemainingTurns'] = 2
-        # Square 31 : The well : wait until someone takes you out
-        if newPosition == 31 :
-            self.dmd.send_text("LE PUITS !", sens=None, iteration=None)
-            self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['31'], 'videos'))
-            self.well['Victim'] = player
-        # Check if a player was already present on the new position. If yes, switch positions
-        for pl, pos in self.positions.items() :
-            if pl != player and pos == newPosition and newPosition != 52 :
-                self.positions[pl] = startPosition
-        # Square 52 : The prison - wait someone visits you
-        if newPosition == 52:
-            if self.prison['Prisoner'] == 'Nobody' :
+        if self.tour:
+            # Square 19 : The hotel - wait 2 turns there
+            if newPosition == 19:
+                self.dmd.send_text("A L'HOTEL !", sens=None, iteration=None)
+                self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['19'], 'videos'))
+                self.hotel['Resident'] = player
+                self.hotel['RemainingTurns'] = 2
+            # Square 31 : The well : wait until someone takes you out
+            if newPosition == 31:
+                self.dmd.send_text("LE PUITS !", sens=None, iteration=None)
+                self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['31'], 'videos'))
+                self.well['Resident'] = player
+                self.well['RemainingTurns'] = 2
+            # Check if a player was already present on the new position. If yes, switch positions
+            for pl, pos in self.positions.items():
+                if pl != player and pos == newPosition and newPosition != 52:
+                    self.positions[pl] = startPosition
+            # Square 52 : The prison - wait someone visits you
+            if newPosition == 52:
+                #if self.prison['Prisoner'] == 'Nobody':
                 self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['52'], 'videos'))
                 self.dmd.send_text("EN PRISON !", sens=None, iteration=None)
-                self.prison['Prisoner'] = player
-            else :
-                self.prison['Prisoner'] = 'Nobody'
+                self.prison['Resident'] = player
+                self.prison['RemainingTurns'] = 2
+               # else:
+               #     self.prison['Prisoner'] = 'Nobody'
+        else:
+            # Square 19 : The hotel - wait 2 turns there
+            if newPosition == 19:
+                self.dmd.send_text("A L'HOTEL !", sens=None, iteration=None)
+                self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['19'], 'videos'))
+                self.hotel['Resident'] = player
+                self.hotel['RemainingTurns'] = 2
+            # Square 31 : The well : wait until someone takes you out
+            if newPosition == 31:
+                self.dmd.send_text("LE PUITS !", sens=None, iteration=None)
+                self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['31'], 'videos'))
+                self.well['Victim'] = player
+            # Check if a player was already present on the new position. If yes, switch positions
+            for pl, pos in self.positions.items():
+                if pl != player and pos == newPosition and newPosition != 52:
+                    self.positions[pl] = startPosition
+            # Square 52 : The prison - wait someone visits you
+            if newPosition == 52:
+                if self.prison['Prisoner'] == 'Nobody':
+                    self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['52'], 'videos'))
+                    self.dmd.send_text("EN PRISON !", sens=None, iteration=None)
+                    self.prison['Prisoner'] = player
+                else:
+                    self.prison['Prisoner'] = 'Nobody'
+            
+            
+            
+            
+            
         # Square 58 : Death - Go back to start
-        if newPosition == 58 :
+        if newPosition == 58:
             self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['58'], 'videos'))
             self.dmd.send_text("MORT !", sens=None, iteration=None)
             newPosition = 0
@@ -172,7 +223,7 @@ class Game(cgame.Game):
         
         
         # Extra before the very first dart : initiate positions on board and assign colors to players
-        if player_launch == 1 and actual_round == 1 and actual_player == 0 :
+        if player_launch == 1 and actual_round == 1 and actual_player == 0:
             self.display.display_background('gooseBoard')
             i = 0
             for p in players:
@@ -180,31 +231,70 @@ class Game(cgame.Game):
                 p.token = self.tokens[i]
                 p.color = self.colors[i]
                 i += 1
+        
+        if self.tour:
+            # We check the hotel to skip turn
+            if player_launch == 1 and self.hotel['Resident'] == players[actual_player].name and self.hotel['RemainingTurns'] > 0  and len(players) > 1:
+                self.hotel['RemainingTurns'] -=1 # One turn less to wait
+                tour2 = str(self.hotel['RemainingTurns']+1)
+                tour = ' '.join(tour2)
+                joueur = players[actual_player].name 
+    
+                #tour -= 1 
+                # Video
+                self.display.message([
+                        f"{joueur} : {self.translate('GameofGoose-hotel')} {tour} {self.translate('GameofGoose-hotel2')}"
+                        ], 2000, None, 'middle', 'big')
+                return_code = 4 # Go to next player
                 
-        # We check the hotel to skip turn
-        if player_launch == 1 and self.hotel['Resident'] == players[actual_player].name and self.hotel['RemainingTurns'] > 0  and len(players) > 1 :
-            self.hotel['RemainingTurns'] -=1 # One turn less to wait
-            # Video
-            return_code = 4 # Go to next player
-            
-        # We check the well to skip turn
-        if player_launch == 1 and self.well['Victim'] == players[actual_player].name and len(players) > 1 :
-            # Video
-            return_code = 4 # Go to next player
-            
-         # We check the prison to skip turn
-        if player_launch == 1 and self.prison['Prisoner'] == players[actual_player].name and len(players) > 1 :
-            # Video
-            return_code = 4 # Go to next player           
-         
+            # We check the well to skip turn
+            if player_launch == 1 and self.well['Resident'] == players[actual_player].name and self.well['RemainingTurns'] > 0  and len(players) > 1:
+                self.well['RemainingTurns'] -=1
+                tour2 = str(self.well['RemainingTurns']+1)
+                tour = ' '.join(tour2)
+                joueur = players[actual_player].name 
+                
+                # Video
+                self.display.message([
+                        f"{joueur} : {self.translate('GameofGoose-well')} {tour} {self.translate('GameofGoose-well2')}"
+                        ], 2000, None, 'middle', 'big')
+                return_code = 4 # Go to next player
+                
+             # We check the prison to skip turn
+            if player_launch == 1 and self.prison['Resident'] == players[actual_player].name and self.prison['RemainingTurns'] > 0  and len(players) > 1 :
+                self.prison['RemainingTurns'] -= 1
+                tour2 = str(self.prison['RemainingTurns']+1)
+                tour = ' '.join(tour2)
+                joueur = players[actual_player].name 
+                # Video
+                self.display.message([
+                        f"{joueur} : {self.translate('GameofGoose-prison')} {tour} {self.translate('GameofGoose-prison2')}"
+                        ], 2000, None, 'middle', 'big')
+                return_code = 4 # Go to next player           
+        else:
+            # We check the hotel to skip turn
+            if player_launch == 1 and self.hotel['Resident'] == players[actual_player].name and self.hotel['RemainingTurns'] > 0  and len(players) > 1:
+                self.hotel['RemainingTurns'] -=1 # One turn less to wait
+                # Video
+                return_code = 4 # Go to next player
+                
+            # We check the well to skip turn
+            if player_launch == 1 and self.well['Victim'] == players[actual_player].name and len(players) > 1:
+                # Video
+                return_code = 4 # Go to next player
+                
+             # We check the prison to skip turn
+            if player_launch == 1 and self.prison['Prisoner'] == players[actual_player].name and len(players) > 1:
+                # Video
+                return_code = 4 # Go to next player            
         # Set total to 0 beginning of turn    
-        if player_launch == 1 : 
+        if player_launch == 1:
             self.totalTurn = 0
             self.dartScore = 0
             self.onlyOneDart = False
             self.twoDartsThrown = False
         
-        # You will probably save the turn to be used in case of backup turn (each first launch) :
+        # You will probably save the turn to be used in case of backup turn (each first launch):
         if player_launch == 1:
             self.save_turn(players)
             # Clean actual_players' columns
@@ -217,18 +307,22 @@ class Game(cgame.Game):
         targ = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'T1', 'T2', 'T3', 'T4', 'T5', 'T6']
         
         # Other levels
-        if self.difficulty == 2 :
+        if self.difficulty == 2:
             targ = targ[:6]
-        elif self.difficulty == 3 :
+        elif self.difficulty == 3:
             targ = targ[6:12]
-        elif self.difficulty == 4 :
+        elif self.difficulty == 4:
             targ = targ[12:] 
-        else :
+        else:
             self.difficulty = 1
         
-        # Turn leds on
-        self.rpi.set_target_leds('|'.join([f'{key}#{self.colors[0]}' for key in targ]))
-
+        if not self.alea:
+            # Turn leds on
+            self.rpi.set_target_leds('|'.join([f'{key}#{self.colors[0]}' for key in targ]))
+        elif self.alea:
+            leds = '|'.join(f'S{number}#{self.colors[0]}|D{number}#{self.colors[0]}|T{number}#{self.colors[0]}' for number in range(1, 21))
+            self.rpi.set_target_leds(leds)
+        
         # Backuping scores
         self.save_turn(players)
         # Send debug output to log system. Use DEBUG or WARNING or ERROR or FATAL
@@ -243,61 +337,59 @@ class Game(cgame.Game):
 
         return_code = 0
         
-        if player_launch == self.nb_darts and actual_round >= self.max_round and actual_player == len(players)-1 :
+        if player_launch == self.nb_darts and actual_round >= self.max_round and actual_player == len(players)-1:
             return_code = 2
 
         # Level 1
         targ = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'T1', 'T2', 'T3', 'T4', 'T5', 'T6']
         
         # Other levels
-        if self.difficulty == 2 :
+        if self.difficulty == 2:
             targ = targ[:6]
-        elif self.difficulty == 3 :
+        elif self.difficulty == 3:
             targ = targ[6:12]
-        elif self.difficulty == 4 :
+        elif self.difficulty == 4:
             targ = targ[12:] 
             
-        if hit in targ: # check if valid throw (one dart is one die)
-            self.dartScore = int(hit[1:])
-            self.display.play_sound('DiceRoll')
-        else :
-            self.dartScore = 0
-         
+        if not self.alea:
+            if hit in targ: # check if valid throw (one dart is one die)
+                self.dartScore = int(hit[1:])
+                self.display.play_sound('DiceRoll')
+            else:
+                self.dartScore = 0
+        if self.alea:
+        ####### aleatoire
+            if hit : # check if valid throw (one dart is one die)
+                self.dartScore = random.randint(1, 6)
+                self.display.play_sound('DiceRoll') 
+        
         # increment total
         self.totalTurn += self.dartScore
         
-        if player_launch == 1 :
+        if player_launch == 1:
             self.firstDart = self.dartScore
             self.onlyOneDart = True
             self.twoDartsThrown = False
-        else :
+        else:
             self.secondDart = self.dartScore
             self.onlyOneDart = False
             self.twoDartsThrown = True
                 
-        if self.totalTurn == 9 and actual_round == 1 : 
-            if not self.master :
+        if self.totalTurn == 9 and actual_round == 1:
+            if not self.master:
                 self.specialFirstTurn(players[actual_player].name, self.firstDart, self.secondDart)
-            else :
+            else:
                 self.advance(players[actual_player].name, self.totalTurn + 1) # Master Mode false, no mega boost on turn, just a +1
-        else :
-            if self.twoDartsThrown :
+        else:
+            if self.twoDartsThrown:
                 self.advance(players[actual_player].name, self.totalTurn)
                     
         # Victory for current player
-        if self.positions[players[actual_player].name] == 63 :
+        if self.positions[players[actual_player].name] == 63:
             self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['victory'], 'videos'))
             self.winner = players[actual_player].ident
             return_code = 3
                         
-            """#LOG FILE
-            f = open("logOfGooseevents", "a")
-            f.write(str(self.positions))
-            f.write('Actual player' + str(actual_player))
-            f.write("\n")
-            f.close()  
-              """     
-                
         # You may want to count how many touches
         # Simple = 1 touch, Double = 2 touches, Triple = 3 touches
         players[actual_player].increment_hits(hit)
@@ -335,30 +427,30 @@ class Game(cgame.Game):
                     self.display.display_image(self.display.file_class.get_full_filename('goose_redCircle', 'images'), (165 + self.scale + 5) * self.ratioX, 813 * self.ratioY, self.scale, self.scale, True)
                 elif p.color == 'blue':
                     self.display.display_image(self.display.file_class.get_full_filename('goose_blueCircle', 'images'), (165 + (self.scale + 5)*2) * self.ratioX , 813 * self.ratioY, self.scale, self.scale, True)
-                else :
+                else:
                     self.display.display_image(self.display.file_class.get_full_filename('goose_yellowCircle', 'images'), (165 + (self.scale + 5)*3) * self.ratioX , 813 * self.ratioY, self.scale, self.scale, True)
             a += 2
             
         # Place dice to inform Players
-        if not(self.onlyOneDart) and not(self.twoDartsThrown) :
+        if not(self.onlyOneDart) and not(self.twoDartsThrown):
             self.display.display_image(self.display.file_class.get_full_filename('gooseDiceWaiting', 'images'), 740 * self.ratioX , 400 * self.ratioY, 180 * self.ratioX, 180 * self.ratioY, True)
             self.display.display_image(self.display.file_class.get_full_filename('gooseDiceWaiting', 'images'), 980 * self.ratioX , 400 * self.ratioY, 180 * self.ratioX, 180 * self.ratioY, True)
         
-        if self.onlyOneDart : 
+        if self.onlyOneDart:
             self.display.display_image(self.display.file_class.get_full_filename('gooseDice' + str(self.firstDart), 'images'), 740 * self.ratioX , 400 * self.ratioY, 180 * self.ratioX, 180 * self.ratioY, True)
             self.display.display_image(self.display.file_class.get_full_filename('gooseDiceWaiting', 'images'), 980 * self.ratioX , 400 * self.ratioY, 180 * self.ratioX, 180 * self.ratioY, True)
             
-        if self.twoDartsThrown : 
+        if self.twoDartsThrown:
             self.display.display_image(self.display.file_class.get_full_filename('gooseDice' + str(self.firstDart), 'images'), 740 * self.ratioX , 400 * self.ratioY, 180 * self.ratioX, 180 * self.ratioY, True)
             self.display.display_image(self.display.file_class.get_full_filename('gooseDice' + str(self.secondDart), 'images'), 980 * self.ratioX , 400 * self.ratioY, 180 * self.ratioX, 180 * self.ratioY, True)
        
         # Show players names
         self.display_player_name(self.display,30, 0, actual_player, Players[0])
-        if len(Players)>1 :
+        if len(Players)>1:
             self.display_player_name(self.display,30 + self.display.pn_size + self.display.margin, 0, actual_player, Players[1])
-        if len(Players)>2 :
+        if len(Players)>2:
             self.display_player_name(self.display,30 + 2*(self.display.pn_size + self.display.margin), 0, actual_player, Players[2])
-        if len(Players)>3 :
+        if len(Players)>3:
             self.display_player_name(self.display,30 + 3*(self.display.pn_size + self.display.margin), 0, actual_player, Players[3])
             
         # Show round number   
@@ -374,7 +466,7 @@ class Game(cgame.Game):
         self.display.display_image(self.display.file_class.get_full_filename('gooseLvl' + str(self.difficulty), 'images'), 1764 * self.ratioX, right_y + right_height - 20, 160 * self.ratioX, 380 * self.ratioY, True)
        
         # Refresh screen
-        if end_of_game :
+        if end_of_game:
             ClickZones = self.display.end_of_game_menu(logo, stat_button=False)
 
         self.display.update_screen()
@@ -411,7 +503,7 @@ class Game(cgame.Game):
 
         # display rect
         background_color = (150,150,150,100)
-        if player.ident == actual_player :
+        if player.ident == actual_player:
             background_color = (245, 245, 245)
         self.display.blit_rect(pos_x, pos_y, self.display.pn_size - self.display.margin, self.display.line_height - self.display.margin, background_color)
 
@@ -430,7 +522,7 @@ class Game(cgame.Game):
     def early_player_button(self, players, actual_player, actual_round):
         """
         Run when player push PLAYERBUTTON before last dart
-        return code :
+        return code:
             1. Next player
             2. Last round reach
             3. Winner is
@@ -442,7 +534,7 @@ class Game(cgame.Game):
         self.advance(players[actual_player].name, self.totalTurn)
         
         # Victory for current player
-        if self.positions[players[actual_player].name] == 63 :
+        if self.positions[players[actual_player].name] == 63:
             self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['victory'], 'videos'))
             self.winner = players[actual_player].ident
             return_code = 3
@@ -457,9 +549,18 @@ class Game(cgame.Game):
         return return_code
         
     def miss_button(self, players, actual_player, actual_round, player_launch):
-        """
-        EMPTY
-        """
+        '''
+        Miss button
+        '''
+        print('miss')
+        if player_launch == 1 : 
+            self.onlyOneDart = True
+        elif player_launch == 2 :
+            self.secondDart  = True
+        self.dartScore = 0
+        players[actual_player].darts_thrown += 1   
+        self.display.play_sound('treasure_crane_jaune')     
+        
+ 
 
-    def check_players_allowed(self, nb_players):
-        return nb_players <= 4
+

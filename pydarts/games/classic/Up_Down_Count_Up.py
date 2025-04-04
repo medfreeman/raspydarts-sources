@@ -11,7 +11,14 @@ GAME_RECORDS = {'Points Per Round': 'DESC', 'Points Per Dart': 'DESC'}
 NB_DARTS = 3
 LOGO = 'Up_Down_Count_Up.png'
 HEADERS = ['D1', 'D2', 'D3', '+/-', '', 'PPD', 'PPR']
+VERSION = '1.00'
 
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 1 and nb_players <= 12, VERSION, 12
+    
 class CPlayerExtended(cplayer.Player):
     """
     Extend the basic player
@@ -173,12 +180,13 @@ class Game(cgame.Game):
 
         # substract penalty points if the round is a nagative round
         #if not self.is_positive_round(actual_round):
+        '''
         score_penalty = (self.nb_darts - self.nb_darts_hit_in_turn) * self.penalty
         if score_penalty > 0:
             players[actual_player].score -= score_penalty
             players[actual_player].round_points -= score_penalty # Keep total for this round
             players[actual_player].points -= score_penalty #for ppd,ppr
-
+        '''
         # Refresh stats
         players[actual_player].columns[5] = (players[actual_player].show_ppd(), 'int')
         players[actual_player].columns[6] = (players[actual_player].avg(actual_round), 'int')
@@ -204,11 +212,18 @@ class Game(cgame.Game):
         Miss button
         """
         players[actual_player].columns[player_launch - 1] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
         players[actual_player].darts_thrown += 1
         # Refresh stats
+        score_penalty = self.penalty ##(self.nb_darts - self.nb_darts_hit_in_turn) * self.penalty
+        if score_penalty > 0:
+            players[actual_player].score -= score_penalty
+            players[actual_player].round_points -= score_penalty # Keep total for this round
+            players[actual_player].points -= score_penalty #for ppd,ppr
         players[actual_player].columns[5] = (players[actual_player].show_ppd(), 'int')
         players[actual_player].columns[6] = (players[actual_player].avg(actual_round), 'int')
         self.refresh_stats(players, actual_round)
+        self.display.play_sound('penality')
 
     def refresh_stats(self, players, actual_round):
         """

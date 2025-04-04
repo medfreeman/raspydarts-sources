@@ -46,6 +46,14 @@ COLORS = {
 TARGETS = ['20', '1', '18', '4', '13', '6', '10', '15', '2', '17', '3', \
         '19', '7', '16', '8', '11', '14', '9', '12', '5']
 
+VERSION = '1.00'
+
+def check_players_allowed(nb_players):
+    """
+    Check if number of players is ok according to options
+    """
+    return nb_players >= 1 and nb_players <= 12, VERSION, 12
+    
 class CPlayerExtended(cplayer.Player):
     '''
     Extend the basic player
@@ -106,7 +114,6 @@ class Game(cgame.Game):
         #display du contrat
         if actual_round == 1:
             text = 'K'
-
         elif actual_round == 2:
             text = '20'
             leds = f'S20#{self.colors[0]}|D20#{self.colors[0]}|T20#{self.colors[0]}'
@@ -294,9 +301,8 @@ class Game(cgame.Game):
                     self.infos += "Hehe ! Good Job !\n"
                     players[actual_player].contrat_done = True
                     handler['sound'] = 'kapitalhardcontrat'
-            else:
-                players[actual_player].contrat_done = False
-
+                    players[actual_player].add_score(players[actual_player].score_contrat)
+                    
         # Round 8 : 17
         elif actual_round == 8 and value == '17':
             players[actual_player].contrat_done = True
@@ -311,6 +317,7 @@ class Game(cgame.Game):
                 # Contract done !
                 handler['return_code'] = 1
                 handler['sound'] = 'kapitalhardcontrat'
+                players[actual_player].add_score(players[actual_player].score_contrat)
 
         # Round 10 : 16
         elif actual_round == 10 and value == '16':
@@ -348,7 +355,8 @@ class Game(cgame.Game):
                     players[actual_player].contrat_done = True
                     handler['sound'] = 'kapitalhardcontrat'
                     self.infos += "Suite done !\n"
-                    # on modifie le score
+                    #correction by Manu pour le contrat reussi on ajoute le contrat au score
+                    players[actual_player].add_score(players[actual_player].score_contrat)
                 else:
                     self.infos += "Looser !\n"
 
@@ -398,9 +406,9 @@ class Game(cgame.Game):
                         self.possibilities.append(TARGETS[(max_hit + len(TARGETS) - 1) % len(TARGETS)])
 
             if players[actual_player].contrat_done:
-                players[actual_player].contrat_done = True
                 handler['sound'] = 'kapitalhardcontrat'
                 self.infos += "Kotkot réussi !!! Good Job mate !\n"
+                players[actual_player].add_score(players[actual_player].score_contrat)
             elif actual_round == 3:
                 self.infos += "Looser.\n"
         # Round 14 : 14
@@ -430,25 +438,14 @@ class Game(cgame.Game):
         # It is recommanded to update stats every dart thrown
         self.refresh_stats(players, actual_round)
 
-        #Check actual winnner if last round reached
-        if actual_round == 15 and player_launch == 3:
-            self.winner = self.check_winner(players)
-            if self.winner is not None:
-                self.infos += f"Current winner is Player {self.winner}{self.lf}"
-                handler['return_code'] = 3
-            # Last round
-            if actual_player == self.nb_players - 1 and player_launch == int(self.nb_darts):
-                self.infos += f"Last round reached ({actual_round}){self.lf}"
-                handler['return_code'] = 2
-
-        elif players[actual_player].contrat_done and dart_valid:
+        if players[actual_player].contrat_done and dart_valid:
             self.jackpot += 1
             self.infos += f"Bien joué Calhagan ! {self.jackpot} touches !{self.lf}"
             score = self.score_map.get(hit)
             players[actual_player].add_dart(actual_round, player_launch, hit, score=score, check=False)
             # on modifie le score dans son contrat
             players[actual_player].score_contrat += score
-            #a chaque touche reussit on augmente son score
+            #a chaque touche reussie on augmente son score
             players[actual_player].add_score(score)
 
             if play_sound:
@@ -460,30 +457,22 @@ class Game(cgame.Game):
             players[actual_player].add_dart(actual_round, player_launch, hit, score=0, check=False)
             handler['sound'] = hit
 
+        #Check actual winnner if last round reached
+        if actual_round == 15 and player_launch == 3:
+            self.winner = self.check_winner(players)
+            #if self.winner is not None:
+            #    self.infos += f"Current winner is Player {self.winner}{self.lf}"
+            #    handler['return_code'] = 1
+            # Last round
+            if actual_player == self.nb_players - 1 and player_launch == int(self.nb_darts):
+                self.infos += f"Last round reached ({actual_round}){self.lf}"
+                handler['return_code'] = 2
+                if self.winner is not None:
+                    handler['return_code'] = 3
+                    
         # Display Recapitulation Text
         self.logs.log("DEBUG", self.infos)
         return handler
-
-    def check_winner(self, players):
-        '''
-        Method to check WHO is the winnner
-        '''
-        deuce = False
-        best_score = -1
-        best_player = None
-        for player in players:
-            if player.score > best_score:
-                best_score = player.score
-                deuce = False #necessary to reset deuce if there is a deuce with a higher score !
-                best_player = player.ident
-            elif player.score == best_score:
-                deuce = True
-                best_player = None
-        if deuce:
-            self.infos += f"There is a score deuce ! Two people have {best_score}.{self.lf}"
-            self.infos += f"No winner!{self.lf}"
-            return None
-        return best_player
 
     def early_player_button(self, players, actual_player, actual_round):
         '''
@@ -491,13 +480,14 @@ class Game(cgame.Game):
         '''
         # Jump to next player by default
         self.infos = "Pneu (or early player buttton) function\n"
+        '''
         # If contract not done
         if not players[actual_player].contrat_done:
             # Play division sound
             self.display.play_sound('kapitaldivision')
             # Divide score
             players[actual_player].score = int(players[actual_player].score / 2)
-
+        '''
         # Check actual winnner if last round reached
         if actual_round == 15:
             self.winner = self.check_winner(players)
@@ -533,6 +523,22 @@ class Game(cgame.Game):
 
         return None
 
+#def miss_button(self, players, actual_player, actual_round, player_launch):
+ #       pass
     def miss_button(self, players, actual_player, actual_round, player_launch):
-        pass
-
+        '''
+        Miss button
+        '''
+        print('miss')
+        #players[actual_player].columns[6] = (self.moyenne, 'int')
+        players[actual_player].columns[player_launch] = ('MISS', 'str')
+        self.display.play_sound('treasure_crane_jaune')
+        players[actual_player].darts_thrown += 1
+        # play penality sound
+        #self.display.play_sound('penality')
+        if not players[actual_player].contrat_done and player_launch == 3:
+            # Play division sound
+            self.display.play_sound('kapitaldivision')
+            # Divide score
+            players[actual_player].score = int(players[actual_player].score / 2)
+        

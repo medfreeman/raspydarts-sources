@@ -1,27 +1,38 @@
 #!/bin/sh
 
 
-PYDARTS_HOME=$HOME/.pydarts
-PYDARTS_VIDEO=/pydarts/videos
+PYDARTS_CFG=pydarts.cfg
+PYDARTS_HOME=/home/pi/.pydarts
+PYDARTS_VIDEOS=/pydarts/videos
+PYDARTS_THEME="`grep 'colorset:' $PYDARTS_HOME/$PYDARTS_CFG  | cut -d':' -f 2`"
+PYDARTS_THEME_VIDEOS=$PYDARTS_HOME/themes/$PYDARTS_THEME/videos
 
-if [ -d $PYDARTS_HOME/videos/intro -a `find $PYDARTS_HOME/videos/intro \( -iname \*.mp4 -o -iname \*.mkv \) -type f | wc -l` -ge 1 ]
-then
-	video="`find $PYDARTS_HOME/videos/intro \( -iname \*.mp4 -o -iname \*.mkv \) -type f | shuf -n 1`"
-elif [ -s $PYDARTS_HOME/videos/intro.mkv ]
-then
-	video=$PYDARTS_HOME/videos/intro.mkv
-elif [ -s $PYDARTS_HOME/videos/intro.mp4 ]
-then
-	video=$PYDARTS_HOME/videos/intro.mp4
-elif [ -s $PYDARTS_VIDEO/intro.mkv ]
-then
-	video=$PYDARTS_VIDEO/intro.mkv
-elif [ -s $PYDARTS_VIDEO/intro.mp4 ]
-then
-	video=$PYDARTS_VIDEO/intro.mp4
-else
-	exit 0
+if [ -s $PYDARTS_HOME/$PYDARTS_CFG ]; then
+	if [ -d $PYDARTS_THEME_VIDEOS -a `find $PYDARTS_THEME_VIDEOS -maxdepth 1 -type f -name "intro.mp4" -o -name "intro.mkv" | wc -l` -ge 1 ]; then
+		echo "Find in $PYDARTS_THEME_VIDEOS"
+		video=`find $PYDARTS_THEME_VIDEOS -maxdepth 1 -type f -name "intro.mp4" -o -name "intro.mkv" | shuf -n 1`
+	elif [ -d $PYDARTS_THEME_VIDEOS/intro -a `find $PYDARTS_THEME_VIDEOS/intro -maxdepth 1 -type f -name "*.mp4" -o -name "*.mkv" | wc -l` -ge 1 ]; then
+		echo "Find in $PYDARTS_THEME_VIDEOS/intro"
+		video=`find $PYDARTS_THEME_VIDEOS/intro -maxdepth 1 -type f -name "*.mkv" -o -name "*.mp4" | shuf -n 1`
+	fi
 fi
-#cvlc $video  -f --no-video-title-show --mouse-hide-timeout 0 -A alsa,none --alsa-audio-device default  --play-and-exit
-omxplayer --vol -1500 -o hdmi "$video"
 
+if [ "$video" = "" ]; then
+	if [ -d $PYDARTS_HOME/videos -a `find $PYDARTS_HOME/videos -maxdepth 1 -type f -name "intro.mp4" -o -name "intro.mkv" | wc -l` -ge 1 ]; then
+		echo "Find in $PYDARTS_HOME/videos"
+		video=`find $PYDARTS_HOME/videos -maxdepth 1 -type f -name "intro.mp4" -o -name "intro.mkv" | shuf -n 1`
+	elif [ -d $PYDARTS_HOME/videos/intro -a `find $PYDARTS_HOME/videos/intro -maxdepth 1 -type f -name "*.mp4" -o -name "*.mkv" | wc -l` -ge 1 ] ;then
+		echo "Find in $PYDARTS_HOME/videos/intro"
+		video=`find $PYDARTS_HOME/videos/intro -maxdepth 1 -type f -name "*.mp4" -o -name "*.mkv" | shuf -n 1`
+	elif [ -d $PYDARTS_VIDEOS -a `find $PYDARTS_VIDEOS -maxdepth 1 -type f -name "intro.mp4" -o -name "intro.mkv" | wc -l` -ge 1 ]; then
+		echo "Find in $PYDARTS_VIDEOS"
+		video=`find $PYDARTS_VIDEOS -maxdepth 1 -type f -name "intro.mp4" -o -name "intro.mkv" | shuf -n 1`
+	elif [ -d $PYDARTS_VIDEOS/intro -a `find $PYDARTS_VIDEOS/intro -maxdepth 1 -type f -name "*.mp4" -o -name "*.mkv" | wc -l`-ge 1 ]; then
+		echo "Find in $PYDARTS_VIDEOS/intro"
+		video=`find $PYDARTS_VIDEOS/intro -maxdepth 1 -type f -name "*.mp4" -o -name "*.mkv" | shuf -n 1`
+	else
+		exit 0
+	fi
+fi
+
+omxplayer --vol -1500 -o hdmi "$video"

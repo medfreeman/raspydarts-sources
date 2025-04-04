@@ -1,0 +1,26 @@
+
+######################################################################################
+####																			   ###
+######################################################################################
+
+Pour créer vos propres vidéos, inspirez vous de l'arborescence des dossiers se situant
+à l'endroit ci contre -----> /pydarts/videos
+Si vous ne créez pas les dossiers/fichiers, RaspyDarts lira les fichiers correspondant
+à l'adresse du dessus.
+Le fichier 'intro' sera au format MKV ou MP4 et sera celui lu au démarrage de votre
+borne.
+
+######################################################################################
+####																			   ###
+######################################################################################
+
+To create your own videos, take inspiration from the folder tree located
+at the location opposite -----> /pydarts/videos
+If you do not create the folders/files, RaspyDarts will read the files corresponding
+to the address above.
+The 'intro' file will be in MKV or MP4 format and will be the one played when 
+your terminal starts.
+
+######################################################################################
+####																			   ###
+######################################################################################

@@ -1,11 +1,9 @@
 [Desktop Entry]
-Version=2.3
+[Desktop Entry]
+Version=4.4.1
 Comment=Raspydarts
 Terminal=false
 Name=Raspydarts
 Exec=/pydarts/RaspyDarts.sh
 Type=Application
 Icon=/pydarts/images/icon.png
-Categories=Game
-Path=/pydarts
-GenericName=Awesome electronic darts game
