@@ -159,7 +159,7 @@ class Game(cgame.Game):
                                                                                             actual_player].havezapped,
                                                                                         players[actual_player].nbzapped,
                                                                                         self.infos)
-        self.infos += "Touche {} : {} ({})\n".format(hit, players[actual_player].get_touch_type(hit), hit)
+        self.infos += "Touche {}\n".format(hit)
         self.infos += "Fleches lancees : {}\n".format(str(player_launch))
         self.infos += "Total des touches : {}\n".format(players[actual_player].get_total_hit())
 
@@ -168,8 +168,11 @@ class Game(cgame.Game):
             self.infos += "/!\ Last round reached ({})\n".format(actual_round)
             handler['return_code'] = 2
 
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+
         # Print debug
-        self.logs.log("DEBUG", self.infos)
+        self.logs.debug(self.infos)
         return handler
 
     #####
@@ -310,7 +313,7 @@ class Game(cgame.Game):
         print('miss')
         #players[actual_player].columns[6] = (self.moyenne, 'int')
         players[actual_player].columns[player_launch-1] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         players[actual_player].darts_thrown += 1
 
     ###############

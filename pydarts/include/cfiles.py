@@ -24,7 +24,7 @@ class Cfile():
 
     def is_dir(self, file_name=None, file_type=None):
         if file_type is None or file_name is None:
-            self.logs.log("WARNING", f"file_type ({file_type}) or file_name ({file_name}) is None.")
+            self.logs.warning(f"file_type ({file_type}) or file_name ({file_name}) is None.")
             return False
 
         if isfile(file_name):
@@ -36,7 +36,7 @@ class Cfile():
 
         config = self.config.dirs.get(file_type, None)
         if config is None:
-            self.logs.log("WARNING", f"Unknown {file_type} file type")
+            self.logs.warning(f"Unknown {file_type} file type")
             return False
 
         sub_dir = config[0]
@@ -62,20 +62,20 @@ class Cfile():
         Seach in personnal directory then in official directory
         """
 
-        #self.logs.log("WARNING", f"get_full_filename called by {sys._getframe().f_back.f_code.co_name}")
-        #self.logs.log("WARNING", f"search for {file_name} of type {file_type}")
+        #self.logs.warning(f"get_full_filename called by {sys._getframe().f_back.f_code.co_name}")
+        #self.logs.warning(f"search for {file_name} of type {file_type}")
 
         if file_type is None or file_name is None:
-            self.logs.log("WARNING", f"file_type ({file_type}) or file_name ({file_name}) is None.")
+            self.logs.warning(f"file_type ({file_type}) or file_name ({file_name}) is None.")
             return None
 
         if isfile(file_name):
-            #self.logs.log("WARNING", f"{file_name} is already a file. No need to search more.")
+            #self.logs.warning(f"{file_name} is already a file. No need to search more.")
             return file_name
 
         config = self.config.dirs.get(file_type, None)
         if config is None:
-            self.logs.log("WARNING", f"Unknown {file_type} file type")
+            self.logs.warning(f"Unknown {file_type} file type")
             return None
 
         sub_dir = config[0]
@@ -87,9 +87,9 @@ class Cfile():
         for extension in extensions:
             full_file_name = f"{file_name.replace(f'.{extension}', '')}.{extension}"
             #if file_type != 'fonts':
-            #    self.logs.log("DEBUG", f"Search for {theme_dir}/{full_file_name} null size file")
+            #    self.logs.debug(f"Search for {theme_dir}/{full_file_name} null size file")
             if isfile(f'{theme_dir}/{full_file_name}') and getsize(f'{theme_dir}/{full_file_name}') == 0:
-            #   self.logs.log("DEBUG", f"Null size file found for {theme_dir}/{full_file_name}")
+            #   self.logs.debug(f"Null size file found for {theme_dir}/{full_file_name}")
                 official = False
                 return None
 
@@ -121,50 +121,49 @@ class Cfile():
             random_file_index = random.randint(0, len(stack) - 1)
             stacked_file = stack.pop(random_file_index)
             self.files[f'{file_name}-{file_type}'] = stack
-            self.logs.log("DEBUG", f"Return {stacked_file} from stack")
+            self.logs.debug(f"Return {stacked_file} from stack")
             return stacked_file
 
         theme_dir = f'{self.theme_dir}/{sub_dir}'
         personnal_dir = f"{self.config.user_dir}/{sub_dir}"
         official_dir = f"{self.config.root_dir}/{sub_dir}"
-        
+
         directories = [theme_dir, personnal_dir, official_dir]
+
         for pathDirectory in directories:
 
-            if file_type == 'sound':
-                    print(f"--> {theme_dir}")
-
-                    if isdir(theme_dir + "/game_start"):
-                        print("il existe")
-            
             for extension in extensions:
                 full_file_name = f"{file_name.replace(f'.{extension}', '')}.{extension}"
 
+                if isfile(f'{pathDirectory}/{full_file_name}') and getsize(f'{pathDirectory}/{full_file_name}') > 0:
+                    return f'{pathDirectory}/{full_file_name}'
+
+                # jolie commentaire mais le code ne fait pas le job
                 # Search for file first
                 # Search in theme first
                 # then in personnal folder
                 # else in official folder
                 #if file_type != 'fonts':
-                #    self.logs.log("DEBUG", f"Search for {theme_dir}/{full_file_name}")
-                if isfile(f'{pathDirectory}/{full_file_name}') and getsize(f'{pathDirectory}/{full_file_name}') > 0:
+                #    self.logs.debug(f"Search for {theme_dir}/{full_file_name}")
+                #if isfile(f'{theme_dir}/{full_file_name}'): #and getsize(f'{theme_dir}/{full_file_name}') > 0:
                 #    if file_type != 'fonts':
-                #        self.logs.log("DEBUG", f"Return {theme_dir}/{full_file_name} from 1")
-                    return f'{pathDirectory}/{full_file_name}'
+                #        self.logs.debug(f"Return {theme_dir}/{full_file_name} from 1")
+                #    return f'{theme_dir}/{full_file_name}'
 
                 #if file_type != 'fonts':
-                #    self.logs.log("DEBUG", f"Search for {personnal_dir}/{full_file_name}")
+                #    self.logs.debug(f"Search for {personnal_dir}/{full_file_name}")
                 #if isfile(f'{personnal_dir}/{full_file_name}') and getsize(f'{personnal_dir}/{full_file_name}') > 0:
                 #    if file_type != 'fonts':
-                #        self.logs.log("DEBUG", f"Return {theme_dir}/{full_file_name} from 2")
+                #        self.logs.debug(f"Return {theme_dir}/{full_file_name} from 2")
                 #    return f'{personnal_dir}/{full_file_name}'
 
                 # Else, in official folder
                 #if file_type != 'fonts':
-                #    self.logs.log("DEBUG", f"Search for {official_dir}/{full_file_name}")
+                #    self.logs.debug(f"Search for {official_dir}/{full_file_name}")
                 #if isfile(f'{official_dir}/{full_file_name}') and getsize(f'{official_dir}/{full_file_name}') > 0:
                 #    if file_type != 'fonts':
-                #        self.logs.log("DEBUG", f"Return {theme_dir}/{full_file_name} from 3")
+                #        self.logs.debug(f"Return {theme_dir}/{full_file_name} from 3")
                 #    return f'{official_dir}/{full_file_name}'
 
-        self.logs.log("DEBUG", "Return None")
+        self.logs.debug("Return None")
         return None

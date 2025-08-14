@@ -106,7 +106,7 @@ class Game(cgame.Game):
             try:
                 self.check_handicap(players)
             except Exception as exception: # pylint: disable=broad-except
-                self.logs.log("ERROR", f"Handicap failed : {exception}")
+                self.logs.error(f"Handicap failed : {exception}")
 
             for player in players:
                 # Init score
@@ -143,7 +143,7 @@ class Game(cgame.Game):
             players[actual_player].columns[3] = (players[actual_player].lives, 'int')
             
         # Print debug output
-        self.logs.log("DEBUG",self.infos)
+        self.logs.debug(self.infos)
         
         return return_code
 
@@ -167,9 +167,12 @@ class Game(cgame.Game):
         Function run after each dart throw - for example, add points to player
         """
 
+        handler = self.init_handler()
+
         # Play DMD animation
         if super().play_show(players[actual_player].darts, hit, play_special=True):
-            self.display.sound_for_touch(hit)
+            #self.display.sound_for_touch(hit)
+            handler['sound'] = hit
 
         score = 0
         
@@ -220,7 +223,7 @@ class Game(cgame.Game):
         self.rpi.set_target_leds ('')
         self.rpi.set_target_leds('|'.join(self.targets))       
                
-        return_code = 0
+        handler['return_code'] = 0
 
 
         if not self.check :
@@ -263,12 +266,17 @@ class Game(cgame.Game):
             winner = self.check_winner(players) ###self.best_score(players)
             if winner is not None:
                 self.winner = winner
-                return_code = 3
+                handler['return_code'] = 3
             else:
                 # No winner : last round reached
-                return_code = 2
+                handler['return_code'] = 2
+                
+        print('HIT')
+        print(hit)
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
 
-        return return_code
+        return handler
 
     def early_player_button(self, players, actual_player, actual_round):
         if self.segment :
@@ -288,7 +296,7 @@ class Game(cgame.Game):
             winner = self.get_winner(players)
             if winner is not None:
                 self.winner = winner
-                self.logs.log("DEBUG", f"winner is {winner}")
+                self.logs.debug(f"winner is {winner}")
                 return winner
         elif actual_round >= self.max_round and actual_player == len(players) - 1:
             # Last round, last player
@@ -330,7 +338,8 @@ class Game(cgame.Game):
         print('miss')
         #players[actual_player].columns[6] = (self.moyenne, 'int')
         players[actual_player].columns[player_launch-1] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        handler['sound'] = 'treasure_crane_jaune'
+        #self.display.play_sound('miss')
         players[actual_player].darts_thrown += 1
         
         #if not self.check :

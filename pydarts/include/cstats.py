@@ -33,7 +33,7 @@ class Stats:
         # Playerstats.csv
         # 0:CricketMarks,1:CricketThrows,2:CricketMPR,3:01Throws,4:01Points,5:01PPR,6:01PPD
         if not os.path.isfile(self.pathfile):
-            self.logs.log("WARNING", f"Stats file {self.pathfile} doesn't exists. Creating...")
+            self.logs.warning(f"Stats file {self.pathfile} doesn't exists. Creating...")
         if not os.path.exists(self.pathdir):
             os.makedirs(self.pathdir)
         self.write_csv()
@@ -47,7 +47,7 @@ class Stats:
             for row in reader:
                 key = row[0]
                 if key in self.player_stats:
-                    self.logs.log("WARNING","This name is duplicated in the file! Skipping!")
+                    self.logs.warning("This name is duplicated in the file! Skipping!")
                 pass
                 self.player_stats[key] = row[1:]
 
@@ -63,7 +63,7 @@ class Stats:
         marks = float(self.player_stats[player][0])
         throws = float(self.player_stats[player][1])
         totl = float((marks/throws)*3)
-        self.logs.log("DEBUG", f"Marks:{marks}, Throws:{throws} , mpr:{totl}")
+        self.logs.debug(f"Marks:{marks}, Throws:{throws} , mpr:{totl}")
         self.player_stats[player][2] = str(round(totl,6))
 
     def ppd(self,player):

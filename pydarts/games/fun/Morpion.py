@@ -9,7 +9,7 @@ import subprocess
 import pygame
 
 # Dictionnay of options - Text format only
-OPTIONS = {'theme': 'default', 'win_points': 3, 'master': False, 'variante': False}
+OPTIONS = {'theme': 'default', 'win_points': 2, 'master': False, 'variante': False}
 # background image - relative to images folder - Name it like the game itself
 LOGO = 'Morpion.png' # background image
 # Columns headers - Better as a string
@@ -416,6 +416,9 @@ class Game(cgame.Game):
          
    def post_dart_check(self,hit,players,actual_round,actual_player,player_launch):
         return_code = 0
+        
+        handler = self.init_handler()
+        
         self.show_hit = True
 
         # Record total dart thrown, total hits (S=1, D=2, T=3) and refresh players stats
@@ -461,7 +464,8 @@ class Game(cgame.Game):
                       h = random.randint(0,len(lst[i]) - 1)
                       self.grid[lst[i][h]] = (self.grid[lst[i][h]][0], -1, 0)
   
-              self.video_player.play_video(self.display.file_class.get_full_filename('morpion/morpion_dbull', 'videos'))
+              #self.video_player.play_video(self.display.file_class.get_full_filename('morpion/morpion_dbull', 'videos'))
+              handler['video'] = 'morpion/morpion_dbull'
 
           else:
               for k,v in enumerate(self.grid):
@@ -832,13 +836,21 @@ class Game(cgame.Game):
                 self.display.sound_for_touch(hit) # Touched !
 
     
+
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+ 
           
         # test for a winner
         if players[actual_player].score >= self.winpoints:
             self.winner =  players[actual_player].ident
-            return_code = 3
+            print('dans test winner')
+            handler['return_code'] = 3
 
-        return return_code
+
+	    
+        return handler
+        #return return_code
 
    def creategrid(self):
       """
@@ -863,7 +875,7 @@ class Game(cgame.Game):
    def miss_button(self, players, actual_player, actual_round, player_launch):
 
       players[actual_player].segments[player_launch-1] = 'MISS'
-      self.display.play_sound('treasure_crane_jaune')    
+      self.display.play_sound('miss')    
       players[actual_player].darts_thrown += 1
 
 
@@ -1040,6 +1052,8 @@ class Game(cgame.Game):
 
    #######################"
    def drawWin(self,actual_player) :
+	   
+      handler = self.init_handler() 
       g = self.grid
 
       if g[0][1] == actual_player and g[1][1] == actual_player and g[2][1] == actual_player:
@@ -1065,6 +1079,10 @@ class Game(cgame.Game):
             self.display.display_image(self.display.file_class.get_full_filename(f'morpion/morpion_{v[1]}', 'images'),self.pos[v[0]][0],self.pos[v[0]][1], self.jw, self.jw, True, False, False)
             self.display.update_screen(rect=(self.pos[v[0]][0], self.pos[v[0]][1], self.jw, self.jw))
             self.display.play_sound('morpion_win1',wait_finish = True)
+            #handler['sound_wait'] = 'morpion_win1'
 
-      self.display.play_sound('motus_win')
+      #self.display.play_sound('motus_win')
+      handler['sound'] = 'motus_win1'
+      
       pygame.time.delay(1500)
+      return handler

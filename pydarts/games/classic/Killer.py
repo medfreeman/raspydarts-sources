@@ -169,7 +169,10 @@ class Game(cgame.Game):
         players[actual_player].points = players[actual_player].score
         self.refresh_stats(players, actual_round)
 
-        self.logs.log("DEBUG", self.infos)
+        self.logs.debug(self.infos)
+
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
 
         return handler
 
@@ -325,7 +328,7 @@ class Game(cgame.Game):
         print('miss')
         #players[actual_player].columns[6] = (self.moyenne, 'int')
         players[actual_player].columns[player_launch+3] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         players[actual_player].darts_thrown += 1
 
     def set_random(self, players, actual_round, actual_player, player_launch, data):

@@ -192,16 +192,19 @@ msgstr "All"
 ######## LANGUES #######
 
 msgid "fr_FR"
-msgstr "Spanish"
+msgstr "French"
 
 msgid "es_ES"
-msgstr "Espagnol"
+msgstr "Spanish"
 
 msgid "en_GB"
 msgstr "English"
 
 msgid "de_DE"
 msgstr "German"
+
+msgid "it_IT"
+msgstr "Italiano"
 
 ######## PARAMETRAGE ########
 
@@ -423,7 +426,7 @@ msgid "update-available"
 msgstr "An update is available. Install it ?"
 
 msgid "updating"
-msgstr "Applying update
+msgstr "Applying update"
 
 ######## CONFIGURATION ########
 

@@ -8,7 +8,7 @@ from include import cgame
 ############
 # Game Variables
 ############
-OPTIONS = {'theme': 'default', 'max_round': 8}
+OPTIONS = {'theme': 'default', 'max_round': 8, 'only3' : True}
 GAME_RECORDS = {'Points Per Round': 'DESC', 'Points Per Dart': 'DESC'}
 NB_DARTS = 3  # Total darts the player has to play
 LOGO = 'Challenge.png'
@@ -46,6 +46,7 @@ class Game(cgame.Game):
         self.options = options
         #  Get the maximum round number
         self.max_round = int(options['max_round'])
+        self.only3 = options['only3']
         
         '''
         self.simple = False
@@ -60,9 +61,11 @@ class Game(cgame.Game):
         self.video_player = video_player
 
         ### MINI JEUX
-        self.jeux = [['onedart'], ['threedarts'], ['onebulls'], ['threebulls'], ['suite'], ['voisin'], ['lower'], ['inferieur'], ['impair'],
-                ['onetriple'], ['onedouble'], ['onesimple'], ['fortune1'], ['fortune2'], ['score_determine'], ['under'], ['oneanimal'], ['color_blue'],
-                ['threetriple'], ['threedouble'], ['threesimple'], ['onebombe'], ['777'], ['multiple'], ['superieur'], ['pair'], ['color_white']]
+        if self.only3 == False :
+            self.jeux = [['onedart'], ['threedarts'], ['onebulls'], ['threebulls'], ['suite'], ['voisin'], ['lower'], ['inferieur'], ['impair'], ['onetriple'], ['onedouble'], ['onesimple'], ['fortune1'], ['fortune2'], ['score_determine'], ['under'], ['oneanimal'], ['color_blue'], ['threetriple'], ['threedouble'], ['threesimple'], ['onebombe'], ['777'], ['multiple'], ['superieur'], ['pair'], ['color_white']]
+        else :
+            self.jeux = [['threedarts'], ['threebulls'], ['suite'], ['voisin'], ['lower'], ['inferieur'], ['impair'], ['fortune1'], ['fortune2'], ['score_determine'], ['under'], ['color_blue'], ['threetriple'], ['threedouble'], ['threesimple'], ['777'], ['multiple'], ['superieur'], ['pair'], ['color_white']]
+
 
         target_suite = [[1, 2, 3],[2, 3, 4], [3, 4, 5], [4, 5, 6], [5, 6, 7], [6, 7, 8], [7, 8, 9], [8, 9, 10], [9, 10, 11], [10, 11, 12], [11, 12, 13], [12, 13, 14], [13, 14, 15], [14, 15, 16], [15, 16, 17], [16, 17, 18], [17, 18, 19], [18, 19, 20]]
         target_voisin = [[1, 18, 4], [18, 4, 13], [4, 13, 6], [13, 6, 10], [6, 10, 15], [10, 15, 2], [15, 2, 17], [2, 17, 3], [17, 3, 19], [3, 19, 7], [19, 7, 16], [7, 16, 8], [16, 8, 11], [8, 11, 14], [11, 14, 9], [14, 9, 12], [9, 12, 5], [12, 5, 20]]
@@ -133,7 +136,7 @@ class Game(cgame.Game):
             try:
                 self.check_handicap(players)
             except Exception as exception: # pylint: disable=broad-except
-                self.logs.log("ERROR", f"Handicap failed : {exception}")
+                self.logs.error(f"Handicap failed : {exception}")
 
             for player in players:
                 # Init score
@@ -528,7 +531,7 @@ class Game(cgame.Game):
             players[actual_player].columns[i] = ('', 'int')
         
         # Print debug output
-        self.logs.log("DEBUG",self.infos)
+        self.logs.debug(self.infos)
         return return_code
 
     def pnj_score(self, players, actual_player, level, player_launch):
@@ -558,12 +561,12 @@ class Game(cgame.Game):
                 best_score = player.score
                 best_player = player.ident
                 best_count = 1
-                self.logs.log("DEBUG", \
+                self.logs.debug(\
                         f"Best found : {best_score} / Count={best_count} / player = {best_player}")
             elif player.score == best_score:
                 best_count += 1
 
-        self.logs.log("DEBUG", \
+        self.logs.debug(\
                 f"Best score : {best_score} / Count={best_count} / Player = {best_player}")
 
         if best_count == 1:
@@ -574,6 +577,9 @@ class Game(cgame.Game):
         """
         Function run after each dart throw - for example, add points to player
         """
+        
+        handler = self.init_handler()
+        
         ### dit le chiffre touche
         self.display.sound_for_touch(hit)
 
@@ -1098,7 +1104,13 @@ class Game(cgame.Game):
                 # No winner : last round reached
                 return_code = 2
 
-        return return_code
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        handler['return_code'] = return_code
+        
+        return handler
+
+        #return return_code
         
     def early_player_button(self, players, actual_player, actual_round):
         print('early - nextplayer presse')
@@ -1132,7 +1144,7 @@ class Game(cgame.Game):
         else :
                 players[actual_player].columns[4] = (self.score2, 'int') 
         players[actual_player].columns[player_launch] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         players[actual_player].darts_thrown += 1
         pass
           

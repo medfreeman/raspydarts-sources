@@ -1,1 +1,59 @@
 
+
+Améliorations :
+    #345 : Pouvoir débuter par le menu des joueurs et/ou afficher que les jeux favoris
+    #344 : Les couleurs sont visibles dans les menus spécifiques
+    #340 : Pouvoir désactiver la recherche de mise à jour automatique
+    #339 : Pouvoir avoir plusieurs vidéos d'intro, à l'allumage de la borne, différentes
+    #335 : Envoi de la version du jeu dans les stats
+    #334 : Optimisation du chargement des logos
+    #331 : Ajout de l'évènement 180
+    #330 : Possibilité de déclencher un toy (allumage ou clignotement) sur chaque évènement
+    #329 : Gestion d'un 2ème MCP (en 0x21)
+    #337 : Paramétrage des couleurs de l'option "Allumer tous les segments avec les couleurs d'origine"
+    #312 : Affichage des options sur 01 et Cricket
+	#376 : Il est possible de définir une couleur par nom de joueur, de modifier la couleur ou conserver celle du Colorset pour l'ordre des joueurs
+    #370 : L'affichage des photos de la cam en jeu est revu (affichage popup en haut à droite avec 1/3 maximum de la taille de l'écran)
+    #385 : Ajout d'un bouton pour vérifier les mises à jour dans le menu de paramétrage
+    #### : Ajout configuration carte MMWorkshop VDarts Led/Card et Julien Toty V2
+
+Régressions :
+    #357 : "Le gagnant est" n'est plus prononcé en fin de partie
+    #332 : Retour de la mise en cache des images
+    #329 : Evenement "attente" ne se déclenchait plus
+	#377 : Le tri des joueurs ne se faisait plus en cas de "rejouer"
+    #379 : Il n'est plus possible de sélectionner "Non attribué" dans l'interface de paramétrage toys et boutons
+
+Correction de bugs :
+    #364 : Déclenchement d'une animation led pour les fléchettes ratées (MISS)
+    #361 : Le son "miss" n'est pas le bon
+    #353 : Les couleurs pour les joueurs dans le Colorset ne sont pas correctement reprise
+    #352 : Impossible d'éteindre la borne en ayant unecran  tactile
+    #351 : Les polices d'écriture ne fonctionnent pas dans le Colorset
+    #350 : Pouvoir gérer l'apparrence des boutons dans le Colorset
+    #348 : Pouvoir sélectionner le mode plein écran dans les paramètres
+    #347 : Les évènements aux doigts ne fonctionnent pas avec certains écran tactile
+    #320 : Bug écran paramétrage des boutons
+    #317 : Reconduction des PNJs en cas de recommencement
+    #316 : Correction bug sauvegarde des jeux favoris
+    #359 : Correction du problème que la musique du joueur suivant ne se coupait pas
+    #373 : Impossible d'accèder à la fenêtre "Test de la cible"
+    #374 : La fenêtre "Test des boutons" apparait rapidement puis revient sur le menu paramétrage
+    #372 : Les events ayant OTHER et contenant le nécessaire pour le HUE font planter l'interface quand on appuie sur "Test"
+    #371 : La partie ne se termine pas qu'avec un tour en plus si aucun ne gagne
+    #375 : Un égalité provoque la sortie de RaspyDarts
+    #### : Correction de la lecture en double de "Et le gagnant est" dans le cas du theme "clear"
+    #368 : Déclenchement des évènements sur S1....S20, D1...D20, T1...T20, 180, simple, double, triple
+    #384 : Correction de l'erreur de mise en cache sur certains jeux Fun
+    #386 : Un appui sur les boutons dans la fenêtre 'Test cible' provoque une erreur
+    #387 : Naviguer avec les boutons pour appuyer sur le bouton de MAJ provoque une erreur
+    #### : Correction erreur dans test_target "'gpio_in' is not defined"
+    #### : Correction du beug quand on indique les entrées/sorties avec une carte perso lors du paramétrage
+
+Optimisations :
+    #346 : Gérer les icones des jeux en noir et blanc
+
+Nouveautés :
+    #360 : Jeu Yatzydarts
+    #338 : Ajout de la gestion de la webcam USB sur certains évènement
+

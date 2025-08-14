@@ -1,4 +1,13 @@
-[DEBUG] 2024-09-30 09:13:15.489696 - No custom animation found
-[DEBUG] StripLeds_Server : Listen raspydarts/stripLeds on localhost
+[DEBUG] 2025-08-05 10:22:44.964418 - No custom animation found
+[DEBUG] StripLeds_Server : Listen  raspydarts/stripLeds  on  localhost
+[DEBUG] TargetLeds_Server : Launch off
+[DEBUG] TargetLeds_Server : Launch Strobe
+[DEBUG] TargetLeds_Server : Launch Strobe
+[DEBUG] TargetLeds_Server : Launch Strobe
+[DEBUG] TargetLeds_Server : Launch Strobe
+[DEBUG] TargetLeds_Server : Launch Strobe
+[DEBUG] TargetLeds_Server : Launch Strobe
+[DEBUG] TargetLeds_Server : Launch Rainbow
 [DEBUG] StripLeds_Server : publish Ack
+[DEBUG] TargetLeds_Server : Launch quit
 [DEBUG] StripLeds_Server : Disconnect. Sleep 2

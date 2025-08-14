@@ -61,6 +61,9 @@ msgstr "Réinitialisation en cours..."
 msgid "Updating_librairies"
 msgstr "Mise à jour des librairies, veuillez patienter..."
 
+msgid "Install_additional_librairies"
+msgstr "Installation des nouvelles librairies, veuillez patienter..."
+
 msgid "continue"
 msgstr "Continuer"
 
@@ -227,7 +230,16 @@ msgstr "Anglais"
 msgid "de_DE"
 msgstr "Allemand"
 
+msgid "it_IT"
+msgstr "Italiano"
+
 ######## PARAMETRAGE ########
+
+msgid "extension1"
+msgstr "Extension 1"
+
+msgid "extension2"
+msgstr "Extension 2"
 
 msgid "general"
 msgstr "Général"
@@ -275,13 +287,13 @@ msgid "startpercent"
 msgstr "Handicap"
 
 msgid "exhibition_mode"
-msgstr "Mode Salon"
+msgstr "Mode Salon (blocage des menus contre les fausses manips)"
 
 msgid "mode"
 msgstr "Mode"
 
 msgid "competition_mode"
-msgstr "Mode Compétition"
+msgstr "Mode Compétition (aucune animation que du jeu)"
 
 msgid "leisure"
 msgstr "Loisir"
@@ -301,7 +313,31 @@ msgstr "Bandeau led couleur unique"
 msgid "illumination_color"
 msgstr "Couleur du bandeau led"
 
+msgid "fast_games_mode"
+msgstr "Ne pas afficher le menu principal (direct choix joueur)"
+
+msgid "only_favorites_games_mode"
+msgstr "Afficher uniquement les jeux favoris"
+
+msgid "check_for_updates"
+msgstr "Vérifier au démarrage si des mises à jour sont disponibles"
+
+msgid "no-update-available"
+msgstr "Aucune mise à jour disponible"
+
+msgid "btn_update"
+msgstr "Vérifier les mises à jour"
+
 ######## EVENEMENTS ########
+
+msgid "event-simple"
+msgstr "Simple"
+
+msgid "event-double"
+msgstr "Double"
+
+msgid "event-triple"
+msgstr "Triple"
 
 msgid "event-launch"
 msgstr "Lancer le jeu"
@@ -330,6 +366,9 @@ msgstr "Simple bull"
 msgid "event-DB"
 msgstr "Double bull"
 
+msgid "event-180"
+msgstr "180"
+
 msgid "event-pressure"
 msgstr "Pression !"
 
@@ -356,6 +395,9 @@ msgstr "Partie interrompue"
 
 msgid "event-quit"
 msgstr "Quitter le jeu"
+
+msgid "no-favs-games"
+msgstr "Veuillez sélectionner des jeux favoris!"
 
 ######## DMD ########
 
@@ -475,6 +517,9 @@ msgstr "Nombre de leds de votre bandeau"
 msgid "menu-PIN_STRIPLED"
 msgstr "Pin du bandeau led (conseillé 12)"
 
+msgid "menu-TYP_STRIPLED"
+msgstr "Type de bandeau led utilisé"
+
 msgid "menu-PIN_TARGETLED"
 msgstr "Pin des leds de la cible (conseillé 21)"
 
@@ -484,11 +529,20 @@ msgstr "Luminosité du bandeau led (1 à 100)"
 msgid "menu-BRI_TARGETLED"
 msgstr "Luminosité des leds de la cible (1 à 100)"
 
+msgid "menu-TYP_TARGETLED"
+msgstr "Type de leds utilisées dans la cible"
+
 msgid "menu-config-already"
 msgstr "Ce pin est déjà utilisé"
 
 msgid "menu-leds-conflict"
 msgstr "Les pins utilisés pour la cible et les strips DOIVENT être différents"
+
+msgid "TYP_TARGETLED"
+msgstr "le type des leds utilisées dans la cible"
+
+msgid "TYP_STRIPLED"
+msgstr "le type des leds utilisées dans le(s) bandeau(x)"
 
 msgid "NBR_STRIPLED"
 msgstr "le nombre de leds de votre bandeau"
@@ -667,7 +721,88 @@ msgstr "Aucune carte d'extension trouvée"
 msgid "config-toysfound"
 msgstr "Toys trouvés sur les sorties suivantes : "
 
+msgid "noCconfig-toysfound"
+msgstr "Aucun Toys trouvés"
+
+msgid "buttons"
+msgstr "Boutons"
+
+msgid "toys"
+msgstr "Toys"
+
+msgid "conf-cam"
+msgstr "Configuration caméra"
+
+msgid "test-cam"
+msgstr "Test caméra"
+
+msgid "camera_id"
+msgstr "Caméra non détectée ? (cliquez ici)"
+
+msgid "picture_path"
+msgstr "Chemin d'enregistrement des images"
+
+msgid "video_path"
+msgstr "Chemin d'enregistrement des vidéos"
+
+msgid "take_a_shot"
+msgstr "Prendre une photo"
+
+msgid "take_a_video"
+msgstr "Prendre une video"
+
+msgid "picture_res_width*picture_res_height"
+msgstr "Résolution des images"
+
+msgid "video_res_width*video_res_height"
+msgstr "Résolution des vidéos"
+
+msgid "flip_horizontal"
+msgstr "Retourner l'image horizontalement"
+
+msgid "flip_vertical"
+msgstr "Retourner l'image verticalement"
+
+msgid "nb_picture"
+msgstr "Nombre de photo lors de l'évènement"
+
+msgid "video_duration"
+msgstr "Durée d'enregistrement vidéo de l'évènement (s)"
+
+msgid "fps"
+msgstr "Fréquence d'enregistrement (fps)"
+
+msgid "directory_order"
+msgstr "Arborescence des dossiers photos et vidéos"
+
+msgid "choice_of_memories"
+msgstr "Choix des souvenirs"
+
+msgid "events"
+msgstr "Actions déclenchant un souvenir (séparateur ,)"
+
+msgid "upload_cloud"
+msgstr "Envoyer dans le cloud"
+
+msgid "path_google_drive"
+msgstr "Répertoire Google Drive (si vide, téléchargement à la racine)"
+
+msgid "dir-dont-exist-create"
+msgstr "Le chemin n'existe pas, voulez-vous le créer ?"
+
+msgid "abstracted"
+msgstr "N'oubliez pas de sauvegarder la configuration !"
+
+msgid "fullscreen_pop"
+msgstr "Afficher les souvenirs au milieu de l'écran"
+
+msgid "duree_ms"
+msgstr "Durée de l'affichage des photos"
+
 ######## MESSAGES ########
+
+msgid "Loading logos..."
+msgstr "Chargement des logos..."
 
 msgid "Ready to kick ass ?"
 msgstr "Prêt à botter des fesses ?"
@@ -712,7 +847,7 @@ msgid "game-options-binary"
 msgstr "Utilisez les touches Fx pour changer les options."
 
 msgid "players-names-subtitle"
-msgstr "Appuyez sur + pour ajouter, - pour supprimer, / pour joueur ordinateur, <Tab> pour mélanger"
+msgstr "Appuyez sur + pour ajouter, - pour supprimer, / pour joueur ordinateur, * pour la couleur du joueur, <Tab> pour mélanger"
 
 msgid "press-player"
 msgstr "Appuyez sur le bouton Player"
@@ -751,7 +886,7 @@ msgid "need-restart"
 msgstr "Voulez-vous redémarrer ?"
 
 msgid "press-enter"
-msgstr "Appuyer sur Entrée ou sur le bouton Validation pour confirmer"
+msgstr "Appuyer sur Entrée, sur le bouton Validation ou un appui sur l'écran pour confirmer"
 
 msgid "are-you-sure"
 msgstr "Etes-vous sûr(e) ?"
@@ -1360,6 +1495,9 @@ msgstr "8 minis jeux (par défaut) sont tirés au hasard parmi les 27 jeux dispo
 msgid "Challenge-max_round"
 msgstr "Nombre de défis"
 
+msgid "Challenge-only3"
+msgstr "Uniquement les défis avec 3 flèches"
+
 ######## CHAOS ######
 
 msgid "Description-Chaos"
@@ -1730,7 +1868,7 @@ msgid "Golf-bulls"
 msgstr "Active le Bull"
 
 msgid "Golf-master"
-msgstr "Master"
+msgstr "Master-Active uniquement le DB"
 
 msgid "Golf-save"
 msgstr "C'est noté ;)"
@@ -2016,9 +2154,6 @@ msgstr "8 max"
 msgid "Mickey-optioncutthroat"
 msgstr "Points aux adversaires"
 
-msgid "Mickey-drinkscore"
-msgstr "Score\"Paye ton coup\""
-
 msgid "Mickey-optioncrazy"
 msgstr "Crazy !"
 
@@ -2034,6 +2169,11 @@ msgstr "Handicap"
 msgid "Mickey-mpr"
 msgstr "MPR"
 
+msgid "Mickey-max_round"
+msgstr "Nombre de tours"
+
+msgid "Mickey-colorised"
+msgstr "Cible colorisée"
 
 ######## MORPION ######
 
@@ -2756,6 +2896,51 @@ msgstr "Touchez la bille rose"
 msgid "Snooker-noir"
 msgstr "Touchez la bille noire"
 
+
+######## SWITCH_OFF #########
+msgid "Description-Switch"
+msgstr "Le but du jeu est d 'éteindre toutes les leds en touchant le chiffre associé\n"
+"mais attention de ne pas les rallumer en les touchant à nouveau.\n"
+"\n"
+"\n"
+"Eteignez toutes les leds pour gagner sinon le meilleur score à la fin des 12 tours, gagne la partie.\n"
+"\n"
+"\n"
+"Options :\n"
+"– Nb de tours : Détermine le nombre de tours.\n"
+"– Numérique : Affiches par ordre numérique.\n"
+"-----\n"
+"- Si vous touchez le SIMPLE d'un chiffre,\n"
+"  Vous switchez ce chiffre,\n"
+"- Si vous touchez le DOUBLE d'un chiffre,\n"
+"  Vous switchez ce chiffre ainsi que le suivant.\n"
+"- Si vous touchez le TRIPLE d'un chiffre,\n"
+"  Vous switchez ce chiffre ainsi que le suivant et le précédent.\n"
+"\n"
+"- Si vous touchez le SB et qu'il est éteint,\n"
+"  Vous allumez SB.\n"
+"- Si vous touchez le SB et qu'il est allumé,\n"
+"  Vous allumez DB.\n"
+"- Si vous touchez le SB et qu'il est allumé ainsi que DB,\n"
+"  Vous éteignez SB.\n"
+"- Si vous touchez le DB et qu'il est éteint ainsi que SB,\n"
+"  Vous allumez DB et SB.\n"
+"- Si vous touchez le DB et qu'il est allumé et que SB est éteint,\n"
+"  Vous allumez SB.\n"
+"- Si vous touchez le DB et qu'il est allumé ainsi que SB,\n"
+"  Vous éteignez DB.\n"
+" "
+
+msgid "Switch-numerique"
+msgstr "Ordre numérique"
+
+
+
+
+
+
+
+
 ######## TARGET #########
 
 msgid "Description-Target"
@@ -3093,6 +3278,12 @@ msgstr "Affectation des leds"
 msgid "setup-buttons"
 msgstr "Paramétrage des boutons et toys"
 
+msgid "setup-couleurs-segments"
+msgstr "Paramétrage couleur segment d'origine"
+
+msgid "setup-cam"
+msgstr "Paramétrage de la caméra"
+
 msgid "test-target"
 msgstr "Test de la cible"
 
@@ -3210,6 +3401,31 @@ msgstr "Redémarrage du jeu"
 msgid "news"
 msgstr "Nouveautés"
 
+msgid "target-simple1"
+msgstr "Simple 1,4,6,..."
+
+msgid "target-simple2"
+msgstr "Simple 20,18,13,..."
+
+msgid "target-double1"
+msgstr "Double 1,4,6,..."
+
+msgid "target-double2"
+msgstr "Double 20,18,13,..."
+
+msgid "target-triple1"
+msgstr "Triple 1,4,6,..."
+
+msgid "target-triple2"
+msgstr "Triple 20,18,13,..."
+
+msgid "target-sb"
+msgstr "Simple bull"
+
+msgid "target-db"
+msgstr "Double bull"
+
+
 ######## Hangman ######
 
 msgid "Description-Hangman"
@@ -3245,3 +3461,45 @@ msgstr "Master"
 msgid "Hangman-word_length"
 msgstr "Longueur des mots"
 
+######## YAHTZYDARTS ######
+
+msgid "Yahtzydarts-name"
+msgstr "Yahtzydarts"
+
+msgid "Yahtzydarts-video"
+msgstr "Vidéo"
+
+msgid "Yahtzydarts-wrong"
+msgstr "Sélectionnez un segment clignotant"
+
+msgid "Description-Yahtzydarts"
+msgstr "Conversion du jeu Yahtzee en Yahtzydarts."
+"\n"
+"Le jeu est séparé en deux parties comme pour le Yahtzee classique,\n"
+"\n"
+"Dans la partie supérieure :  vous devez toucher les chiffres dédiés pour\n"
+"marquer des points.  Vous obtiendrez un bonus supplémentaire si vos points\n"
+"sont égaux ou supérieurs au total à atteindre affiché dans la case Bonus.\n" 
+"\n"
+"Dans la partie inférieure : vous devez réaliser diverses combinaisons tels que\n"
+"brelan, carré ou autre pour marquer des points.\n"
+"-----\n"
+"Vous disposez de 2 à 5 flèches pour réaliser votre combinaison, cela dépend du\n"
+"segment que vous touchez\n"
+"\n"
+"- Si vous touchez un simple, vous obtenez 1 dé du chiffre touché.\n"
+"- Si vous touchez un double, vous obtenez 2 dés du chiffre touché.\n"
+"- Si vous touchez un triple, vous obtenez 3 dés du chiffre touché.\n"
+"\n"
+"NOTE : si vous possédez déjà 3 dés et que vous touchez un triple, vous\n"
+"n'obtiendrez que 2 chiffres de celui ci vu qu'il n'y a que 5 dés maximum.\n"
+"\n"
+"Si vous ratez les chiffres demandés, vous obtenez un dé (même si vous faites\n"
+"un triple ou un double) ayant 0 comme valeur, bien que celui ci soit un\n"
+"raté, vous pourrez malgré tout vous en servir pour faire une combinaison.\n"
+"\n"
+"Pour valider votre combinaison, appuyez manuellement sur l'un de segments\n"
+"clignotants (ou pour les plus téméraires, visez le !) \n"
+"\n" 
+"Options :\n"
+"- Vidéos : Affiche ou non les vidéos."

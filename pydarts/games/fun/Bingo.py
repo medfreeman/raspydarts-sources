@@ -8,7 +8,7 @@ import subprocess
 import pygame
 
 # Dictionnay of options - Text format only
-OPTIONS = {'win_points':'2', 'master':'1', 'block':False}
+OPTIONS = {'win_points':'2', 'master':'0', 'block':False}
 # background image - relative to images folder - Name it like the game itself
 GAME_LOGO = 'Bingo.png' # background image
 # Columns headers - Better as a string
@@ -105,7 +105,11 @@ class Game(cgame.Game):
       
    # Actions done before each dart throw - for example, check if the player is allowed to play
    def pre_dart_check(self, players, actual_round, actual_player, player_launch):
-        return_code = 0
+        #return_code = 0
+        
+        handler = self.init_handler()
+        
+        handler['return_code'] = 0
 
         # Set score at startup
         if actual_round == 1 and player_launch == 1 and actual_player == 0:
@@ -164,11 +168,16 @@ class Game(cgame.Game):
         self.rpi.set_target_leds('|'.join(f"{mult}{segment}" for mult in ('S', 'D', 'T') for segment in self.leds))         
         self.rpi.set_target_leds_blink('|'.join(f"{mult}{segment}" for mult in ('S', 'D', 'T') for segment in self.leds_blink)) 
         
-        return return_code
+        #return return_code
+        return handler
 
 
    def post_dart_check(self,hit,players,actual_round,actual_player,player_launch):
-        return_code = 0
+	   
+        handler = self.init_handler()
+	    
+        #return_code = 0
+        handler['return_code'] = 0
         self.show_hit = True
 
         # Record total dart thrown, total hits (S=1, D=2, T=3) and refresh players stats
@@ -188,12 +197,15 @@ class Game(cgame.Game):
             ### Melange la grille - toucher 2x - a codedr
             random.shuffle(self.grid)
             #self.video_player.play_video(self.display.file_class.get_full_filename('bingo/bingo_bulls', 'videos'))
-            self.display.play_sound('bingo_SB')
+            #self.display.play_sound('bingo_SB')
+            handler['sound'] = 'bingo_SB'
         
         elif hit == 'DB' :
             self.show_hit = False
             #self.video_player.play_video(self.display.file_class.get_full_filename('bingo/bingo_bulls', 'videos'))
-            self.display.play_sound('bingo_DB')
+            #self.display.play_sound('bingo_DB')
+            handler['sound'] = 'bingo_DB'
+            
             for k,v in enumerate(self.grid):
                 if v[1] == -1 :
                     self.grid[k] = (v[0], actual_player, 1, v[3]) 
@@ -209,11 +221,13 @@ class Game(cgame.Game):
                         if multi == 3 :
                               multi = 2
                         self.grid[k] = (v[0], actual_player, multi, v[3])
-                        self.display.play_sound('bingo_son1')
+                        #self.display.play_sound('bingo_son1')
+                        handler['sound'] = 'bingo_son1'
 
                     elif v[2] == 1 and v[1] == actual_player  :
                         self.grid[k] = (v[0], actual_player, 2, v[3]) 
-                        self.display.play_sound('bingo_son2')
+                        #self.display.play_sound('bingo_son2')
+                        handler['sound'] = 'bingo_son2'
                   
                     elif v[2] == 2 and v[1] == actual_player and self.block :
                         multi += v[3]  
@@ -222,33 +236,40 @@ class Game(cgame.Game):
                               self.grid[k] = (v[0], actual_player, 2, self.nb_block) 
                         else :
                               self.grid[k] = (v[0], actual_player, 2, multi)
-                        self.display.play_sound('bingo_sonBLK')
+                        #self.display.play_sound('bingo_sonBLK')
+                        handler['sound'] = 'bingo_sonBLK'
    
                     elif v[1] != actual_player : 
                         niv = v[2] - multi
                         if v[2] == 2 and multi == 2 and v[3] < self.nb_block:
                             self.grid[k] = (v[0], -1, 0, v[3])    ### REMISE A 0 - v[3] pour advs garde ses blocks
-                            self.display.play_sound('bingo_son0')
+                            #self.display.play_sound('bingo_son0')
+                            handler['sound'] = 'bingo_son0'
                             
                         elif v[2] == 2 and multi == 3 and v[3] < self.nb_block:
                             self.grid[k] = (v[0], actual_player, 1, 0)  ### v[3] REMIS A 0
-                            self.display.play_sound('bingo_son1')
+                            #self.display.play_sound('bingo_son1')
+                            handler['sound'] = 'bingo_son1'
                             
                         elif v[2] == 2 and multi == 1 and v[3] < self.nb_block:
                             self.grid[k] = (v[0], v[1], 1, v[3])   ### pas REMIS A 0 - v[3] pour advs garde ses blocks
-                            self.display.play_sound('bingo_son3')
+                            #self.display.play_sound('bingo_son3')
+                            handler['sound'] = 'bingo_son3'
    
                         elif v[2] == 1 and multi == 3 and v[3] < self.nb_block:
                             self.grid[k] = (v[0], actual_player, 2, 0)   ### v[3] REMIS A 0
-                            self.display.play_sound('bingo_son2')
+                            #self.display.play_sound('bingo_son2')
+                            handler['sound'] = 'bingo_son2'
                             
                         elif v[2] == 1 and multi == 2 and v[3] < self.nb_block:
                             self.grid[k] = (v[0], actual_player, 1, 0)  ### v[3] REMIS A 0
-                            self.display.play_sound('bingo_son1')
+                            #self.display.play_sound('bingo_son1')
+                            handler['sound'] = 'bingo_son1'
                             
                         elif v[2] == 1 and multi == 1 and v[3] < self.nb_block:
                             self.grid[k] = (v[0], -1, 0, v[3])      ### REMISE A 0 - v[3] pour advs garde ses blocks
-                            self.display.play_sound('bingo_son0')  
+                            #self.display.play_sound('bingo_son0')  
+                            handler['sound'] = 'bingo_son0'
 
                         else:
                             self.show_hit = False  
@@ -256,7 +277,7 @@ class Game(cgame.Game):
                     self.BlinkCase(k)
                     self.DrawCase(k, True)
                     self.display.update_screen()
-                    self.display.play_sound('bingo_')
+                    #self.display.play_sound('bingo_')
   
         # test recordille validée
         g = self.grid
@@ -274,7 +295,8 @@ class Game(cgame.Game):
            (g[0][1] == actual_player and g[6][1] == actual_player and g[12][1] == actual_player and g[18][1] == actual_player and g[24][1] == actual_player) and (g[0][2] == 2 and g[6][2] == 2 and g[12][2] == 2 and g[18][2] == 2 and g[24][2] == 2) or \
            (g[4][1] == actual_player and g[8][1] == actual_player and g[12][1] == actual_player and g[16][1] == actual_player and g[20][1] == actual_player) and (g[4][2] == 2 and g[8][2] == 2 and g[12][2] == 2 and g[16][2] == 2 and g[20][2] == 2) :
            
-             self.display.play_sound('bingo_win2',wait_finish = True)
+             #self.display.play_sound('bingo_win2',wait_finish = True) (doublon)
+             #handler['sound_wait'] = 'bingo_win2'
              self.drawWin(actual_player)
              players[actual_player].score += 1
              self.creategrid()
@@ -285,9 +307,15 @@ class Game(cgame.Game):
         # test for a winner
         if players[actual_player].score >= self.winpoints:
             self.winner =  players[actual_player].ident
-            return_code = 3
+            #return_code = 3
+            handler['return_code'] = 3
 
-        return return_code
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        
+        
+        return handler
+        #return return_code
 
    def creategrid(self):
       """
@@ -318,10 +346,16 @@ class Game(cgame.Game):
     
    def miss_button(self, players, actual_player, actual_round, player_launch):
 
+      
+      handler = self.init_handler()
+      
       players[actual_player].segments[player_launch-1] = 'MISS'
-      self.display.play_sound('treasure_crane_jaune')
+      #self.display.play_sound('miss')
+      handler['sound'] = 'miss'
           
       players[actual_player].darts_thrown += 1
+      
+      return handler
    
 
 
@@ -554,6 +588,8 @@ class Game(cgame.Game):
           win = [(20,'b'),(16,'i'),(12,'n'),(8,'g'),(4,'o')]
 
 #### FAIRE AFFICHER BINGO 
+      handler = self.init_handler()
+
       for v in win :
           self.display.display_image(self.display.file_class.get_full_filename(f'bingo/bingo_{actual_player}{v[1]}', 'images'),self.pos[v[0]][0],self.pos[v[0]][1], self.jw, self.jw, True, False, False)
           self.display.display_image(self.display.file_class.get_full_filename('bingo/bingo_board', 'images'),self.x, self.y, self.bw, self.bw, True, False, False)
@@ -561,6 +597,10 @@ class Game(cgame.Game):
           self.display.update_screen()
           
           self.display.play_sound(f'bingo_win1',wait_finish = True)
+          #handler['sound_wait'] = 'bingo_win1'
           
-      #self.display.play_sound('bingo_win2')
+      self.display.play_sound('bingo_win2')
+      #handler['sound'] = 'bingo_win2'
       pygame.time.delay(1500)
+      
+      return handler

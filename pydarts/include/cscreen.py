@@ -35,6 +35,8 @@ import pygame
 from pygame.locals import *
 from include.ColorSets import *
 
+from include import ccamera
+
 try:
     from include import cqrcode
     QRCODE = True
@@ -84,7 +86,7 @@ class Screen(pygame.Surface):
     '''
     Class for display
     '''
-    def __init__(self, config, logs, File, lang, rpi, dmd, video_player, Font=None, random_speed=False, wait_event_time=None, t_event=None):
+    def __init__(self, config, logs, File, lang, rpi, dmd, video_player, image_player, Font=None, random_speed=False, wait_event_time=None, t_event=None):
         # Init
         self.gamepath = os.getcwd()
         self.backupscript = f"{self.gamepath}/scripts/Backup.sh"
@@ -103,8 +105,8 @@ class Screen(pygame.Surface):
         self.config = config
         self.colorsets = {}
         # Image cache (speed up pygame image load process
+        self.games = {}
         self.imagecache = {}
-        self.imagescalecache = {}
         # For drawing a dart board
         self.targets = {20: 1, 1: 2, 18: 3, 4: 4, 13: 5, 6: 6, 10: 7, 15: 8, 2: 9, 17: 10, 3: 11, 19: 12, 7: 13,
                          16: 14, 8: 15, 11: 16, 14: 17, 9: 18, 12: 19, 5: 20}
@@ -148,6 +150,7 @@ class Screen(pygame.Surface):
         self.rpi = rpi
         self.dmd = dmd
         self.video_player = video_player
+        self.image_player = image_player
         self.game_options = []
 
         self.game_background = None
@@ -164,14 +167,14 @@ class Screen(pygame.Surface):
         else:
             self.qrcode = None
         self.qrlogo = ''
+        self.camera = ccamera.Camera(self.config, self.display, logs, show_in_parametrage=True)
 
     def set_end_of_game_winner(self, value):
         self.end_of_game_winner = value
-        # end added by Manu
 
     def set_soundmultiplier(self, multiplier):
         self.sound_multiplier = int(multiplier) / 100
-        self.logs.log("DEBUG", f"sound_multiplier is set to {self.sound_multiplier}")
+        self.logs.debug(f"sound_multiplier is set to {self.sound_multiplier}")
 
     def set_blinktime(self, value):
         self.blinktime = int(value)
@@ -179,6 +182,7 @@ class Screen(pygame.Surface):
     def reset_mode(self):
         self.blinktime = int(self.config.get_value('SectionGlobals', 'blinktime'))
         self.video_player.level = int(self.config.get_value('SectionGlobals', 'videos'))
+        self.image_player.level = int(self.config.get_value('SectionGlobals', 'videos'))
 
     def blit(self, source, destination, area=None):
         if str(pygame.version.ver) == '2.0.0':
@@ -235,11 +239,11 @@ class Screen(pygame.Surface):
         '''
         Init background
         '''
-        self.logs.log("DEBUG", f"Cleaning image cache")
+        self.logs.debug(f"Cleaning image cache")
         if self.background is None or self.background != background:
             self.imagecache = {}
         self.background = background
-        self.logs.log("DEBUG", f"Background is now {self.background}")
+        self.logs.debug(f"Background is now {self.background}")
 
     def mcp_error(self, error):
         '''
@@ -354,7 +358,7 @@ class Screen(pygame.Surface):
             iconimage = pygame.image.load(imagefile).convert_alpha()
             pygame.display.set_icon(iconimage)
         else:
-            self.logs.log("WARNING", f"Unable to load icon image.")
+            self.logs.warning(f"Unable to load icon image.")
         pygame.key.set_mods(0)    # HACK: work-a-round for a SDL bug??
         #if Toggle:
         #    pygame.mouse.set_cursor(*cursor)    # Duoas 16-04-2007
@@ -375,17 +379,17 @@ class Screen(pygame.Surface):
                 colorset_file = self.file_class.get_full_filename('Colorset', 'text')
                 if colorset_file is None:
                     raise Exception(f"No Colorset.cfg in {self.file_class.theme_dir}/other")
-                self.logs.log("INFO", f"Use {colorset_file} for color's customization")
+                self.logs.info(f"Use {colorset_file} for color's customization")
                 ColorSet['Colorset'] = self.config.read_colorset(colorset_file)
                 self.colorset = ColorSet['Colorset']
                 for key, value in ColorSet['clear'].items():
                     if key not in self.colorset:
                         self.colorset[key] = value
                     else:
-                        self.logs.log("INFO", f"Customization : {key} is customized to {value}")
+                        self.logs.info(f"Customization : {key} is customized to {value}")
             except Exception as e:
-                self.logs.log("WARNING", "Error during load of custom colorset")
-                self.logs.log("WARNING", f"Error was {e}")
+                self.logs.warning("Error during load of custom colorset")
+                self.logs.warning(f"Error was {e}")
                 self.colorset = ColorSet['clear']
 
         if self.choosen_colorset != 'clear':
@@ -407,9 +411,9 @@ class Screen(pygame.Surface):
                 self.defaultfontpath = self.colorset['font']
             else:
                 self.defaultfontpath = f"{self.config.fontsDir}/{self.colorset['font']}"
-            self.logs.log("INFO", f"Font defined in your colorset : {self.colorset['font']}")
+            self.logs.info(f"Font defined in your colorset : {self.colorset['font']}")
         except Exception as e:
-            self.logs.log("INFO", "No font defined in your colorset")
+            self.logs.info("No font defined in your colorset")
 
     def init_resolution(self, newresolution=False):
         '''
@@ -421,21 +425,20 @@ class Screen(pygame.Surface):
         if newresolution:
             self.res['x'] = int(newresolution[0])
             self.res['y'] = int(newresolution[1])
-            self.logs.log("DEBUG", f"Using display mode : {self.res['x']}x{self.res['y']}")
+            self.logs.debug(f"Using display mode : {self.res['x']}x{self.res['y']}")
         elif self.fullscreen is False:
             self.res['x'] = int(self.config.get_value('SectionGlobals', 'resx'))
             self.res['y'] = int(self.config.get_value('SectionGlobals', 'resy'))
-            self.logs.log("DEBUG", f"Using display mode : {self.res['x']}x{self.res['y']}")
+            self.logs.debug(f"Using display mode : {self.res['x']}x{self.res['y']}")
         else:
             infoObject = pygame.display.Info()
             self.res['x'] = infoObject.current_w
             self.res['y'] = infoObject.current_h
-            self.logs.log("DEBUG", f"Ho yeah, going fullscreen : {self.res['x']}x{self.res['y']}")
+            self.logs.debug(f"Ho yeah, going fullscreen : {self.res['x']}x{self.res['y']}")
 
         # Exit if resolution smaller than minimal size
         if self.res['x'] < self.resmin['x'] or self.res['y'] < self.resmin['y']:
-            self.logs.log("WARNING",
-                f"Cannot reduce resolution to something smaller than {self.resmin['x']}x{self.resmin['y']}, sorry.")
+            self.logs.warning(f"Cannot reduce resolution to something smaller than {self.resmin['x']}x{self.resmin['y']}, sorry.")
             self.res['x'] = self.resmin['x']
             self.res['y'] = self.resmin['y']
 
@@ -493,7 +496,7 @@ class Screen(pygame.Surface):
             font_size = font.size(str(text))
 
             if text_size <= 0:
-                self.logs.log("ERROR", f"Unable to find suitable text size for a box of size {width}x{height} and for text {text}")
+                self.logs.error(f"Unable to find suitable text size for a box of size {width}x{height} and for text {text}")
                 return None
 
             if font_size[0] < width and font_size[1] < height:
@@ -528,8 +531,8 @@ class Screen(pygame.Surface):
         try:
             text = self.lang.translate(text, game)
         except Exception as e:
-            self.logs.log("WARNING", "Issue in Screen.lit_text method.")
-            self.logs.log("DEBUG", f"Issue is {e}")
+            self.logs.warning("Issue in Screen.lit_text method.")
+            self.logs.debug(f"Issue is {e}")
 
         if margin:
             text_margin = self.margin
@@ -735,22 +738,23 @@ class Screen(pygame.Surface):
                 if click[0] >= zones[key][0] and click[0] <= zones[key][0] + zones[key][2] and click[1] >= zones[key][1] and click[1] <= zones[key][1] + zones[key][3]:
                     return key
         except Exception as e:
-            self.logs.log("WARNING", "Issue in cscreen.is_clicked method.")
-            self.logs.log("DEBUG", f"Issue is {e}")
+            self.logs.warning("Issue in cscreen.is_clicked method.")
+            self.logs.debug(f"Issue is {e}")
             return False
 
     def get_rpi_config(self):
         '''
         1st execution : get configuration
         '''
-        self.logs.log("INFO", f"Lauch target's setup wizard")
+        self.logs.info(f"Lauch target's setup wizard")
 
 
         self.display_background()    # display basic screen
         self.display_ips(big=True)            # display IPs addresses
         self.menu_header("config-interface")
         self.update_screen()
-        cards_dd = [['Ji', 'Cartes de Jimmy'], ['Jo', 'Carte de Joffrey'], ['Ch', 'La Chti Raspycard'], ['Jt', 'Carte de Julien'], ['Mm', 'MM-Workshop DartCab'], ['Re', 'DartBoard'], ['Au', 'card-other']]
+        cards_dd = [['Ji', 'Cartes de Jimmy'], ['Jo', 'Carte de Joffrey'], ['Ch', 'La Chti Raspycard'], ['Jt', 'Carte de Julien V1'],
+                    ['Jt2', 'Carte de Julien V2'],['Mm', 'MM-Workshop DartCab'], ['MMWVdarts', 'MM-Workshop VDarts'], ['Re', 'DartBoard'], ['Au', 'card-other']]
         card = self.dropdown(6 * self.res_x_16, 3 * self.res_y_16, cards_dd)
         if card == 'escape':
             return False
@@ -777,12 +781,16 @@ class Screen(pygame.Surface):
             self.config.set_ji_card_config()
         elif card in ('Ji2', 'Ji3'):
             self.config.set_ji2_card_config()
+        elif card == 'MMWVdarts':
+            self.set_mmworks_vdartscard_config()
         elif card == 'GB':
             self.config.set_gb_card_config()
         elif card == 'ED':
             self.config.set_ed900_card_config()
         elif card == 'Jt':
             self.config.set_jt_card_config()
+        elif card == 'Jt2':
+            self.config.set_jt2_card_config()
         elif card == 'Jiz':
             self.config.set_jiz_card_config()
         elif card == 'Ch':
@@ -830,12 +838,12 @@ class Screen(pygame.Surface):
                 self.menu_header("config-pin_out", subtxt)
                 self.update_screen()
 
-                tmp = self.input_value_item('pins', '', 1, 27, align = 'Center')
+                tmp = self.input_value_item('pins', '', 1, 27, align='Center')
 
                 if tmp in ('', 'space'):
                     j = totalOuts
                 elif tmp == 'escape':
-                    j -= 1
+                    j-=1
                     if len(used_pins)>0:
                         used_pins.pop()
                     if j < 0:
@@ -846,7 +854,9 @@ class Screen(pygame.Surface):
                     new_outputs[key] = tmp
                     self.rpi.set_outputs(tmp)
                     used_pins.append(tmp)
-                    j += 1
+                    j+=1
+                    
+            self.rpi.init_gpio(new_outputs, 'OUT')
 
             # Parametrage des pins d'entrée
             j = 0
@@ -865,11 +875,11 @@ class Screen(pygame.Surface):
                 self.menu_header("Configuration des pins d'entrée de la cible", subtxt)
                 self.update_screen()
 
-                tmp = self.input_value_item('pins', '', 1, 27, align = 'Center')
+                tmp = self.input_value_item('pins', '', 1, 27, align='Center')
                 if tmp in ('', 'space'):
                     j = totalIns
                 elif tmp == 'escape':
-                    j -= 1
+                    j-=1
                     used_pins.pop()
                     if j < 1:
                         return False
@@ -879,7 +889,9 @@ class Screen(pygame.Surface):
                     new_inputs[key] = tmp
                     self.rpi.set_inputs(tmp)
                     used_pins.append(tmp)
-                    j += 1
+                    j+=1
+
+            self.rpi.init_gpio(new_inputs, 'IN')
 
             # Parametrage des boutons
 
@@ -894,7 +906,7 @@ class Screen(pygame.Surface):
                 j = 0
                 while j < totalButtons:
                     if list(self.config.buttons)[j] == 'EXTENDED_GPIO':
-                        j += 1
+                        j+=1
                         continue
 
                     key = list(self.config.buttons)[j]
@@ -908,11 +920,11 @@ class Screen(pygame.Surface):
                     self.menu_header("Configuration du Raspberry", key)
                     self.update_screen()
 
-                    tmp = self.input_value_item('pins', '', 1, 27, align = 'Center')
+                    tmp = self.input_value_item('pins', '', 1, 27, align='Center')
                     if tmp in ('', 'space'):
                         j = totalButtons
                     elif tmp == 'escape':
-                        j -= 1
+                        j-=1
                         used_pins.pop()
                         if j < 1:
                             return False
@@ -921,10 +933,10 @@ class Screen(pygame.Surface):
                     else:
                         new_buttons[key] = tmp
                         used_pins.append(tmp)
-                        j += 1
+                        j+=1
 
-            self.rpi.init_gpio(new_inputs, 'IN')
-            self.rpi.init_gpio(new_outputs, 'OUT')
+            #self.rpi.init_gpio(new_inputs, 'IN')
+            #self.rpi.init_gpio(new_outputs, 'OUT')
 
         # Leds conf
         new_leds = {}
@@ -948,14 +960,16 @@ class Screen(pygame.Surface):
             self.menu_header(self.lang.translate('conf-leds'))
             self.message([f"{self.lang.translate('conf-fillin')} {self.lang.translate(key)}"], 0, None, 'fullbottom', 'big', refresh=False)
             self.update_screen()
-
+            
             if key in ('PIN_STRIPLED', 'PIN_TARGETLED'):
-                tmp = self.input_value_item('pins', '', 1, 27, align = 'Center')
+                tmp = self.input_value_item('pins', '', 1, 27, align='Center')
             elif key in ('BRI_STRIPLED', 'BRI_TARGETLED'):
-                tmp = self.input_value_item('number', '', 1, 100, align = 'Center')
+                tmp = self.input_value_item('number', '', 1, 100, align='Center')
+            elif key in ('TYP_STRIPLED', 'TYP_TARGETLED'):
+                tmp = self.dropdown(self.res['x'] * 6 / 16, 3 * self.res_y_16, [['rgb','RGB'], ['grb','GRB']])
             elif key == 'NBR_STRIPLED':
-                tmp = self.input_value_item('number', '', 1, 1000, align = 'Center')
-
+                tmp = self.input_value_item('number', '', 1, 1000, align='Center')
+            
             if tmp in ('', 'space'):
                 new_leds[key] = '0'
                 if key == 'PIN_STRIPLED':
@@ -968,11 +982,14 @@ class Screen(pygame.Surface):
                 elif key.startswith('BRI') or key == 'NBR_STRIPLED':
                     if key in ('NBR_STRIPLED', 'BRI_TARGETLED'):
                         used_pins.pop()
-                    j -= 1
+                    j-=1
                 else:
                     tmp = 'escape'
+            elif key in ('TYP_STRIPLED', 'TYP_TARGETLED'):
+                new_leds[key] = tmp
+                j+=1
             elif tmp == 'escape':
-                j -= 1
+                j-=1
                 if j < 0:
                     return False
             elif key in ('PIN_STRIPLED', 'PIN_TARGETLED') and tmp in used_pins:
@@ -981,7 +998,7 @@ class Screen(pygame.Surface):
                 new_leds[key] = tmp
                 if key.startswith('PIN'):
                     used_pins.append(tmp)
-                j += 1
+                j+=1
 
         self.rpi.set_leds_conf(new_leds)
 
@@ -1051,14 +1068,14 @@ class Screen(pygame.Surface):
                 else:
                     # Cancel next step because of the key is the same than the previous or unauthorized
                     i -= 1
-                    j -= 1
+                    j-=1
 
                 i += 1
-                j += 1
+                j+=1
 
             for l in [1, 2, 3, 4]:
                 new_keys[self.config.keys[j]] = ''
-                j += 1
+                j+=1
 
             if new_buttons['EXTENDED_GPIO'] == '1':
                 from include import cgpio_extender
@@ -1074,7 +1091,7 @@ class Screen(pygame.Surface):
         else:
             used_pins = []
             for p in self.rpi.inputs:
-                pin = elf.raspberry.inputs[p]
+                pin = self.raspberry.inputs[p]
                 if pin != '':
                     used_pins.append(int(pin))
 
@@ -1084,7 +1101,10 @@ class Screen(pygame.Surface):
                     used_pins.append(int(pin))
 
         if leds_ji == 'yes':
-            self.config.set_ji_leds_config()
+            if card == 'MMWVdarts':
+                self.config.set_mmworks_leds_config()
+            else:
+                self.config.set_ji_leds_config()
 
         self.display_background()    # display basic screen
         self.menu_header("config-buttons_choice", "config-buttons_question")
@@ -1473,11 +1493,12 @@ class Screen(pygame.Surface):
 
         return selected
 
-    def players_menu(self, favorites, context='game', bank=[], sets=None, competition_mode=False):
+    def players_menu(self, favorites, context='game', bank=None, sets=None, competition_mode=False, colors_available = None, players_color = None):
         '''
         Player Names menu
         '''
         players = []
+        player_color = []
         nb_players = 0
 
         if context == 'pref':
@@ -1495,7 +1516,7 @@ class Screen(pygame.Surface):
 
         if len(players) == 0:
             players.append(f"{self.lang.translate('Player')} 1")
-
+        
         if context in ('netcreate', 'netjoin'):
             btn_random = False
             selected = 1
@@ -1505,7 +1526,16 @@ class Screen(pygame.Surface):
         else:
             btn_random = False
             selected = len(players) + 2
-
+        
+        # For players color dropdown
+        colors_list = []
+        if colors_available is not None:
+            for val in colors_available:
+                if val in pygame.color.THECOLORS:
+                    colors_list.append((val, (pygame.Color(val).r, pygame.Color(val).g, pygame.Color(val).b)))
+        # For operation via Colorset with player1, player2, etc
+        colors_list.append(('AUTO COLORSET', (128, 128, 128)))
+        
         # Init enabled F keys
         key_pressed = ''
 
@@ -1530,7 +1560,7 @@ class Screen(pygame.Surface):
             for player in players:
                 shortcut = f'F{i}'
                 # Display player name
-                tmp = self.player_item((i, nb_elements, selected), shortcut, player, special=special)
+                tmp = self.player_item((i, nb_elements, selected), shortcut, player, special=special, specific_color=players_color)
 
                 # Add clickable zones
                 for (e, f) in tmp:
@@ -1547,7 +1577,10 @@ class Screen(pygame.Surface):
                 nb_players = len(players)
 
             # go back and next
-            click_zones['escape'] = self.display_button(i == selected, 'back', special='escape')
+            if bool(self.config.get_value('SectionGlobals', 'fast_games_mode', False)) and context in ('game', 'netcreate', 'netjoin'):
+                click_zones['escape'] = self.display_button(i == selected, 'main-menu', special='escape')
+            else:
+                click_zones['escape'] = self.display_button(i == selected, 'back', special='escape')
             if context in ('game', 'netcreate', 'netjoin'):
                 if btn_random:
                     click_zones['shake'] = self.display_button(i + 1 == selected, 'shake', special='refresh')
@@ -1618,7 +1651,8 @@ class Screen(pygame.Surface):
             #   -|F1    Del 1st player
             #   /|F1    Player 1 PNJ
             #   1|F1    Select player 1
-
+            #   *|F1    Player 1 Color
+            
             if clicked:
                 if "|" in clicked:
                     splitted = clicked.split("|")
@@ -1641,7 +1675,7 @@ class Screen(pygame.Surface):
                 selected = self.navigate(selected, key_pressed, nb_elements, 3, 3, sound=False, zero=zero)
             else:
                 selected = self.navigate(selected, key_pressed, nb_elements, 2, 2, sound=False, zero=zero)
-
+            
             if key_pressed in shortcuts:
                 selected = int(key_pressed.replace('F', ''))
                 key_pressed = 'enter'
@@ -1649,8 +1683,8 @@ class Screen(pygame.Surface):
             # Key analysis
             if key_pressed in ESCAPE_KEYS or (key_pressed in ENTER_KEYS and selected == nb_elements + 1):
                 if context in ('pref', 'bank'):
-                    return sets, 'escape'
-                return sets, 'escape', competition_mode
+                    return sets, 'escape', players_color
+                return sets, 'escape', competition_mode, players_color
 
             if key_pressed in TAB_KEYS or (key_pressed in ENTER_KEYS and selected == nb_elements + 2 and btn_random):
                 # Randomize players
@@ -1670,21 +1704,24 @@ class Screen(pygame.Surface):
                         break
                     i += 1
 
-                if bank is None or bank == [''] :
-                    missing_players = [(f'{new_player}', f'{new_player}')]
+                if bank is None or len(bank) == 0 or len(bank[0]) == 0:
+                    players.append(f'{new_player}')
                 else:
                     missing_players = [(f'{player}', f'{player}') for player in bank if player not in players] + [(new_player, new_player)]
 
-                if len(missing_players) > 1:
-                    new_player = self.dropdown(int(6.5 * self.res_x_16 ), int(2.5 * self.res_y_16), missing_players)
+                    if len(missing_players) > 1:
+                        new_player = self.dropdown(int(6.5 * self.res_x_16 ), int(2.5 * self.res_y_16), missing_players)
 
-                if new_player != 'escape':
-                    players.append(f'{new_player}')
+                    if new_player != 'escape':
+                        players.append(f'{new_player}')
 
                 selected = i
                 btn_random = True
 
             elif key_pressed in MINUS_KEYS and nb_elements > 1 and selected <= nb_elements:
+                # Remove player color
+                if players[selected-1] in players_color:
+                    players_color.pop(players[selected-1])
                 # Remove player
                 players.pop(selected - 1)
                 selected -= 1
@@ -1722,10 +1759,22 @@ class Screen(pygame.Surface):
                 # Next Screen !
                 self.define_constants(nb_elements)
                 if context in ('pref', 'bank'):
-                    return sets, sorted(new_players)
+                    return sets, sorted(new_players), players_color
                 elif context in ('netcreate', 'netjoin'):
-                    return sets, new_players, True
-                return sets, new_players, competition_mode
+                    return sets, new_players, True, players_color
+                return sets, new_players, competition_mode, players_color
+            
+            elif ((key_pressed in ENTER_KEYS and clic == "*") or (key_pressed == "*")) and nb_elements > 1 and selected <= nb_elements:
+                tmp = self.dropdown(self.res['x'] * 6 / 16,
+                                    3 * self.res_y_16,
+                                    colors_list,
+                                    special='colors',
+                                    navigate='white') 
+                if tmp != 'escape':
+                    if tmp == 'AUTO COLORSET':
+                        players_color.pop(players[selected - 1])
+                    else:
+                        players_color[str(players[selected - 1])] = tuple([color[1] for color in colors_list if color[0] == str(tmp)][0])
 
             elif key_pressed in ENTER_KEYS + CONTINUE_KEYS:
                 # Edit player name
@@ -2061,20 +2110,12 @@ class Screen(pygame.Surface):
         else:
             add_arrows = False
 
-        index = 0
-        if special == 'dmdColor':
-            index = 0
-            for color in values:
-                index += 1
-                if color == navigate:
-                    selected = index
-                    break
-        else:
-            for value in values:
-                index += 1
-                if navigate == value[0]:
-                    selected = index
-                    break
+        index = 0        
+        for value in values:
+            index += 1
+            if navigate == value[0]:
+                selected = index
+                break
 
         border_radius = self.get_radius(int(height / 2))
         while True:
@@ -2127,12 +2168,10 @@ class Screen(pygame.Surface):
                     else:
                         FirstLast = None
 
-                    if special == 'font':
-                        click_zones[str(i)] = self.dropdown_item(i_rect, selected == i, value[1], special='font', FirstLast=FirstLast)
-                    elif special == 'pattern':
-                        click_zones[str(i)] = self.dropdown_item(i_rect, selected == i, value[1], special='pattern', FirstLast=FirstLast)
-                    elif special == 'dmdColor':
-                        click_zones[str(i)] = self.dropdown_item(i_rect, selected == i, value, FirstLast=FirstLast)
+                    if special in ['font', 'pattern']:
+                        click_zones[str(i)] = self.dropdown_item(i_rect, selected == i, value[1], special=special, FirstLast=FirstLast)
+                    if special == 'colors':
+                        click_zones[str(i)] = self.dropdown_item(i_rect, selected == i, value[0], special=special, FirstLast=FirstLast)
                     else:
                         click_zones[str(i)] = self.dropdown_item(i_rect, selected == i, value[1], FirstLast=FirstLast)
                     i_rect.y = i_rect.bottom
@@ -2160,14 +2199,8 @@ class Screen(pygame.Surface):
                     selected -= 1
                 else:
                     selected = int(clicked)
-                    if special == 'dmdColor':
-                        return values[selected - 1]
-
                     return values[selected - 1][0]
             elif key_pressed in ENTER_KEYS:
-                if special == 'dmdColor':
-                    return values[selected - 1]
-
                 return values[selected - 1][0]
             elif key_pressed in ESCAPE_KEYS:
                 return 'escape'
@@ -2194,7 +2227,17 @@ class Screen(pygame.Surface):
         else:
             corners = 'None'
 
-        self.new_blit_rect2(rect, color, corners=corners)
+        if special == 'colors':
+            brdr_size = 0
+            if selected:
+                brdr_size = 4
+            try:
+                self.new_blit_rect2(rect, pygame.Color(value), corners=corners, border_size=brdr_size, border_color= self.colorset['menu-border'])
+            except:
+                # La coleur n'est pas geree par pygame
+                self.new_blit_rect2(rect, color, corners=corners, border_size=brdr_size, border_color= self.colorset['menu-border'])
+        else:
+            self.new_blit_rect2(rect, color, corners=corners)
 
         if selected:
             text_color = self.colorset['menu-text-white']
@@ -2693,7 +2736,7 @@ class Screen(pygame.Surface):
 
         return (pos_x, pos_y, width, height)
 
-    def player_item(self, item, shortcut, name, special, alpha=None):
+    def player_item(self, item, shortcut, name, special, alpha=None, specific_color=None):
         '''
         Display Players' menu items
         item is : (item_id, total, selected)
@@ -2719,7 +2762,15 @@ class Screen(pygame.Surface):
         minus = self.colorset['border-size'] + self.colorset['padding']
 
         shortcut_bg_color = self.colorset['menu-shortcut']
-
+        
+        #if specific_color:
+        if specific_color is not None and name in specific_color:
+            specific_backcolor = specific_color[name]
+            specific_lbl_color = ""
+        else:
+            specific_backcolor = self.colorset['menu-inactive']
+            specific_lbl_color = "AUTO"
+        
         if special == 'first':
             minus_bg_color = self.colorset['menu-inactive']
         else:
@@ -2731,29 +2782,29 @@ class Screen(pygame.Surface):
             plus_bg_color = self.colorset['menu-ok']
 
         radius = self.get_radius(height / 2)
-
+        
+        # Highlight menu
         if item[0] == item[2]:
             shortcut_text_color = self.colorset['menu-text-black']
             text_color = self.colorset['menu-text-white']
 
             inside_y = pos_y + minus
             inside_h = height - 2 * minus
-
-            rect = pygame.Rect(pos_x, pos_y, width, height)
+            
+            rect = pygame.Rect(pos_x, pos_y, width + height + minus, height)
             self.blit_border(rect, self.colorset['menu-border'], self.colorset['border-size'], corners='All')
 
             # Display Firstname
             firstname_x = pos_x + minus
             rect = pygame.Rect(firstname_x, inside_y, width - 3 * height - minus, inside_h)
             self.new_blit_rect2(rect, self.colorset['menu-selected'], alpha=alpha, corners='Left')
-
-            pnj_x = rect.x + rect.width
-            rect.x += height
-            rect.width -= height
             
-            if pict_shortcut is None :
+            if pict_shortcut is None:
                 rect.x -= inside_h
                 rect.w += inside_h
+            else:
+                rect.x += height
+                rect.width -= height
                 
             self.blit_text2(name, rect, color=text_color, align=align_text)
 
@@ -2766,8 +2817,18 @@ class Screen(pygame.Surface):
                     self.blit_text2(pict_shortcut, rect, color=shortcut_text_color)
                 else:
                     self.blit_text2(shortcut, rect, color=shortcut_text_color)
-
+                    
+            specific_x = firstname_x + width - 3 * height 
+            rect.x += height
+            rect.width -= height
+            
+            # Color box
+            rect = pygame.Rect(specific_x, inside_y, height, inside_h)
+            self.new_blit_rect2(rect, specific_backcolor, alpha=alpha)
+            self.blit_text2(specific_lbl_color, rect, color=text_color)
+            
             # Pnj box
+            pnj_x = specific_x + height
             rect = pygame.Rect(pnj_x, inside_y, height, inside_h)
             self.new_blit_rect2(rect, shortcut_bg_color, alpha=alpha)
             self.blit_text2('PNJ', rect, color=text_color)
@@ -2797,7 +2858,9 @@ class Screen(pygame.Surface):
             firstname_x = pos_x + height
             rect = pygame.Rect(firstname_x - height, pos_y, width - 3 * height, height)
             self.new_blit_rect2(rect, player_color, alpha=alpha, corners='Left', border_radius=radius)
-            rect = pygame.Rect(firstname_x, pos_y, width - 4 * height, height)          
+            
+            if pict_shortcut is not None :
+                rect = pygame.Rect(firstname_x, pos_y, width - 4 * height, height)
             
             if pict_shortcut is None :
                 rect.x -= height - 2 * minus
@@ -2812,10 +2875,15 @@ class Screen(pygame.Surface):
                     self.blit_text2(pict_shortcut, rect, color=shortcut_text_color)
                 else:
                     self.blit_text2(shortcut, rect, color=shortcut_text_color)
-                    
-
+                                  
+            # Color box
+            specific_x = firstname_x + width - 4 * height  
+            rect = pygame.Rect(specific_x, pos_y, height, height)
+            self.new_blit_rect2(rect, specific_backcolor, alpha=alpha)
+            self.blit_text2(specific_lbl_color, rect, color=text_color)            
+                
             # Pnj box
-            pnj_x = firstname_x + width - 4 * height
+            pnj_x = specific_x + height
             rect = pygame.Rect(pnj_x, pos_y, height, height)
             self.new_blit_rect2(rect, shortcut_color, alpha=alpha)
             self.blit_text2('PNJ', rect, color=text_color)
@@ -2832,6 +2900,8 @@ class Screen(pygame.Surface):
             self.new_blit_rect2(rect, minus_color, alpha=alpha, corners='Right', border_radius=radius)
             self.blit_text2('-', rect, color=text_color)
 
+        click_zones.append(('*|' + shortcut, (specific_x, pos_y, height, height)))
+            
         if special != 'first':
             click_zones.append(('-|' + shortcut, (minus_x, pos_y, height, height)))
         if special != 'last':
@@ -2839,7 +2909,6 @@ class Screen(pygame.Surface):
 
         click_zones.append(('/|' + shortcut, (pnj_x, pos_y, height, height)))
         click_zones.append((shortcut, (firstname_x, pos_y, width - 4 * height, height)))
-
 
         return click_zones
 
@@ -2863,7 +2932,6 @@ class Screen(pygame.Surface):
         item_per_col = (item[1] // item_per_line) + 1
 
         # Max size of logo
-#        height = min(max_w // item_per_line, max_h // item_per_col)
         height = (max_w // (item_per_line+1))
 
         # To center logo on available surface
@@ -2881,7 +2949,7 @@ class Screen(pygame.Surface):
         inactive_color = self.colorset['menu-inactive']
         border_color = self.colorset['menu-border']
         
-        if(available == False):
+        if not available:
             selected_color = self.colorset['menu-warning']
             border_color = self.colorset['menu-warning']
 
@@ -2963,6 +3031,9 @@ class Screen(pygame.Surface):
         elif align == 'Half':
             pos_x = int(self.res['x'] * 6 / 16)
             width = int(self.res['x'] * 4 / 16 - height)
+        elif align == 'Right':
+            pos_x = int(self.res['x'] * 9 / 16)
+            width = int(self.res['x'] * 8 / 16 - min_x - height)
         else:
             pos_x = int(self.res['x'] * 5 / 16)
             width = int(self.res['x'] / 2 - min_x - height)
@@ -3059,7 +3130,8 @@ class Screen(pygame.Surface):
                     ['alpha', 'num', 'fx', 'math', 'arrows'],
                     ['PLAYERBUTTON', 'BACKUPBUTTON', 'GAMEBUTTON', 'EXTRABUTTON',
                     'escape', 'enter', 'backspace', 'tab', 'TOGGLEFULLSCREEN',
-                    'space', 'single-click'])
+                    'space', 'single-click'],
+                    events=[(self.wait_event_time, 'EVENT', 'wait')])
 
             # Click cases
             clicked = self.is_clicked(click_zones, key_pressed)
@@ -3176,7 +3248,9 @@ class Screen(pygame.Surface):
                 self.update_screen(rect_array=old_selection)
                 self.update_screen(rect_array=selection)
 
-            key_pressed = self.rpi.listen_inputs(['arrows', 'fx'], ['escape', 'PLAYERBUTTON', 'BACKUPBUTTON', 'TOGGLEFULLSCREEN', 'GAMEBUTTON', 'single-click', 'enter', 'space'])
+            key_pressed = self.rpi.listen_inputs(['arrows', 'fx'], 
+                                                 ['escape', 'PLAYERBUTTON', 'BACKUPBUTTON', 'TOGGLEFULLSCREEN', 'GAMEBUTTON', 'single-click', 'enter', 'space'],
+                                                 events=[(self.wait_event_time, 'EVENT', 'wait')])
 
             # Click cases
             clicked = self.is_clicked(click_zones, key_pressed)
@@ -3196,44 +3270,22 @@ class Screen(pygame.Surface):
             if key_pressed in SAVE_KEYS or (key_pressed in ENTER_KEYS and selected == nb_elements + 2):
                 return ', '.join(prefered)
 
-            if selected == - 2:
-                game_list = self.get_games_list()
+            if selected < 1:
+                if selected == - 2:
+                    game_list = self.get_games_list()
+                if selected == - 1:
+                    game_list = self.get_games_list(category='fun')
+                if selected == 0:
+                    game_list = self.get_games_list(category='sport')
+
                 nb_elements = len(game_list)
-                prefered = []
-                for game in favorites.split(', '):
-                    if game != '':
-                        prefered.append(game)
 
                 game_list.sort()
                 refresh = True
-                tab = -2
-
-            if selected == - 1:
-                game_list = self.get_games_list(category='fun')
-                nb_elements = len(game_list)
-                prefered = []
-                for game in favorites.split(', '):
-                    if game != '':
-                        prefered.append(game)
-
-                game_list.sort()
-                refresh = True
-                tab = -1
-
-            if selected == 0:
-                game_list = self.get_games_list(category='sport')
-                nb_elements = len(game_list)
-                prefered = []
-                for game in favorites.split(', '):
-                    if game != '':
-                        prefered.append(game)
-
-                game_list.sort()
-                refresh = True
-                tab = 0
+                tab = selected
 
             # Keyboard cases
-            if (key_pressed in ENTER_KEYS) and selected <= nb_elements:
+            if key_pressed in ENTER_KEYS and selected <= nb_elements and selected > 0:
                 if games[selected - 1] in prefered:
                     prefered.remove(games[selected - 1])
                 else:
@@ -3387,7 +3439,9 @@ class Screen(pygame.Surface):
             # Update screen
             self.update_screen()
 
-            key_pressed = self.rpi.listen_inputs(['arrows', 'fx'], ['escape', 'PLAYERBUTTON', 'BACKUPBUTTON', 'TOGGLEFULLSCREEN', 'GAMEBUTTON', 'single-click', 'enter', 'space'], events=[(self.wait_event_time, 'EVENT', 'wait')])
+            key_pressed = self.rpi.listen_inputs(['arrows', 'fx'], 
+                                                 ['escape', 'PLAYERBUTTON', 'BACKUPBUTTON', 'TOGGLEFULLSCREEN', 'GAMEBUTTON', 'single-click', 'enter', 'space'], 
+                                                 events=[(self.wait_event_time, 'EVENT', 'wait')])
 
             # Click cases
             clicked = self.is_clicked(click_zones, key_pressed)
@@ -3456,9 +3510,10 @@ class Screen(pygame.Surface):
             authorized = ['num', 'alpha', 'math', 'arrows']
             limited = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ',', '.', 'backspace', 'enter', 'escape']
         elif v_type == 'string':
+            authorized = ['num', 'alpha', 'fx', 'math', 'arrows']
             limited = None
         else:
-            self.logs.log("ERROR", f"Line 2786 : Unauthorized type: {v_type}")
+            self.logs.error(f"Line 2786 : Unauthorized type: {v_type}")
             return False
 
         self.save_background()
@@ -3580,8 +3635,13 @@ class Screen(pygame.Surface):
                     if v_type != 'string' and value == '0' and str(key) != '0':
                         value = key
                     elif not(v_type == 'number' and value == '' and str(key) == '0') or zero:
+                        if str(key).isspace():
+                            key = ' '
                         value = f"{value}{key}"
                     character = str(key)
+            elif "space" in key:
+                value = f"{value} "
+                character = ' '
 
     def reverse_leds(self, leds):
         '''
@@ -3656,7 +3716,7 @@ class Screen(pygame.Surface):
         Setup pins and brightness of leds
         '''
         selected = 1
-        nb_elements = 5
+        nb_elements = 7
         new = {}
 
         links = {}
@@ -3676,7 +3736,10 @@ class Screen(pygame.Surface):
             index = 1
             for key in new:
                 shortcut = f'F{index}'
-                click_zones[shortcut] = self.menu_item((index, nb_elements, selected), (shortcut, self.lang.translate(f"menu-{key}"), BTN_VALUE, new[key]), exit=False)
+                if key not in ('TYP_STRIPLED', 'TYP_TARGETLED'):
+                    click_zones[shortcut] = self.menu_item((index, nb_elements, selected), (shortcut, self.lang.translate(f"menu-{key}"), BTN_VALUE, new[key]), exit=False)
+                else:
+                    click_zones[shortcut] = self.menu_item((index, nb_elements, selected), (shortcut, self.lang.translate(f"menu-{key}"), BTN_DROPDOWN, new[key]), exit=False)
                 links[shortcut] = key
                 shortcuts[shortcut] = index
 
@@ -3687,7 +3750,9 @@ class Screen(pygame.Surface):
 
             self.update_screen()
 
-            key = self.rpi.listen_inputs(['arrows'], ['escape', 'PLAYERBUTTON', 'BACKUPBUTTON', 'TOGGLEFULLSCREEN', 'GAMEBUTTON', 'single-click', 'enter', 'space'])
+            key = self.rpi.listen_inputs(['arrows'], 
+                                         ['escape', 'PLAYERBUTTON', 'BACKUPBUTTON', 'TOGGLEFULLSCREEN', 'GAMEBUTTON', 'single-click', 'enter', 'space'],
+                                         events=[(self.wait_event_time, 'EVENT', 'wait')])
 
             # Click cases
             clicked = self.is_clicked(click_zones, key)
@@ -3715,7 +3780,7 @@ class Screen(pygame.Surface):
                 else:
                     self.message(['menu-leds-conflict'], 1000, self.colorset['menu-text-black'], 'middle', 'big')
 
-            if key in ('F1', 'F3') or (selected in (1, 3) and key in ENTER_KEYS):
+            if key in ('F1', 'F4') or (selected in (1, 4) and key in ENTER_KEYS):
                 key = f'F{selected}'
                 tmp = self.input_value_item('pins', new[links[key]], 10, 21)
                 if tmp == 'escape' :
@@ -3725,17 +3790,420 @@ class Screen(pygame.Surface):
                 elif tmp != 'escape':
                     new[links[key]] = tmp
 
-            if key in ('F2', 'F5') or (selected in (2, 5) and key in ENTER_KEYS):
+            if key in ('F2', 'F6') or (selected in (2, 6) and key in ENTER_KEYS):
                 key = f'F{selected}'
                 tmp = self.input_value_item('number', new[links[key]], 1, 100)
                 if tmp != 'escape':
                     new[links[key]] = tmp
 
-            if key == 'F4' or (selected == 4 and key in ENTER_KEYS):
+            if key == 'F5' or (selected == 5 and key in ENTER_KEYS):
                 key = f'F{selected}'
                 tmp = self.input_value_item('number', new[links[key]], 1, 1000)
                 if tmp != 'escape':
                     new[links[key]] = tmp
+
+            if key in ('F3', 'F7') or (selected in (3,7) and key in ENTER_KEYS):
+                key = f'F{selected}'
+                tmp = self.dropdown(self.res['x'] * 6 / 16, 3 * self.res_y_16, [['grb', 'GRB (ws2812b)'], ['rgb','RGB (ws2815b)']])
+                if tmp != 'escape':
+                    new[links[key]] = tmp
+
+
+    def setup_couleurs_segments_menu(self, color_available, dispatcher):
+        '''
+        Setup couleurs segments d'origine
+        '''
+        refresh = True
+        selected = 1
+        nb_elements = 1
+        conf_colorset_segments = []
+        values_conf_segment = []
+        conf_colorset = ['target-simple1','target-simple2',
+                         'target-double1','target-double2',
+                         'target-triple1','target-triple2',
+                         'target-sb','target-db']
+        
+        conf_values = []
+        for val in color_available:
+            if val in pygame.color.THECOLORS:
+                conf_values.append((val, (pygame.Color(val).r, pygame.Color(val).g, pygame.Color(val).b)))
+                
+        for conf in conf_colorset:
+            conf_colorset_segments.append([conf, self.colorset[conf], 'dropdown_colors', 1, conf_values, 0, False])
+                                    
+        while True:
+            nb_elements = len(conf_colorset)
+            click_zones = {}
+            shortcuts = []
+            cursor = []
+
+            # Draw bg
+            self.display_background()
+
+            # Titles
+            self.menu_header('setup-couleurs-segments')
+            
+            incr = 0
+            paire_impaire = "1"
+            for hit in [f'{mult}{num}' for mult in ['S', 'D', 'T'] for num in [20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5]] + ['SB', 'DB']:                
+                # Draw the right thing
+                if hit in ['SB', 'DB']:
+                    score = 'Bull'
+                else:        
+                    if (int(incr) % 2) == 0:
+                        paire_impaire = "2"
+                    else:
+                        paire_impaire = "1" 
+                    incr += 1               
+                    multiplier = hit[:1]
+                    score = int(hit[1:])                    
+                
+                if score == 'Bull' :
+                    if hit == 'SB':
+                        self.draw_bull(True, False, self.colorset[f"target-sb"], center=False)
+                    else:
+                        self.draw_bull(False, True, self.colorset[f"target-db"], center=False)
+                elif multiplier == 'S':
+                    self.draw_exterior_simple(self.targets[score], self.colorset[f"target-simple{paire_impaire}"], center=False)
+                    self.draw_interior_simple(self.targets[score], self.colorset[f"target-simple{paire_impaire}"], center=False)
+                elif multiplier == 'D':
+                    self.draw_double(self.targets[score], self.colorset[f"target-double{paire_impaire}"], center=False)
+                else:
+                    self.draw_triple(self.targets[score], self.colorset[f"target-triple{paire_impaire}"], center=False)
+
+            index = 1
+            for confs in conf_colorset_segments:
+                if confs[2] == 'dropdown_colors':
+                    value = ''
+                    for element in confs[4]:
+                        if element[0] == confs[1] or element[1] == confs[1]:
+                            value = element[0]
+                            break
+                            
+                click_zones[f'F{index}'] = self.menu_item((index, nb_elements, selected), (f'F{index}', confs[0], BTN_DROPDOWN, value), align='Right')
+                shortcuts.append(f'F{index}')
+                cursor.append(click_zones[f'F{index}'])                
+                index += 1
+                
+            click_zones['escape'] = self.display_button(nb_elements + 1 == selected, 'back', special='escape')
+            click_zones['save'] = self.display_button(nb_elements + 2 == selected, 'save', special='return')
+
+            if refresh:
+                dispatcher.publish('Background', limit=['TARGET','STRIP','OTHER'])
+                self.update_screen()
+                refresh = False
+
+            key_press = self.rpi.listen_inputs(['arrows', 'fx'], 
+                                         ['escape', 'PLAYERBUTTON', 'BACKUPBUTTON', 'TOGGLEFULLSCREEN', 'GAMEBUTTON', 'single-click', 'enter', 'space'])
+                                           #,timeout=int(self.wait_event_time) + 100)
+            
+            # Click cases
+            clicked = self.is_clicked(click_zones, key_press)
+            if clicked:
+                key_press = clicked
+
+            # Navigation
+            selected = self.navigate(selected, key_press, nb_elements, 2, 1)
+
+            # Keyboard cases
+            if key_press in shortcuts:
+                selected = int(key_press.replace('F', ''))
+                key_press = 'enter'
+                        
+            if key_press in SAVE_KEYS or (key_press in ENTER_KEYS and selected == nb_elements + 2):     
+                for key_conf in conf_colorset:
+                    values_conf_segment.append((key_conf, self.colorset[key_conf])) 
+                dispatcher.publish('off', limit=['TARGET','STRIP','OTHER'])
+                return values_conf_segment
+
+            # Key analysis
+            if key_press in ESCAPE_KEYS or (key_press in ENTER_KEYS and selected == nb_elements + 1):
+                dispatcher.publish('off', limit=['TARGET','STRIP','OTHER'])
+                return 'escape'
+                                                          
+            
+            if key_press in ENTER_KEYS:
+                if conf_colorset_segments[selected - 1][2] == 'dropdown_colors':
+                    value_selected = ''
+                    for element in conf_values:
+                        if element[0] == conf_colorset_segments[selected - 1][1] or element[1] == conf_colorset_segments[selected - 1][1]:
+                            value_selected = element[0]
+                            break
+                    tmp = self.dropdown(self.res['x'] * 6 / 16, 3 * self.res_y_16,
+                            conf_colorset_segments[selected - 1][4],
+                            special='colors',
+                            navigate=value_selected) 
+                    if tmp != 'escape':
+                        value_selected = ''
+                        for element in conf_values:
+                            if element[0] == tmp or element[1] == tmp:
+                                value_selected = element[1]
+                                break
+                        conf_colorset_segments[selected - 1][1] = str(tmp)
+                        self.colorset[conf_colorset_segments[selected - 1][0]] = value_selected
+                        color_values = []
+                        for seg in conf_colorset:
+                            color_values.append(str(self.colorset[seg]).replace('(','').replace(')','').replace(' ',''))
+                        dispatcher.publish('reload', "|".join(color_values), limit=['TARGET','STRIP','OTHER'])
+                            
+            # Force refresh off screen
+            #selection = None
+            refresh = True
+            
+    def setup_cam_menu(self, config_camera):
+        '''
+        Setup cam menu
+        '''        
+        menu_configuration = []
+        refresh = True
+        resw_picts = None
+        resh_picts = None
+        resw_vids = None
+        resh_vids = None
+        res_values = []
+        menu_config_camera = {x:config_camera[x] for x in config_camera}
+       
+        for conf in menu_config_camera: 
+            zero = False           
+            min_value = 0
+            max_value = 100
+            conf_values = [] 
+            if ('camera_id' in conf):
+                conf_type = 'check'
+                if config_camera[conf] == '-1':
+                    menu_config_camera[conf] = False
+                else:
+                    menu_config_camera[conf] = True
+            elif (conf in ('flip_horizontal', 'flip_vertical', 'upload_cloud', 'fullscreen_pop')):
+                conf_type = 'check'
+                if config_camera[conf] == '0':
+                    menu_config_camera[conf] = False
+                else:
+                    menu_config_camera[conf] = True
+            elif ('directory_order' in conf):
+                conf_type = 'dropdown'
+                conf_values = [('0', 'Date/Jeux'), ('1', 'Jeux/Date')]
+            elif ('choice_of_memories' in conf):
+                conf_type = 'dropdown'
+                conf_values = [('0', 'Rien'), ('1', 'QUE Photos'), ('2', 'QUE Videos'), ('3', 'ALEATOIREMENT Photos ou Videos')]
+            elif (conf in ('picture_path', 'video_path', 'events', 'path_google_drive')):
+                conf_type = 'string'
+                min_value = 1
+                max_value = 128
+            elif ('nb_picture' in conf):
+                conf_type = 'dropdown'
+                for a in range(1,6):
+                    conf_values.append((str(a), str(a)))
+            elif ('video_duration' in conf):
+                conf_type = 'dropdown'
+                for a in [ 5, 10, 15 ]:
+                    conf_values.append((str(a), str(a)))
+            elif ('fps' in conf):
+                conf_type = 'dropdown'
+                for a in [ 15, 30, 60 ]:
+                    conf_values.append((str(a), str(a)))
+            elif ('resolutions_available' in conf):
+                if menu_config_camera[conf] != '':
+                    for res in menu_config_camera[conf].split(','):
+                        res_values.append((res, res))
+            elif ('picture_res_width' in conf):
+                resw_picts = menu_config_camera[conf]
+            elif ('picture_res_height' in conf):
+                resh_picts = menu_config_camera[conf]
+            elif ('video_res_width' in conf):
+                resw_vids = menu_config_camera[conf]
+            elif ('video_res_height' in conf):
+                resh_vids = menu_config_camera[conf]
+                
+            if conf not in ('picture_path', 'video_path', 'picture_res_width', 'picture_res_height',
+                            'video_res_width', 'video_res_height', 'resolutions_available', 'fps', 'duree_ms'): 
+                menu_configuration.append([conf, menu_config_camera[conf], conf_type, max_value, conf_values, min_value, zero])
+            
+        if None != resw_picts and None != resh_picts:
+            if res_values == []:
+                res_values.append((f"{resw_picts}x{resh_picts}", f"{resw_picts}x{resh_picts}"))
+            # On prend par defaut la plus haute resolution pas d'impacte sur le Rpi
+            #menu_configuration.append(['picture_res_width*picture_res_height', f'{resw_picts}x{resh_picts}', 'dropdown', 1, res_values, 0, False])
+            
+        if None != resw_vids and None != resh_vids:
+            if res_values == []:
+                res_values.append((f"{resw_vids}x{resh_vids}", f"{resw_vids}x{resh_vids}"))
+            # On prend par defaut la plus haute resolution, mais diminuer la résolution peut ameliorer la qualite video Rpi
+            menu_configuration.append(['video_res_width*video_res_height', f'{resw_vids}x{resh_vids}', 'dropdown', 1, res_values, 0, False])
+        
+        menu_configuration.append(['take_a_shot', '0', 'check', 1, [], 0, False])
+        menu_configuration.append(['take_a_video', '0', 'check', 1, [], 0, False])
+        
+        nb_elements = len(menu_configuration)
+        old_selection = None        
+        selected = 1
+        self.camera.camera_start()
+        
+        while True:
+            click_zones = {}
+            shortcuts = []
+            cursor = []
+
+            # Draw bg
+            self.display_background()
+
+            # Titles
+            self.menu_header('setup-cam')
+            
+            index = 1
+            for confs in menu_configuration:
+                if confs[2] == 'check' and not confs[1] and confs[0] not in 'camera_id':
+                    value = False
+                    Cbtn = BTN_CHECK
+                elif confs[2] == 'check' and confs[1] and confs[0] not in 'camera_id':
+                    value = True
+                    Cbtn = BTN_CHECK
+                elif confs[2] == 'dropdown':
+                    value = ''
+                    for element in confs[4]:
+                        if element[0] == confs[1] or element[1] == confs[1]:
+                            value = element[1]
+                    Cbtn = BTN_DROPDOWN
+                else:
+                    value = confs[1]
+                    Cbtn = BTN_VALUE
+                if confs[0] in ('camera_id', 'take_a_shot', 'take_a_video'):
+                    click_zones[f'F{index}'] = self.menu_item((index, nb_elements, selected), (f'F{index}', confs[0], BTN_CHOICE, None), align='Left')
+                else:
+                    click_zones[f'F{index}'] = self.menu_item((index, nb_elements, selected), (f'F{index}', confs[0], Cbtn, value), align='Left')
+                shortcuts.append(f'F{index}')
+                cursor.append(click_zones[f'F{index}'])                
+                index += 1
+            
+            click_zones['escape'] = self.display_button(nb_elements + 1 == selected, 'back', special='escape')
+            click_zones['save'] = self.display_button(nb_elements + 2 == selected, 'save', special='return')
+            
+            ################
+            # Update screen
+            if refresh:
+                self.update_screen()
+                refresh = False
+            elif old_selection is None:
+                self.update_screen(rect_array=[click_zones[cz] for cz in click_zones])
+            
+            posX_camera = int(click_zones['F1'][0] + click_zones['F1'][2] + 100)
+            posY_camera = int(click_zones['F1'][1] + (click_zones['F1'][3]/2))
+            
+            key = self.rpi.listen_inputs(['arrows', 'fx'],
+                                         ['escape', 'PLAYERBUTTON', 'BACKUPBUTTON', 'TOGGLEFULLSCREEN', 'GAMEBUTTON', 'single-click', 'enter', 'space',\
+                                          'backspace']
+                                         , events=[(self.wait_event_time, 'EVENT', 'wait')]
+                                         , camera=(self.camera, self.screen, posX_camera, posY_camera))
+            
+            # Click cases
+            clicked = self.is_clicked(click_zones, key)
+            if clicked:
+                key = clicked
+
+            # Navigation
+            selected = self.navigate(selected, key, nb_elements, 1, 2)
+                
+            # Key analysis
+            if key in ESCAPE_KEYS or (key in ENTER_KEYS and selected == nb_elements + 1):           
+                self.camera.camera_stop()
+                return 'escape'
+                        
+            if key in SAVE_KEYS or (key in ENTER_KEYS and selected == nb_elements + 2):           
+                self.camera.camera_stop()
+                return config_camera
+            
+            if key in shortcuts:
+                selected = int(key.replace('F', ''))
+                key = 'enter'
+            elif isinstance(key, str) and len(key) == 1 and selected <= nb_elements and menu_configuration[selected - 1][2] == 'Alpha':
+                key = 'enter'
+                
+            if key in ENTER_KEYS :
+                key_press = menu_configuration[selected - 1][0]
+                if key_press == 'camera_id':
+                    self.camera.camera_stop()
+                    camera = self.camera.find_camera()
+                    if None is camera:
+                        self.update_screen(self.message(['Camera non trouvée!'], wait=3000, color=self.colorset['menu-ko'], size='big', refresh=True))
+                    elif not camera:
+                        self.update_screen(self.message(['Camera non trouvée!'], wait=3000, color=self.colorset['menu-ko'], size='big', refresh=True))
+                    else:
+                        self.update_screen(self.message(['Camera trouvée!'], wait=3000, color=self.colorset['menu-ok'], size='big', refresh=True))
+                        # Attention : on utilise toujours que la premiere donc '0', mais en cas de branchement/débranchement
+                        #             il se peut que l'indice de la premiere change (passe de 0 a 1) et au redemarrage du Rpi on sera de nouveau a 0
+                        config_camera['camera_id'] = list(camera.keys())[0]
+                        #
+                        menu_configuration[selected - 1][1] = config_camera['camera_id']
+                        for conf in menu_configuration:
+                            if conf[2] == 'dropdown' and (conf[0] == "picture_res_width*picture_res_height" or conf[0] == "video_res_width*video_res_height"):
+                                conf[1] = camera[config_camera['camera_id']][0][0]
+                                conf[4] = camera[config_camera['camera_id']]
+                        resolution_find = []
+                        for resol in camera[config_camera['camera_id']]:
+                            resolution_find.append(resol[0])
+                        config_camera['resolutions_available'] = ','.join(resolution_find)
+                        config_camera['picture_res_width'] = camera[config_camera['camera_id']][0][0].split('x')[0]
+                        config_camera['picture_res_height'] = camera[config_camera['camera_id']][0][0].split('x')[1]
+                        config_camera['video_res_width'] = camera[config_camera['camera_id']][0][0].split('x')[0]
+                        config_camera['video_res_height'] = camera[config_camera['camera_id']][0][0].split('x')[1]
+                        self.camera.init_var(config_camera, show_in_parametrage=True)
+                        self.camera.camera_start()
+                                            
+                elif key_press in ('flip_horizontal', 'flip_vertical', 'upload_cloud', 'fullscreen_pop'):
+                    self.camera.camera_stop()
+                    if key_press in ('flip_horizontal', 'flip_vertical', 'upload_cloud', 'fullscreen_pop'):
+                        if menu_configuration[selected - 1][1]:
+                            menu_configuration[selected - 1][1] = False
+                            config_camera[key_press] = '0'
+                        else:
+                            menu_configuration[selected - 1][1] = True
+                            config_camera[key_press] = '1'
+                    self.camera.init_var(config_camera, show_in_parametrage=True)
+                    self.camera.camera_start()
+                        
+                elif menu_configuration[selected - 1][2] == 'dropdown':
+                    self.camera.camera_stop()
+                    tmp = self.dropdown(self.res['x'] * 6 / 16, 3 * self.res_y_16, 
+                                menu_configuration[selected - 1][4], navigate=menu_configuration[selected - 1][1])
+                    if tmp != 'escape':
+                        menu_configuration[selected - 1][1] = tmp
+                        if key_press == 'picture_res_width*picture_res_height':
+                            config_camera['picture_res_width'] = tmp.split('x')[0]
+                            config_camera['picture_res_height'] = tmp.split('x')[1]
+                        elif key_press == 'video_res_width*video_res_height':
+                            config_camera['video_res_width'] = tmp.split('x')[0]
+                            config_camera['video_res_height'] = tmp.split('x')[1]
+                        elif key_press in ('nb_picture', 'video_duration', 'fps', 'directory_order', 'choice_of_memories'):
+                            config_camera[key_press] = tmp
+                    self.camera.init_var(config_camera, show_in_parametrage=True)
+                    self.camera.camera_start()
+                        
+                elif key_press in ('picture_path', 'video_path', 'events', 'path_google_drive'):
+                    click_zone = cursor[selected - 1]
+                    tmp = self.input_value_item(menu_configuration[selected - 1][2], menu_configuration[selected - 1][1], 
+                            menu_configuration[selected - 1][5], menu_configuration[selected - 1][3], 
+                            text = menu_configuration[selected - 1][0], zero = menu_configuration[selected - 1][6])
+                    if tmp != 'escape':
+                        menu_configuration[selected - 1][1] = tmp
+                        if key_press in ('events', 'path_google_drive'):
+                            config_camera[key_press] = tmp
+                        else:
+                            if not os.path.exists(tmp):
+                                response = self.wait_validation('dir-dont-exist-create')
+                                if response:
+                                    os.mkdir(tmp)
+                                    self.update_screen(self.message(['abstracted'], wait=3000, color=self.colorset['menu-ok'], size='big', refresh=True))
+                            if key_press in ('picture_path', 'video_path'):
+                                config_camera['picture_path'] = tmp.split('*')[0]
+                
+                elif key_press in ('take_a_shot', 'take_a_video'):
+                    if key_press in 'take_a_shot':
+                        self.camera.take_a_shot(start_stop=False)
+                    elif key_press in 'take_a_video':
+                        self.camera.take_a_video((self.screen, self.defaultfontpath, posX_camera, posY_camera))
+                            
+            # Force refresh off screen
+            refresh = True
 
     def setup_led_menu(self, number, s_value, d_value, t_value, e_value, bull=False):
         '''
@@ -3782,7 +4250,7 @@ class Screen(pygame.Surface):
                 for column in range(1, 5):
                     y_ = pos_y + (1 + index) * h
                     w_ = w
-                    align = 'Left'
+                    align='Left'
 
                     if column == 1:
                         text = texts[key]
@@ -3812,11 +4280,11 @@ class Screen(pygame.Surface):
                         background_color = 'menu-shortcut'
                         textColor = 'menu-text-black'
                         index_click_zone = f'T-{key}'
-                        align = 'Center'
+                        align='Center'
 
 
                     self.new_blit_rect(x_, y_, w_, h, self.colorset[background_color], Alpha=Alpha, border_color=self.border_color(selected, column, index))
-                    self.blit_text(text, x_, y_, w_, h, self.colorset[textColor], align = align)
+                    self.blit_text(text, x_, y_, w_, h, self.colorset[textColor], align=align)
                     if index_click_zone != None:
                         click_zones[index_click_zone] = (x_, y_, w_, h)
                         shortcuts[index_click_zone] = [index, column]
@@ -3848,7 +4316,9 @@ class Screen(pygame.Surface):
 
             self.update_screen(rect=(pos_x, pos_y, W, H))
 
-            key = self.rpi.listen_inputs(['arrows', 'fx'], ['escape', 'PLAYERBUTTON', 'BACKUPBUTTON', 'TOGGLEFULLSCREEN', 'GAMEBUTTON', 'single-click', 'enter', 'space'])
+            key = self.rpi.listen_inputs(['arrows', 'fx'], 
+                                         ['escape', 'PLAYERBUTTON', 'BACKUPBUTTON', 'TOGGLEFULLSCREEN', 'GAMEBUTTON', 'single-click', 'enter', 'space'],
+                                         events=[(self.wait_event_time, 'EVENT', 'wait')])
 
             # Click cases
             clicked = self.is_clicked(click_zones, key)
@@ -3981,11 +4451,11 @@ class Screen(pygame.Surface):
             pos_y = 3*H
             self.new_blit_rect(pos_x, pos_y, N*W, H, self.colorset['menu-item-black'])
             self.new_blit_rect(pos_x + N*W, pos_y, S*W, H, self.colorset['menu-item-black'])
-            self.blit_text("simple", pos_x + N*W, pos_y, S*W, H, self.colorset['menu-text-white'], align = 'Left')
+            self.blit_text("simple", pos_x + N*W, pos_y, S*W, H, self.colorset['menu-text-white'], align='Left')
             self.new_blit_rect(pos_x + W*(N + S), pos_y, D*W, H, self.colorset['menu-item-black'])
-            self.blit_text("double", pos_x + W+S*W, pos_y, D*W, H, self.colorset['menu-text-white'], align = 'Left')
+            self.blit_text("double", pos_x + W+S*W, pos_y, D*W, H, self.colorset['menu-text-white'], align='Left')
             self.new_blit_rect(pos_x + W*(N + S+D), pos_y, T*W, H, self.colorset['menu-item-black'])
-            self.blit_text("triple", pos_x + W+S*W + D*W, pos_y, T*W, H, self.colorset['menu-text-white'], align = 'Left')
+            self.blit_text("triple", pos_x + W+S*W + D*W, pos_y, T*W, H, self.colorset['menu-text-white'], align='Left')
             self.new_blit_rect(pos_x + W*(N + S+D + T), pos_y, E*W, H, self.colorset['menu-item-black'])
             self.blit_text("tire", pos_x + W*(N + S+D + T), pos_y, E*W, H, self.colorset['menu-text-white'])
             self.new_blit_rect(pos_x + W*(N + S+D + T+E), pos_y, W, H, self.colorset['menu-item-black'])
@@ -4013,7 +4483,7 @@ class Screen(pygame.Surface):
 
                     j = 0
                     for (k, w) in [('S', S), ('D', D), ('T', T), ('E', E), ('A', 1)]:
-                        j += 1
+                        j+=1
                         key = f"{k}{n}"
                         if k == 'A':
                             background_color = self.colorset['menu-shortcut']
@@ -4053,7 +4523,9 @@ class Screen(pygame.Surface):
 
             if sub == '':
                 self.update_screen()
-                key = self.rpi.listen_inputs(['arrows', 'fx'], ['escape', 'PLAYERBUTTON', 'BACKUPBUTTON', 'TOGGLEFULLSCREEN', 'GAMEBUTTON', 'single-click', 'enter', 'space'])
+                key = self.rpi.listen_inputs(['arrows', 'fx'], 
+                                             ['escape', 'PLAYERBUTTON', 'BACKUPBUTTON', 'TOGGLEFULLSCREEN', 'GAMEBUTTON', 'single-click', 'enter', 'space'],
+                                            events=[(self.wait_event_time, 'EVENT', 'wait')])
             else:
                 selected = shortcuts[f'S{sub}']
                 key = 'enter'
@@ -4202,29 +4674,48 @@ class Screen(pygame.Surface):
         '''
         Buttons setup menu
         '''
-        selected = 1
 
-        ButtonsList = [('', 'notattributed')]
+        if self.rpi.gpio.mcp1 is None:
+            self.message([self.lang.translate('nogpio')], 3000, None, 'middle', 'big', bg_color='menu-ko')
+            return 'escape'
+
+        selected = 1
+        ext1_buttons = []
+        ext1_buttons_list = []
+        ext2_buttons = []
+        ext2_buttons_list = []
+
+        selected_buttons_list = [('', 'notattributed')]
 
         for letter in ('A', 'B'):
             for number in (0, 1, 2, 3, 4, 5, 6, 7):
-                ButtonsList.append((f'{letter}{number}', f'{letter}{number}'))
+                ext1_buttons_list.append((f'{letter}{number}', f'{letter}{number}'))
 
-        if buttons['EXTENDED_GPIO'] == '1':
-            index = 0
-            for button in buttons:
-                if button != 'EXTENDED_GPIO':
-                    index += 1
-                    if buttons[button] != '0':
-                        break
-            if index == 16 :    # Tous les boutons à 0
-                buttons = Defaults.copy()
+        for letter in ('C', 'D'):
+            for number in (0, 1, 2, 3, 4, 5, 6, 7):
+                ext2_buttons_list.append((f'{letter}{number}', f'{letter}{number}'))
 
+        index = 0
+        for button in buttons:
+            if buttons[button] != '0' and buttons[button] != '':
+                index = 1
+
+        for button in self.rpi.gpio.get_defaults():
+            if button.startswith('TOY'):
+                ext2_buttons.append(button)
+            else:
+                ext1_buttons.append(button)
+
+        if index == 0 :    # Tous les boutons à 0
+            buttons = Defaults.copy()
+
+        selected_buttons = ext1_buttons
+        selected_buttons_list += ext1_buttons_list
         refresh = True
         while True:
             click_zones = {}
-            shortcuts = {}
-            cursor = {}
+            shortcuts = []
+            cursor = []
             index = 0
 
             # Draw bg
@@ -4233,29 +4724,30 @@ class Screen(pygame.Surface):
             # Titles
             self.menu_header('setup-buttons')
 
-            nb_elements = len(buttons)
+            #Tabs
+            click_zones['F-1'] = self.display_button(-1 == selected, 'extension1', special='tab1')
+            shortcuts.append(f'F-1')
+            click_zones['F0'] = self.display_button(0 == selected, 'extension2', special='tab3')
+            shortcuts.append(f'F0')
 
-            click_zones['btn-extended'] = self.button_item((1, nb_elements, selected), self.lang.translate(buttons['EXTENDED_GPIO']), 'extended', self.alpha2)
-            shortcuts['btn-extended'] = 1
-            cursor[1] = 'btn-extended'
 
-            if buttons['EXTENDED_GPIO'] == '1':
-                index = 1
-                for button in buttons:
-                    if button != 'EXTENDED_GPIO':
-                        index += 1
-                        if (index // 2) % 2 == 0:
-                            Alpha = self.alpha
-                        else:
-                            Alpha = self.alpha2
-                        if buttons[button] == '':
-                            val = 'notattributed'
-                        else:
-                            val = buttons[button]
-                        click_zones[f'btn-{button}'] = self.button_item((index, nb_elements, selected), val, button.replace('pin_', ''), Alpha)
+            nb_elements = len(selected_buttons)
 
-                        shortcuts[f'btn-{button}'] = index
-                        cursor[index] = f'btn-{button}'
+            index = 0
+            for button in selected_buttons:
+                index += 1
+                if (index // 2) % 2 == 0:
+                    Alpha = self.alpha
+                else:
+                    Alpha = self.alpha2
+                if buttons[button] == '':
+                    val = 'notattributed'
+                else:
+                    val = buttons[button]
+                click_zones[f'F{index}'] = self.button_item((index, nb_elements, selected), val, button.replace('pin_', ''), Alpha)
+
+                shortcuts.append(f'F{index}')
+                cursor.append(click_zones[f'F{index}'])
 
             click_zones['escape'] = self.display_button(nb_elements + 1 == selected, 'back', special='escape')
             click_zones['reset'] = self.display_button(nb_elements + 2 == selected, 'reset', special='refresh')
@@ -4278,11 +4770,11 @@ class Screen(pygame.Surface):
                 key = clicked
 
             # Navigation
-            selected = self.navigate(selected, key, nb_elements, 3, 3, item_per_line=2 , left_right=True)
+            selected = self.navigate(selected, key, nb_elements, 3, 3, zero=-1, item_per_line=2 , left_right=True)
 
             # Shortcuts
             if key in shortcuts:
-                selected =shortcuts[key]
+                selected = int(key.replace('F', ''))
                 key = 'enter'
 
             if key in ESCAPE_KEYS or (key in ENTER_KEYS and selected == nb_elements + 1):
@@ -4295,26 +4787,32 @@ class Screen(pygame.Surface):
                 return buttons
 
             # Key analysis
-            if key == 'btn-extended' or (key in ENTER_KEYS and selected == 1):
-                tmp = self.dropdown(self.res['x'] / 8*3, self.res['y'] / 4, [('1', 'yes'), ('0', 'no')], navigate=buttons['EXTENDED_GPIO'])
-                buttons['EXTENDED_GPIO'] = str(tmp)
-                if tmp == '1':
-                    buttons = Defaults.copy()
-                else:
-                    for button in buttons:
-                        buttons[button] = '0'
+            # Change tab
+            if selected == -1:
+                selected_buttons = ext1_buttons
+                selected_buttons_list += ext1_buttons_list
+                tab = -1
+                refresh = True
+                continue
+            
+            if selected == 0:
+                selected_buttons = ext2_buttons
+                selected_buttons_list += ext2_buttons_list
+                tab = 0
+                refresh = True
+                continue
+            
+            if key in ENTER_KEYS :
+                key = cursor[selected-1]
 
-            elif key in ENTER_KEYS :
-                key = cursor[selected]
-
-                old = buttons[key.replace('btn-', '')]    # A2 par ex
-                t = self.dropdown(self.res['x'] / 8*3, self.res['y'] / 4, ButtonsList, navigate = buttons[key.replace('btn-', '')])
+                old = buttons[selected_buttons[selected-1]]
+                t = self.dropdown(self.res['x'] / 8*3, self.res['y'] / 4, selected_buttons_list, navigate = selected_buttons[selected-1])
                 if t != 'escape':
                     for button in buttons:
                         if buttons[button] == t and t != '':
                             buttons[button] = old
                             break
-                    buttons[key.replace('btn-', '')] = t
+                    buttons[selected_buttons[selected-1]] = t
 
     '''
     Test toys menu
@@ -4325,11 +4823,11 @@ class Screen(pygame.Surface):
         toys = []
 
         for toy in self.rpi.buttons:
-            if toy.startswith('LIGHT_') and self.rpi.buttons[toy] != '':
+            if (toy.startswith('LIGHT_') or toy.startswith('TOY')) and self.rpi.buttons[toy] != '':
                 toys.append((self.rpi.buttons[toy], toy))
                 nb_elements += 1
 
-        self.rpi.light_buttons(toys, state=False)
+        self.rpi.light_toys(toys, state=False)
 
         while True:
             click_zones = {}
@@ -4360,7 +4858,9 @@ class Screen(pygame.Surface):
             # Update screen
             self.update_screen()
 
-            key = self.rpi.listen_inputs(['arrows', 'fx'], ['escape', 'PLAYERBUTTON', 'BACKUPBUTTON', 'TOGGLEFULLSCREEN', 'GAMEBUTTON', 'single-click', 'enter', 'space'])
+            key = self.rpi.listen_inputs(['arrows', 'fx'], 
+                                         ['escape', 'PLAYERBUTTON', 'BACKUPBUTTON', 'TOGGLEFULLSCREEN', 'GAMEBUTTON', 'single-click', 'enter', 'space'],
+                                         events=[(self.wait_event_time, 'EVENT', 'wait')])
 
             # Click cases
             clicked = self.is_clicked(click_zones, key)
@@ -4381,7 +4881,7 @@ class Screen(pygame.Surface):
 
             if key in ENTER_KEYS :
                 toy = toys[selected - 1][1]
-                self.rpi.gpio.strobe_buttons([toy], delay=1200, delay_off=400)
+                self.rpi.gpio.strobe_toys([toy], delay_on=1200, delay_off=400)
 
 
     def setup_menu(self):
@@ -4390,7 +4890,7 @@ class Screen(pygame.Surface):
         '''
         selected = self.selected_menu.get('setup', 1)
 
-        nb_elements = 7
+        nb_elements = 9
 
         refresh = True
         old_selection = None
@@ -4413,18 +4913,24 @@ class Screen(pygame.Surface):
             # Led's setup
             click_zones['F3'] = self.menu_item((3, nb_elements, selected), ("F3", "setup-leds", BTN_CHOICE, None), exit=False)
             shortcuts.append('F3')
-            # Test buttons
-            click_zones['F4'] = self.menu_item((4, nb_elements, selected), ("F4", "test-buttons", BTN_CHOICE, None), exit=False)
+            # Backcolor led's darts setup
+            click_zones['F4'] = self.menu_item((4, nb_elements, selected), ("F4", "setup-couleurs-segments", BTN_CHOICE, None), exit=False)
             shortcuts.append('F4')
-            # Test target
-            click_zones['F5'] = self.menu_item((5, nb_elements, selected), ("F5", "test-target", BTN_CHOICE, None), exit=False)
+            # Cam setup
+            click_zones['F5'] = self.menu_item((5, nb_elements, selected), ("F5", "setup-cam", BTN_CHOICE, None), exit=False)
             shortcuts.append('F5')
-            # Test toys
-            click_zones['F6'] = self.menu_item((6, nb_elements, selected), ("F6", "test-toys", BTN_CHOICE, None), exit=False)
+            # Test buttons
+            click_zones['F6'] = self.menu_item((6, nb_elements, selected), ("F6", "test-buttons", BTN_CHOICE, None), exit=False)
             shortcuts.append('F6')
-            # Test toys
-            click_zones['F7'] = self.menu_item((7, nb_elements, selected), ("F7", "reset", BTN_CHOICE, None), exit=False)
+            # Test target
+            click_zones['F7'] = self.menu_item((7, nb_elements, selected), ("F7", "test-target", BTN_CHOICE, None), exit=False)
             shortcuts.append('F7')
+            # Test toys
+            click_zones['F8'] = self.menu_item((8, nb_elements, selected), ("F8", "test-toys", BTN_CHOICE, None), exit=False)
+            shortcuts.append('F8')
+            # Test toys
+            click_zones['F9'] = self.menu_item((9, nb_elements, selected), ("F9", "reset", BTN_CHOICE, None), exit=False)
+            shortcuts.append('F9')
             # go back and next
             click_zones['escape'] = self.display_button(nb_elements + 1 == selected, 'back', special='escape')
 
@@ -4446,7 +4952,9 @@ class Screen(pygame.Surface):
             else:
                 self.update_screen(rect_array=[old_selection, selection])
 
-            key = self.rpi.listen_inputs(['arrows', 'fx'], ['escape', 'PLAYERBUTTON', 'BACKUPBUTTON', 'TOGGLEFULLSCREEN', 'GAMEBUTTON', 'single-click', 'enter', 'space'], events=[(self.wait_event_time, 'EVENT', 'wait')])
+            key = self.rpi.listen_inputs(['arrows', 'fx'], 
+                                         ['escape', 'PLAYERBUTTON', 'BACKUPBUTTON', 'TOGGLEFULLSCREEN', 'GAMEBUTTON', 'single-click', 'enter', 'space'],
+                                         events=[(self.wait_event_time, 'EVENT', 'wait')])
 
             # Click cases
             clicked = self.is_clicked(click_zones, key)
@@ -4477,15 +4985,21 @@ class Screen(pygame.Surface):
                     return 'setup-leds'
 
                 if selected == 4:
-                    return 'test-buttons'
+                    return 'setup-couleurs-segments'
 
                 if selected == 5:
-                    return 'test-target'
+                    return 'setup-cam'
 
                 if selected == 6:
-                    return 'test-toys'
+                    return 'test-buttons'
 
                 if selected == 7:
+                    return 'test-target'
+
+                if selected == 8:
+                    return 'test-toys'
+
+                if selected == 9:
                     return 'reset'
 
                 if selected == nb_elements + 1:
@@ -4493,7 +5007,7 @@ class Screen(pygame.Surface):
 
             old_selection = selection
 
-    def miscellaneous(self):
+    def miscellaneous(self, update):
         '''
         Miscellaneous
         '''
@@ -4547,13 +5061,14 @@ class Screen(pygame.Surface):
 
             # go back and next
             click_zones['escape'] = self.display_button(nb_elements + 1 == selected, 'back', special='escape')
+            click_zones['update'] = self.display_button(nb_elements + 2 == selected, 'btn_update', special='return')
 
             if selected <= nb_elements:
                 selection = click_zones[f'F{selected}']
             elif nb_elements + 1 == selected:
                 selection = click_zones['escape']
             elif nb_elements + 2 == selected:
-                selection = click_zones['save']
+                selection = click_zones['update']
             else:
                 selection = None
 
@@ -4567,7 +5082,9 @@ class Screen(pygame.Surface):
             else:
                 self.update_screen(rect_array=[click_zones[cz] for cz in click_zones])
 
-            key = self.rpi.listen_inputs(['arrows', 'fx'], ['escape', 'PLAYERBUTTON', 'BACKUPBUTTON', 'TOGGLEFULLSCREEN', 'GAMEBUTTON', 'single-click', 'enter', 'space'])
+            key = self.rpi.listen_inputs(['arrows', 'fx'], 
+                                         ['escape', 'PLAYERBUTTON', 'BACKUPBUTTON', 'TOGGLEFULLSCREEN', 'GAMEBUTTON', 'single-click', 'enter', 'space'],
+                                         events=[(self.wait_event_time, 'EVENT', 'wait')])
 
             # Click cases
             clicked = self.is_clicked(click_zones, key)
@@ -4575,7 +5092,7 @@ class Screen(pygame.Surface):
                 key = clicked
 
             # Navigation
-            selected = self.navigate(selected, key, nb_elements, 1, 1)
+            selected = self.navigate(selected, key, nb_elements, 2, 2)
 
             # Shortcuts
             if key in shortcuts:
@@ -4585,6 +5102,41 @@ class Screen(pygame.Surface):
 
             if key in ESCAPE_KEYS or (key in ENTER_KEYS and selected == nb_elements + 1):
                 return 'escape'
+            
+            if 'update' in key or (key in ENTER_KEYS and selected == nb_elements + 2):
+                version = update[0].get_version(self.logs)
+                try:
+                    self.update_screen(self.message(['update-check'], 0, None, 'middle'))
+                    last, new_version, size = update[0].get_last(self.logs, \
+                            update[1]['servers'].split(',')[0].split(':')[0], '5000', version)
+                    
+                    if last is None:
+                        self.update_screen(self.message(['no-update-available'], 1500, None, 'middle'))
+                    else:
+                        self.update_screen(self.message(['update-download'], 0, None, 'middle'))
+                        last, size = update[0].download_update(self.logs, \
+                                update[1]['servers'].split(',')[0].split(':')[0], '5000', last, size)
+                        
+                        if last is None:
+                            self.update_screen(self.message(['update-failed'], 1500, None, 'middle'))
+                        else:
+                            response = self.wait_validation("update-available")
+                            if response:
+                                self.update_screen(self.message(['updating'], 0, None, 'middle'))
+                                update[0].apply_update(self.logs, last, new_version)
+                                self.update_screen(self.message([f'Version {new_version} installée', 'restarting'], \
+                                        1000,  'middle', bg_color='menu-ok'))
+                                version = new_version
+                        
+                                response = self.wait_validation("Voulez-vous redémarrer?")                            
+                                if response:
+                                    return 'restart'
+                except Exception as exception:
+                    self.logs.debug("[WARNING] Unable to check/get updates.")
+                    self.logs.debug(f"[WARNING] Error was {exception}")
+                    self.logs.debug(f"version is {version}")
+                key = 'update'
+                refresh = True
 
             if key in ENTER_KEYS :
                 self.selected_menu['miscellaneous'] = selected
@@ -4617,7 +5169,6 @@ class Screen(pygame.Surface):
         for device in ['STRIP', 'TARGET', 'DMD', 'MATRIX', 'OTHER']:
             if device not in Event:
                 Event[device] = [empty_animation]
-            #elif len(Event[device]) == 0 and device in ['STRIP', 'TARGET'] and event_name not in ('touch', 'SB', 'DB'):
             elif len(Event[device]) == 0 and device in ['STRIP', 'TARGET'] and event_name not in ('touch'):
                 Event[device] = ['']
 
@@ -4730,7 +5281,7 @@ class Screen(pygame.Surface):
                         Alpha = self.alpha2
                     if j > 0:
                         i += 1
-                    j += 1
+                    j+=1
                     if j == 2:
                         pos_x = int(self.res['x'] * 2.5 / 16)
                         rect = pygame.Rect(pos_x, pos_y, w, H)
@@ -5048,7 +5599,7 @@ class Screen(pygame.Surface):
                     Event[dev][index] = f"{an},{tmp},{co},{de}"
                 refresh = True
             elif act == 'color':
-                tmp = self.dropdown(self.res['x'] * 6 / 16, 3 * self.res_y_16, colors_dropdown, navigate=Event[dev][index].split(',')[2])
+                tmp = self.dropdown(self.res['x'] * 6 / 16, 3 * self.res_y_16, colors_dropdown, special='colors', navigate=Event[dev][index].split(',')[2])
                 if tmp != 'escape':
                     anim = Event[dev][index].split(',')
                     an = anim[0]
@@ -5136,7 +5687,7 @@ class Screen(pygame.Surface):
             index = 0
             for event in events:
                 index += 1
-                click_zones[event] = self.menu_item((index, nb_elements, selected), (None, f"event-{event}", BTN_CHOICE, None), align = 'Half')
+                click_zones[event] = self.menu_item((index, nb_elements, selected), (None, f"event-{event}", BTN_CHOICE, None), align='Half')
                 shortcuts.append(event)
                 cursor[event] = index
 
@@ -5151,7 +5702,9 @@ class Screen(pygame.Surface):
             else:
                 self.update_screen(rect_array=[click_zones[cz] for cz in click_zones])
 
-            key = self.rpi.listen_inputs(['arrows', 'fx'], ['escape', 'PLAYERBUTTON', 'BACKUPBUTTON', 'TOGGLEFULLSCREEN', 'GAMEBUTTON', 'single-click', 'enter', 'space', 'backspace'])
+            key = self.rpi.listen_inputs(['arrows', 'fx'], 
+                                         ['escape', 'PLAYERBUTTON', 'BACKUPBUTTON', 'TOGGLEFULLSCREEN', 'GAMEBUTTON', 'single-click', 'enter', 'space', 'backspace'],
+                                         events=[(self.wait_event_time, 'EVENT', 'wait')])
 
             # Click cases
             clicked = self.is_clicked(click_zones, key)
@@ -5177,7 +5730,7 @@ class Screen(pygame.Surface):
             if key in ENTER_KEYS or key in RIGHT_KEYS:
                 return shortcuts[selected - 1]
 
-    def customization_menu(self, customization):
+    def customization_menu(self, customization, colors_available):
         '''
         Customization menu
         '''
@@ -5198,14 +5751,15 @@ class Screen(pygame.Surface):
             min_value = 1
             max_value = 10000
             zero = False
-            if option in ('startpercent', 'nbcol', 'resx', 'resy', 'fullscreen', \
+
+            if option in ('startpercent', 'nbcol', 'resx', 'resy', 
                     'masterserver', 'endgamestats', 'videosound_multiplier', 'pnj_time'):
                 avoid.append([option, customization[option], '', 0, []])
                 continue
 
-            if option in ('endgamestats', 'bypass-stats', 'onscreenbuttons', 'fullscreen', \
-                    'keeporder', 'play_firstname', 'print_dartstroke', 'light_target', 'light_strip', \
-                    'competition_mode', 'exhibition_mode', 'illumination_mode'):  
+            if option in ('endgamestats', 'bypass-stats', 'onscreenbuttons', 'fullscreen',
+                    'keeporder', 'play_firstname', 'print_dartstroke', 'light_target', 'light_strip',
+                    'competition_mode', 'exhibition_mode', 'illumination_mode', 'fast_games_mode', 'only_favorites_games_mode', 'check_for_updates'):  
                 option_type = 'check'
                 option_values = []
                 if customization[option] == 'False' or customization[option] is False:
@@ -5284,6 +5838,9 @@ class Screen(pygame.Surface):
             elif option == 'preferedcategory':
                 option_type = 'dropdown'
                 option_values = [('classic', 'classic'), ('fun', 'fun'), ('sport', 'sport')]
+            elif option == 'illumination_color':
+                option_type = 'dropdown_colors'
+                option_values = [(val, val) for val in colors_available]
             else:
                 option_type = 'string'
                 option_values = []
@@ -5292,7 +5849,9 @@ class Screen(pygame.Surface):
                     max_value = 12
                 else:
                     max_value = 64
+                    
             all_customization.append([option, customization[option], option_type, max_value, option_values, min_value, zero])
+            
             if option in ('pnj_time', 'nextplayer_sound_duration', 'releasedartstime', 'onscreenbuttons', 'keeporder', 'videos', \
                 'play_firstname', 'print_dartstroke', 'light_target', 'light_strip', 'waitevent_time', 'competition_mode', \
                 'illumination_mode', 'illumination_color'):
@@ -5332,7 +5891,7 @@ class Screen(pygame.Surface):
                 elif option[2] == 'check' and option[1]:
                     value = True
                     Cbtn = BTN_CHECK
-                elif option[2] == 'dropdown':
+                elif 'dropdown' in option[2]:
                     value = ''
                     for element in option[4]:
                         if element[0] == option[1] or element[1] == option[1]:
@@ -5389,7 +5948,8 @@ class Screen(pygame.Surface):
             else:
                 self.update_screen(rect_array=[old_selection, selection])
 
-            key = self.rpi.listen_inputs(allowed, ['escape', 'PLAYERBUTTON', 'BACKUPBUTTON', 'TOGGLEFULLSCREEN', 'GAMEBUTTON', 'single-click', 'enter', 'space', 'backspace'], events=[(self.wait_event_time, 'EVENT', 'wait')])
+            key = self.rpi.listen_inputs(allowed, ['escape', 'PLAYERBUTTON', 'BACKUPBUTTON', 'TOGGLEFULLSCREEN', 'GAMEBUTTON', 'single-click', 'enter', 'space', 'backspace'],
+                                         events=[(self.wait_event_time, 'EVENT', 'wait')])
 
             # Click cases
             clicked = self.is_clicked(click_zones, key)
@@ -5454,14 +6014,26 @@ class Screen(pygame.Surface):
                         selected_customization[selected - 1][1] = str(tmp)
                     # Force refresh off screen
                     selection = None
+                    
+                elif selected_customization[selected - 1][2] == 'dropdown_colors':
+                    tmp = self.dropdown(self.res['x'] * 6 / 16, 3 * self.res_y_16,
+                            selected_customization[selected - 1][4],
+                            special='colors',
+                            navigate=selected_customization[selected - 1][1]) 
+                    if tmp != 'escape':
+                        selected_customization[selected - 1][1] = str(tmp)
+                    # Force refresh off screen
+                    selection = None
+                    refresh = True
+                    
                 elif selected_customization[selected - 1][2] == 'dropdown':
                     if selected_customization[selected - 1][0] == 'font':
-                        tmp = self.dropdown(self.res['x'] * 6 / 16, 3 * self.res_y_16, \
-                                selected_customization[selected - 1][4], \
+                        tmp = self.dropdown(self.res['x'] * 6 / 16, 3 * self.res_y_16,
+                                selected_customization[selected - 1][4],
                                 special='font', navigate=selected_customization[selected - 1][1])
                     else:
-                        tmp = self.dropdown(self.res['x'] * 6 / 16, 3 * self.res_y_16, \
-                                selected_customization[selected - 1][4], \
+                        tmp = self.dropdown(self.res['x'] * 6 / 16, 3 * self.res_y_16,
+                                selected_customization[selected - 1][4],
                                 navigate=selected_customization[selected - 1][1])
                     if tmp != 'escape':
                         selected_customization[selected - 1][1] = tmp
@@ -5470,11 +6042,11 @@ class Screen(pygame.Surface):
                     refresh = True
                 else:
                     click_zone = cursor[selected - 1]
-                    tmp = self.input_value_item(selected_customization[selected - 1][2], \
-                            selected_customization[selected - 1][1], \
-                            selected_customization[selected - 1][5], \
-                            selected_customization[selected - 1][3], \
-                            text = selected_customization[selected - 1][0], \
+                    tmp = self.input_value_item(selected_customization[selected - 1][2],
+                            selected_customization[selected - 1][1],
+                            selected_customization[selected - 1][5],
+                            selected_customization[selected - 1][3],
+                            text = selected_customization[selected - 1][0],
                             zero = selected_customization[selected - 1][6])
                     if tmp != 'escape':
                         if selected_customization[selected - 1][2] == 'number':
@@ -5695,8 +6267,7 @@ class Screen(pygame.Surface):
             key = self.rpi.listen_inputs(['arrows', 'fx', 'alpha', 'math'],
                  ['escape', 'PLAYERBUTTON', 'BACKUPBUTTON', 'TOGGLEFULLSCREEN', 'GAMEBUTTON',
                 'single-click', 'double-click', 'resize', 'VOLUME-UP', 'VOLUME-DOWN', 'enter', 'space'],
-                 events=[(self.wait_event_time, 'EVENT', 'wait')], timeout=self.wait_event_time)
-                 #events=[(3000, 'EVENT', 'wait'), (500, 'LIGHT', ['LIGHT_NAVIGATE'])])
+                 events=[(self.wait_event_time, 'EVENT', 'wait')])
 
             # Click cases
             clicked = self.is_clicked(click_zones, key)
@@ -5778,25 +6349,30 @@ class Screen(pygame.Surface):
         '''
         Get Game List from local game folder
         '''
-        if category == 'favoris':
-            fileiter = (os.path.join(root, f)
-                    for root, _, files in chain(os.walk(f'games/classic'), os.walk(f'games/fun'), os.walk(f'games/sport'))
-                    for f in files if f.replace('.py', '').replace('_', ' ') in favorites)
+        if self.games.get(category) is None:
+            if category == 'favoris':
+                fileiter = (os.path.join(root, f)
+                        for root, _, files in chain(os.walk(f'games/classic'), os.walk(f'games/fun'), os.walk(f'games/sport'))
+                        for f in files if f.replace('.py', '').replace('_', ' ') in favorites)
+            else:
+                fileiter = (os.path.join(root, f)
+                        for root, _, files in os.walk(f'games/{category}')
+                        for f in files)
+            fileiter = sorted(fileiter)
+            menu_data = [self.lang.translate('game-list')]
+            games = []
+            for foundfiles in fileiter:
+                name, extension = os.path.splitext(foundfiles)
+                if extension == '.py' and os.path.basename(name) != '__init__':
+                    games.append(os.path.basename(name).replace('_', ' '))
+                    menu_data.append(os.path.basename(name).replace('_', ' '))
+
+            # Display all games names
+            self.logs.debug(f"Found these games : {'/'.join(menu_data[1:])}")
+            self.games[category] = games
+            return games
         else:
-            fileiter = (os.path.join(root, f)
-                    for root, _, files in os.walk(f'games/{category}')
-                    for f in files)
-        fileiter = sorted(fileiter)
-        menu_data = [self.lang.translate('game-list')]
-        games = []
-        for foundfiles in fileiter:
-            name, extension = os.path.splitext(foundfiles)
-            if extension == '.py' and os.path.basename(name) != '__init__':
-                games.append(os.path.basename(name).replace('_', ' '))
-                menu_data.append(os.path.basename(name).replace('_', ' '))
-        # Display all games names
-        self.logs.log("DEBUG", f"Found these games : {'/'.join(menu_data[1:])}")
-        return games
+            return self.games.get(category)
 
     def get_description(self, game):
         '''
@@ -5807,10 +6383,10 @@ class Screen(pygame.Surface):
             description = self.lang.translate(f"Description-{game.replace(' ', '_')}")
         except:
             description.append(self.lang.translate('game-no-desc'))
-            self.logs.log("WARNING", f"Unable to get a description for game {game}")
+            self.logs.warning(f"Unable to get a description for game {game}")
         return description
 
-    def game_category_menu(self, favorites, category=None):
+    def game_category_menu(self, favorites, category=None, load=False):
         '''
         Menu which display a table to choose the category of the game
         '''
@@ -5833,24 +6409,29 @@ class Screen(pygame.Surface):
         refresh = True
 
         while True:
-            if selected == 1:
+            if selected == 1 and not load:
                 self.dmd.send_text(self.lang.translate('dmd-game-classic'))
-            elif selected == 2:
+            elif selected == 2 and not load:
                 self.dmd.send_text(self.lang.translate('dmd-game-fun'))
-            elif selected == 3:
+            elif selected == 3 and not load:
                 self.dmd.send_text(self.lang.translate('dmd-game-sport'))
-            elif favorites:
+            elif favorites and not load:
                 self.dmd.send_text(self.lang.translate('dmd-game-favorites'))
             click_zones = {}
-            # Draw background
-            self.display_background()
+            if not load:
+                # Draw background
+                self.display_background()
 
-            # Screen Titles
-            self.menu_header(self.lang.translate('game-cat'))
+                # Screen Titles
+                self.menu_header(self.lang.translate('game-cat'))
 
             click_zones['F1'] = self.logo_item((1, nb_elements, selected), 'menu_classic', nb_elements, 'Center', limit_height=self.res['y'] / 3, menu=True)
             click_zones['F2'] = self.logo_item((2, nb_elements, selected), 'menu_fun', nb_elements, 'Center', limit_height=self.res['y'] / 3, menu=True)
             click_zones['F3'] = self.logo_item((3, nb_elements, selected), 'menu_sport', nb_elements, 'Center', limit_height=self.res['y'] / 3, menu=True)
+
+            if load:
+                return
+
             if favorites:
                 click_zones['F4'] = self.logo_item((4, nb_elements, selected), 'menu_favoris', nb_elements, 'Center', limit_height=self.res['y'] / 3, menu=True)
 
@@ -5866,7 +6447,6 @@ class Screen(pygame.Surface):
                 refresh = False
             else:
                 self.update_screen(rect_array=[click_zones[click_zone] for click_zone in click_zones])
-
 
             key = self.rpi.listen_inputs(
                     ['arrows', 'fx', 'alpha', 'math'],
@@ -5894,16 +6474,16 @@ class Screen(pygame.Surface):
             if key in ENTER_KEYS + SAVE_KEYS:
                 return categories[selected - 1]
 
-    def game_menu(self, category, games_list, favorites, selected_game=None, Nb_player=2):
+    def game_menu(self, category, games_list, favorites, nb_player, selected_game=None, load=False):
         '''
         Menu which display a table to choose the game
         '''
         selected = 1
 
-        self.dmd.send_text(self.lang.translate('dmd-game-choice'), tempo=1)
+        if not load:
+            self.dmd.send_text(self.lang.translate('dmd-game-choice'), tempo=1)
 
         games = []
-
         index = 1
         # Favorites first
         for game in games_list:
@@ -5932,17 +6512,18 @@ class Screen(pygame.Surface):
 
         refresh = True
         old_selection = None
-        self.imagecache = {}
+        #self.imagecache = {}
         
         while True:
             click_zones = {}
             shortcuts = []
             validate = []
-            # Draw background
-            self.display_background()
+            if not load:
+                # Draw background
+                self.display_background()
 
-            # Screen Titles
-            self.menu_header(self.lang.translate('game-list'))
+                # Screen Titles
+                self.menu_header(self.lang.translate('game-list'))
 
             index = 1
             for game in games:     # Display Game menu
@@ -5950,13 +6531,14 @@ class Screen(pygame.Surface):
                 try:
                     min_max_players_per_game = self.config.get_value('NbOfPlayersPerGame', game.replace(" ", "_"))
                 except:
-                    print("[] No game with name '{0}' find in DefaultConfig['NbOfPlayersPerGame'] dict".format(game.replace(" ", "_")))
-                    min_max_players_per_game = [ 0, 0, False ]
+                    self.logs.error("[] No game with name '{0}' find in DefaultConfig['NbOfPlayersPerGame'] dict".format(game.replace(" ", "_")))
+                    min_max_players_per_game = [0, 0, False]
                     
-                good_nb_players = (int(min_max_players_per_game[0]) <= Nb_player) and (Nb_player <= int(min_max_players_per_game[1]))
+                good_nb_players = int(min_max_players_per_game[0]) <= nb_player and nb_player <= int(min_max_players_per_game[1])
                 player_in_pairs = bool(min_max_players_per_game[2])
-                if player_in_pairs == True :
-                    if (Nb_player % 2) != 0 :
+
+                if player_in_pairs:
+                    if nb_player % 2 != 0:
                         good_nb_players = False
                 
                 if index == selected:
@@ -5966,10 +6548,12 @@ class Screen(pygame.Surface):
                 click_zones[shortcut] = self.logo_item((index, len(games), selected), game.replace(' ', '_'), nb_column, 'Left', border_radius=25, available=good_nb_players)
                 
                 validate.append(good_nb_players)
-                if(good_nb_players == True) :
+                if good_nb_players:
                     shortcuts.append(shortcut)
                 index += 1
 
+            if load:
+                return
             # Arrow to go back and next
             click_zones['escape'] = self.display_button(index == selected, 'back', special='escape')
 
@@ -6009,9 +6593,6 @@ class Screen(pygame.Surface):
             selected = self.navigate(selected, key, nb_elements, 1, 1, \
                     item_per_line=nb_column, left_right=True)
             
-#            print(f"validate = {validate}")
-#            print(f"validate {validate[selected-1]}  , selected = {selected}")
-
             if selected <= nb_elements:
                 self.dmd.send_text(games[selected - 1].replace('_', ' '))
             else:
@@ -6167,19 +6748,19 @@ class Screen(pygame.Surface):
 
         while True:
             try:
-                self.logs.log("DEBUG", f"Try to connect to {host}:{port}")
+                self.logs.debug(f"Try to connect to {host}:{port}")
                 master_client.connect_master(host, port)
-                self.logs.log("DEBUG", f"Connected")
+                self.logs.debug(f"Connected")
             except:
-                self.logs.log("ERROR", f"Unable to reach Master Server : {host}:{port}")
+                self.logs.error(f"Unable to reach Master Server : {host}:{port}")
                 self.display_background()
                 self.message([self.lang.translate('master-client-no-connection')])
                 return 'escape'    # Tels master loop to turn back to previous menu
 
             game_list = master_client.wait_list(number_of_players)    # get and clean server list
-            self.logs.log("DEBUG", f"game_list={game_list}")
+            self.logs.debug(f"game_list={game_list}")
             master_client.close_connection()
-            self.logs.log("DEBUG", f"Disconnected")
+            self.logs.debug(f"Disconnected")
 
             # In case of network issue
             if game_list is False:
@@ -6193,7 +6774,7 @@ class Screen(pygame.Surface):
             if game_list == 0:
                 game_list = {}
             # In case of a list containing something (or not)
-            self.logs.log("DEBUG", f"Received a list with {len(game_list)} games")
+            self.logs.debug(f"Received a list with {len(game_list)} games")
             nb_elements = len(game_list) + 1    # Add first line
 
             while True:
@@ -6300,9 +6881,7 @@ class Screen(pygame.Surface):
             text_width = box_width
             text_height = box_height +  self.res_y_16  - 2 * marge_y
             text_margin = int(marge_y / 2)
-#            text_height = nb_lines * 24 + (nb_lines - 1) * text_margin + 40
-#            text_height = text_height + self.res_y_16
-#            print(f'text_height, nb_lines = {text_height}, {nb_lines}')
+
         # cut description for not full mode
         if not full:
             description = description.split("-----\n")[0]
@@ -6355,10 +6934,12 @@ class Screen(pygame.Surface):
                 
         # Add description
         description = description.splitlines()
-        #new by manu
         height = int((int(self.res['x']) / 1920) * 27)
         indice = 78
-        font = pygame.font.Font(f'{self.config.fontsDir}/FreeSansBold.ttf', height)
+        if(self.colorset.get('font') is None):
+            font = pygame.font.Font(f'{self.config.fontsDir}/FreeSansBold.ttf', height)
+        else:
+            font = pygame.font.Font(self.colorset['font'], height)
 
         index = 0
         text_pos_y += 20 # Border radiue
@@ -6382,7 +6963,7 @@ class Screen(pygame.Surface):
         '''
         Game options menu
         '''
-        self.logs.log("DEBUG", "Waiting for game options")
+        self.logs.debug("Waiting for game options")
 
         # Show message on Raspydarts DMD
         self.dmd.send_text(self.lang.translate('game-options'), tempo=1)
@@ -6420,7 +7001,7 @@ class Screen(pygame.Surface):
             try:
                 min_max_players_per_game = self.config.get_value('NbOfPlayersPerGame', game.replace(" ", "_"))
             except:
-                print("[] No game with name '{0}' find in DefaultConfig['NbOfPlayersPerGame'] dict".format(game.replace(" ", "_")))
+                self.logs.error("[] No game with name '{0}' find in DefaultConfig['NbOfPlayersPerGame'] dict".format(game.replace(" ", "_")))
                 min_max_players_per_game = [ 0, 0, False ]
                 
             good_nb_players = (int(min_max_players_per_game[0]) <= number_of_players) and (number_of_players <= int(min_max_players_per_game[1]))
@@ -6450,13 +7031,12 @@ class Screen(pygame.Surface):
                 self.qrcode.set_qrsize() # remet la taille par defaut au cas ou elle aurait changé dans un jeu
                 self.qrcode.set_color('black','white')
                 image_qrcode = self.draw_qrcode(game)
-                self.affiche_qrcode(image_qrcode)
+                self.display_qrcode(image_qrcode)
                 del image_qrcode #libère la mémoire après l'affichage
 
             index = 1
             for option_name, option_value in game_options.items():
-                #New Added by Manu 24-02-2024
-                text = self.traduire_option(game,option_name)
+                text = self.translate_option(game,option_name)
 
                 if (option_name.endswith('Teaming') or \
                         option_name.endswith('optionteamscore')) and not teaming:
@@ -6588,8 +7168,7 @@ class Screen(pygame.Surface):
                     else:
                         min_value = 0
                         max_value = 500
-                    #New Added by Manu 24-02-2024
-                    translate = self.traduire_option(game,options[selected][2])
+                    translate = self.translate_option(game,options[selected][2])
                     tmp = self.input_value_item('number', '', min_value, max_value, text=translate)
 
                     if tmp != 'escape':
@@ -6664,7 +7243,7 @@ class Screen(pygame.Surface):
         '''
         Dsiplay records
         '''
-        self.logs.log("DEBUG", f"Displaying Hi score table for {game}, options : {options}")
+        self.logs.debug(f"Displaying Hi score table for {game}, options : {options}")
 
         ratio = 1 / 2
 
@@ -6834,7 +7413,6 @@ class Screen(pygame.Surface):
         self.blit_rect(0, pos_y, self.res['x'], height, self.colorset['menu-ko'])
         self.blit_text('end-of-game', 0, pos_y, self.res['x'], height, self.colorset['menu-text-black'])
 
-        # Added by Manu to display match result
         if len(self.end_of_game_winner) > 0:
             pos_y = self.res['y'] / 2 # middle
             if self.lang.translate('nowinner') == self.end_of_game_winner:
@@ -6870,7 +7448,7 @@ class Screen(pygame.Surface):
                 for rect in rect_array:
                     self.blit(rect[0], (rect[1][0], rect[1][1]))
                     if index != 3:
-                        self.display_image(online[index], rect[1][0], rect[1][1], width=rect[1][2], height=rect[1][3], UseCache=True)
+                        self.display_image(online[index], rect[1][0], rect[1][1], width=rect[1][2], height=rect[1][3])
                     self.update_screen(rect[1])
 
                 if index >= 3:
@@ -7093,7 +7671,7 @@ class Screen(pygame.Surface):
         if logo is not None:
             self.display_logo(logo)
         self.end_of_game_text(logo is not None)
-        self.rpi.light_buttons(['LIGHT_NEXTPLAYER', 'LIGHT_BACK', 'LIGHT_VALIDATE', 'LIGHT_NAVIGATE'], True)
+        self.rpi.light_toys(['LIGHT_NEXTPLAYER', 'LIGHT_BACK', 'LIGHT_VALIDATE', 'LIGHT_NAVIGATE'], True)
 
         selected = 2
         while True:
@@ -7156,7 +7734,7 @@ class Screen(pygame.Surface):
 
         if self.colorset['game-type'] is not None:
             if self.game_type == 'online':
-                self.display_image(self.online_icon, self.res_x / 2 - 110, pos_y + height, width=gt_height, height=gt_height, UseCache=True)
+                self.display_image(self.online_icon, self.res_x / 2 - 110, pos_y + height, width=gt_height, height=gt_height)
             self.blit_text(f"{self.game_type} game", pos_x, pos_y + height, width, gt_height, color=self.colorset['game-type'], dafont='Impact', align='Center', valign='top', margin=False)
 
     def new_display_players(self, players, actual_player, end_of_game=False):
@@ -7195,20 +7773,20 @@ class Screen(pygame.Surface):
                     pygame.draw.line(self.screen, self.colorset['game-bg'], (player_x + player_width, player_y), (player_x + player_width, player_y + player_height), 2)
 
                 if index < actual_player:
-                    align = 'Left'
-                    icon_align = 'Right'
+                    align='Left'
+                    icon_align='Right'
                 else:
-                    icon_align = 'Left'
-                    align = 'Right'
+                    icon_align='Left'
+                    align='Right'
                 skull_icon = self.file_class.get_full_filename('killer_skull', 'images')
                 pygame.draw.line(self.screen, color, (player_x, player_y), (player_x + player_width, player_y), self.margin * 2)
                 self.blit_text(name, player_x, player_y - self.margin * 2, player_width, heading_height + self.margin * 2, color=player_color, dafont='Impact', align=align, valign='Bottom')
                 self.blit_text(score, player_x, player_y + heading_height, player_width, player_height - heading_height, color=heading_color, dafont='Impact', align=align)
                 if not player.alive:
                     if index < actual_player:
-                        self.display_image(skull_icon, player_x + player_width - (player_height - heading_height), player_y + heading_height, player_width, player_height - heading_height, UseCache=True)
+                        self.display_image(skull_icon, player_x + player_width - (player_height - heading_height), player_y + heading_height, player_width, player_height - heading_height)
                     else:
-                        self.display_image(skull_icon, player_x, player_y + heading_height, player_width, player_height - heading_height, UseCache=True)
+                        self.display_image(skull_icon, player_x, player_y + heading_height, player_width, player_height - heading_height)
             else:
                 # For actual player's infos
                 actual_color = color
@@ -7230,7 +7808,7 @@ class Screen(pygame.Surface):
             pygame.draw.line(self.screen, self.colorset['game-bg'], (player_x, player_y + heading_height), (player_x + player_width, player_y + heading_height), 2)
             pygame.draw.line(self.screen, self.colorset['game-bg'], (player_x, player_y), (player_x, player_y + player_height), 2)
             pygame.draw.line(self.screen, self.colorset['game-bg'], (player_x + player_width, player_y), (player_x + player_width, player_y + player_height), 2)
-        self.display_image(dart_icon, player_x + self.margin, player_y + heading_height + self.margin, width=dart_icon_size, height=dart_icon_size, UseCache=True)
+        self.display_image(dart_icon, player_x + self.margin, player_y + heading_height + self.margin, width=dart_icon_size, height=dart_icon_size)
         if self.colorset['game-bg'] is not None:
             self.blit_text(actual_name, player_x, player_y - self.margin, player_width, heading_height + self.margin * 2, color=self.colorset['game-bg'], dafont='Impact', align='Center')
         else:
@@ -7340,7 +7918,7 @@ class Screen(pygame.Surface):
         return (pygame.transform.scale(image, (image_width, image_height)), (image_width, image_height))
 
     #@debug
-    def display_image(self, imagepath, pos_x, pos_y, width=0, height=0, Scale=False, center_x=False, center_y=False, rect=None, Screen=None, UseCache=True, change_colors=None, enabledImage=True):
+    def display_image(self, imagepath, pos_x, pos_y, width=0, height=0, Scale=False, center_x=False, center_y=False, rect=None, Screen=None, change_colors=None, enabledImage=True, UseCache=True):
         '''
         Scale and display an image
         '''
@@ -7349,62 +7927,40 @@ class Screen(pygame.Surface):
 
         # Cache is cleaned when resolution changed
         # Store in cache for Scate True/False and width/height (surface size to blit
-        if change_colors is None:
-            image_cache = f'{imagepath}-{Scale}-{width}-{height}'
-        else:
-            image_cache = f'{imagepath}-{Scale}-{width}-{height}-{change_colors}'
+        image_cache = f'{imagepath}-{Scale}-{width}-{height}-{enabledImage}-{change_colors}'
 
-        if UseCache:
-            if image_cache not in self.imagecache:
-                try:
-                    self.logs.log("DEBUG", f"Inserting image into cache {imagepath} ({image_cache})")
-                    if(enabledImage == False):
-                        loaded_image_PIL = Image.open(imagepath).convert('LA').convert('RGBA')
-                        loaded_image = pygame.image.fromstring(
-                                            loaded_image_PIL.tobytes(),
-                                            loaded_image_PIL.size,
-                                            loaded_image_PIL.mode).convert_alpha()
-                    else:
-                        # Load
-                        loaded_image = pygame.image.load(imagepath).convert_alpha()
-                    if change_colors is not None:
-                        image_pixel_array = pygame.PixelArray(loaded_image)
-                        for change in change_colors:
-                            image_pixel_array.replace(change[0], change[1])
-            
-                    # Scale
-                    scaled = self.scale_image(loaded_image, scale=Scale, width=int(width), height=int(height))
-                    # then store image + size
+        if image_cache not in self.imagecache or UseCache is False:
+            try:
+                self.logs.debug(f"Inserting image into cache {imagepath} ({image_cache})")
+                if enabledImage:
+                    # Load
+                    loaded_image = pygame.image.load(imagepath).convert_alpha()
+                else:
+                    loaded_image_PIL = Image.open(imagepath).convert('LA').convert('RGBA')
+                    loaded_image = pygame.image.fromstring(
+                                        loaded_image_PIL.tobytes(),
+                                        loaded_image_PIL.size,
+                                        loaded_image_PIL.mode).convert_alpha()
+
+                if change_colors is not None:
+                    image_pixel_array = pygame.PixelArray(loaded_image)
+                    for change in change_colors:
+                        image_pixel_array.replace(change[0], change[1])
+        
+                # Scale
+                scaled = self.scale_image(loaded_image, scale=Scale, width=int(width), height=int(height))
+                # then store image + size
+                if UseCache:
                     self.imagecache[image_cache] = scaled
 
-                except Exception as e:
-                    self.logs.log("WARNING", f"Unable to load image {imagepath}. Error was {e}.")
-                    return False
+            except Exception as e:
+                self.logs.warning(f"Unable to load image {imagepath}. Error was {e}.")
+                return False
 
-                self.logs.log("DEBUG", f"{len(self.imagecache)} elements in cache")
-            scaled_image = self.imagecache[image_cache][0]
-            scaled_width = self.imagecache[image_cache][1][0]
-            scaled_height = self.imagecache[image_cache][1][1]
-        else:
-            if(enabledImage == False):
-                loaded_image_PIL = Image.open(imagepath).convert('LA').convert('RGBA')
-                loaded_image = pygame.image.fromstring(
-                                    loaded_image_PIL.tobytes(),
-                                    loaded_image_PIL.size,
-                                    loaded_image_PIL.mode).convert_alpha()
-            else:
-                # Load
-                loaded_image = pygame.image.load(imagepath).convert_alpha()
-            if change_colors is not None:
-                image_pixel_array = pygame.PixelArray(loaded_image)
-                for change in change_colors:
-                    image_pixel_array.replace(change[0], change[1])
-
-            # Scale
-            scaled = self.scale_image(loaded_image, scale=Scale, width=int(width), height=int(height))
-            scaled_image = scaled[0]
-            scaled_width = scaled[1][0]
-            scaled_height = scaled[1][1]
+            self.logs.debug(f"{len(self.imagecache)} elements in cache")
+        scaled_image = self.imagecache[image_cache][0]
+        scaled_width = self.imagecache[image_cache][1][0]
+        scaled_height = self.imagecache[image_cache][1][1]
 
         # Compute posiion
         if center_x:
@@ -7759,21 +8315,17 @@ class Screen(pygame.Surface):
             for option, value in self.game_options.items():
                 if option == 'theme':
                     continue
-                if option == 'Time' and value == 0:
+                if option == 'Time':
                     continue
-                #New Added by Manu 24-02-2024    
-                txt_option = self.traduire_option(game,option)
+                if value == '0' or value is False:
+                    continue 
+                txt_option = self.translate_option(game, option)
 
                 if value is True:
                     self.blit_text(f'{txt_option}', pos_x, pos_y, width, height, color=self.colorset['game-option'], dafont='Impact', align='Right', margin=False)
-                elif value is False:
-                    continue
                 else:
-                    if value != '0':
-                        self.blit_text(f'{txt_option} : {value}', pos_x, pos_y, width, height, color=self.colorset['game-option'], dafont='Impact', align='Right', margin=False)
-                    else:
-                        continue
-                pos_y += height + self.margin
+                    self.blit_text(f'{txt_option} : {value}', pos_x, pos_y, width, height, color=self.colorset['game-option'], dafont='Impact', align='Right', margin=False)
+            pos_y += height + self.margin
 
     def display_rem_darts(self, remaining, nb_darts, dartimage='target'):
         '''
@@ -7977,7 +8529,7 @@ class Screen(pygame.Surface):
                         self.blit_text(text2, left_x, left_y, int(left_w / 2), text_h, color=player.color, dafont='Impact', align='Right', margin=False)
                     left_y += text_h
             except:
-                self.logs.log("ERROR", f"No score historized for this game")
+                self.logs.error(f"No score historized for this game")
 
     def display_round(self, actual_round, max_round, set_number=None, max_set=None):
         '''
@@ -8108,7 +8660,7 @@ class Screen(pygame.Surface):
             subprocess.run(f'espeak -a {volume} -s {speed} -v mb-fr1 "{text}" --stdout |aplay 2> /dev/null', shell=True)
             return True
         except Exception as e:
-            self.logs.log("WARNING", f"Problem trying to use espeak : {e}")
+            self.logs.warning(f"Problem trying to use espeak : {e}")
             return False
 
     def fade_out(self, sound, duration, fade_time):
@@ -8135,7 +8687,7 @@ class Screen(pygame.Surface):
                     # Set volume to defined setting and play
                     volume = round((int(self.sound_volume) * self.sound_multiplier / 100), 1)
                     sound.set_volume(volume)
-                    self.logs.log("INFO", f"Play {sound_file} at volume {volume}")
+                    self.logs.info(f"Play {sound_file} at volume {volume}")
                     play_sound = sound.play()
 
                     # if crop duration is requested, new thread to fadeout the sound
@@ -8150,9 +8702,9 @@ class Screen(pygame.Surface):
                     else:
                         return play_sound
             except Exception as e:
-                self.logs.log("WARNING", f"Unable to load audio while trying to play file : {sound_file}\n{e}")
+                self.logs.warning(f"Unable to load audio while trying to play file : {sound_file}\n{e}")
         else:
-            self.logs.log("WARNING", f"Unable to load this audio file : {filename}")
+            self.logs.warning(f"Unable to load this audio file : {filename}")
 
     def wait_end_sound(self, played_sound):
         '''
@@ -8187,7 +8739,7 @@ class Screen(pygame.Surface):
             self.sound_volume = max(0, self.sound_volume)
             self.sound_volume = min(100, self.sound_volume)
 
-            self.logs.log("DEBUG", f"Volume level is now {self.sound_volume}")
+            self.logs.debug(f"Volume level is now {self.sound_volume}")
             if diff > 0:
                 self.play_sound('vol+', wait_finish=False)
             else:
@@ -8211,12 +8763,15 @@ class Screen(pygame.Surface):
         '''
         Play Winner at the end of the Game (priority : personnal sound / speech / "you")
         '''
+        play_sound_end_game = "winneris"
+        if player.find(',') > 0:
+            play_sound_end_game = "winnerare"
 
-        if self.file_class.is_dir('winneris', 'sounds'):
-            self.play_sound('winneris', wait_finish=False, duration=duration)
-            return
+        if self.file_class.is_dir(play_sound_end_game, 'sounds'):
+            self.play_sound(play_sound_end_game, wait_finish=False, duration=duration)
+            self.play_sound(f'{self.config.root_dir}/sounds/{play_sound_end_game}.ogg', wait_finish=True, duration=duration)
         else:
-            self.play_sound('winneris', wait_finish=True, duration=duration)
+            self.play_sound(play_sound_end_game, wait_finish=True, duration=duration)        
 
         if delay is not None:
             pygame.time.wait(delay)
@@ -8298,13 +8853,12 @@ class Screen(pygame.Surface):
         and 1.0.9 are supposed to be compatibles)
         '''
         if serverversion[:3] != self.config.pyDartsVersion[:3]:
-            self.logs.log('ERROR',
-                        f'Version of client ({self.config.pyDartsVersion}) and server \
+            self.logs.error(f'Version of client ({self.config.pyDartsVersion}) and server \
                                 ({serverversion}) do not match. This is strongly \
                                 discouraged ! Please upgrade !')
             self.message([self.lang.translate('version-mismatch')], 200, None, 'middle', 'big', bg_color='menu-ko')
         else:
-            self.logs.log('DEBUG', f'Version of client ({self.config.pyDartsVersion}) \
+            self.logs.debug(f'Version of client ({self.config.pyDartsVersion}) \
                     and server ({serverversion}) are supposed to be compatible. Continuing...')
 
     def draw_triple(self, angle_index, color=None, center=True):
@@ -8537,13 +9091,13 @@ class Screen(pygame.Surface):
     def sort_players(self, player):
         return player[1]
         
-    def traduire_option(self, game, option_name):
-        #Traduction des options de jeu Added by Manu 24-02-2024
+    def translate_option(self, game, option_name):
         if option_name[0:6].upper() == 'DEBUG-': # Dictionnaire DEBUG pour aide au debugage des jeux (voir Othello)
             text = option_name[6:] #On ne traduit pas c'est pour un debug
             #DEBUG-Nb_de_tour  affichera Nb_de_tour
             return text
         text = self.lang.translate(f'{game}-{option_name}')
+        self.logs.debug(f"Cherche {game}-{option_name}")
         if text == f'{game}-{option_name}': # pas de traduction trouvée
             text = self.lang.translate(f'AllGame-{option_name}')
         return text
@@ -8557,7 +9111,7 @@ class Screen(pygame.Surface):
             img = None #n'affiche pas l'image à nouveau
         return img
 
-    def affiche_qrcode(self, img = None, pos_x = -160 ,pos_y = 10 ):
+    def display_qrcode(self, img = None, pos_x = -160 ,pos_y = 10 ):
         '''
         Affiche qrcode
         '''

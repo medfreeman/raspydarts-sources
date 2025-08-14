@@ -10,7 +10,7 @@ from include import cgame
 # Game Variables
 ############
 
-OPTIONS = {'theme': 'default', 'max_round': 10, 'winscore': 10, 'simple50' : False}
+OPTIONS = {'theme': 'default', 'max_round': 8, 'winscore': 10, 'simple50' : False}
 GAME_RECORDS = {'Points Per Round': 'DESC', 'Points Per Dart': 'DESC'}
 NB_DARTS = 3  # Total darts the player has to play
 LOGO = 'Target.png'
@@ -79,7 +79,7 @@ class Game(cgame.Game):
             try:
                 self.check_handicap(players)
             except Exception as exception: # pylint: disable=broad-except
-                self.logs.log('ERROR', f'Handicap failed : {exception}')
+                self.logs.error(f'Handicap failed : {exception}')
 
             for player in players:
                 # Init score
@@ -131,7 +131,7 @@ class Game(cgame.Game):
             #return 1
 
         # Print debug output
-        self.logs.log('DEBUG', self.infos)
+        self.logs.debug(self.infos)
         return return_code
 
     def post_dart_check(self, hit, players, actual_round, actual_player, player_launch):
@@ -227,6 +227,9 @@ class Game(cgame.Game):
             print('possible hit = 0')
             handler['return_code'] = 1 #nextplayer
 
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+
         return handler
 
     def miss_button(self, players, actual_player, actual_round, player_launch):
@@ -246,7 +249,7 @@ class Game(cgame.Game):
         elif players[actual_player].round_points < self.cible :
             self.display.play_sound('target_rate')
             players[actual_player].columns[player_launch-1] = ('MISS', 'str')
-            self.display.play_sound('treasure_crane_jaune')
+            #self.display.play_sound('miss')
             players[actual_player].darts_thrown += 1
             self.display.message(['Fléchette suivante'], None, None, 'middle', 'big')
         

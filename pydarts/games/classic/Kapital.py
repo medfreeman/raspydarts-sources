@@ -355,7 +355,6 @@ class Game(cgame.Game):
                     players[actual_player].contrat_done = True
                     handler['sound'] = 'kapitalhardcontrat'
                     self.infos += "Suite done !\n"
-                    #correction by Manu pour le contrat reussi on ajoute le contrat au score
                     players[actual_player].add_score(players[actual_player].score_contrat)
                 else:
                     self.infos += "Looser !\n"
@@ -469,9 +468,12 @@ class Game(cgame.Game):
                 handler['return_code'] = 2
                 if self.winner is not None:
                     handler['return_code'] = 3
+
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
                     
         # Display Recapitulation Text
-        self.logs.log("DEBUG", self.infos)
+        self.logs.debug(self.infos)
         return handler
 
     def early_player_button(self, players, actual_player, actual_round):
@@ -500,7 +502,7 @@ class Game(cgame.Game):
                     return 3
                 return 2
 
-        self.logs.log('DEBUG', self.infos)
+        self.logs.debug(self.infos)
         return 1
 
     def search_possible_launch(self, score, player_launch):
@@ -532,7 +534,7 @@ class Game(cgame.Game):
         print('miss')
         #players[actual_player].columns[6] = (self.moyenne, 'int')
         players[actual_player].columns[player_launch] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         players[actual_player].darts_thrown += 1
         # play penality sound
         #self.display.play_sound('penality')

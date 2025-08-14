@@ -142,7 +142,7 @@ class Game(cgame.Game):
 #        if self.winner is not None:
 #            return 3
 
-        self.logs.log("DEBUG", self.infos)
+        self.logs.debug(self.infos)
         return return_code
 
     def post_dart_check(self, hit, players, actual_round, actual_player, player_launch):
@@ -262,8 +262,10 @@ class Game(cgame.Game):
                     print(f"High Score : {self.winner} = {self.high_score}")
                     handler['return_code'] = 3
 
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
 
-        self.logs.log("DEBUG", self.infos)
+        self.logs.debug(self.infos)
         return handler
 
 #    def check_winner(self, players, actual_player, player_launch):
@@ -292,8 +294,7 @@ class Game(cgame.Game):
     def get_possibilitirs(self, target_score, kinito=False):
         '''
         Get possibilities in ordre to light leds
-        '''
-        # modified by Manu to check winscore       
+        '''    
         possibilities = []
         for multiplier in ['S', 'D', 'T']:
             if multiplier == 'S':
@@ -388,7 +389,7 @@ class Game(cgame.Game):
         print('miss')
         #players[actual_player].columns[6] = (self.moyenne, 'int')
         players[actual_player].columns[player_launch+3] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         players[actual_player].darts_thrown += 1
         check = False
         if not check :
@@ -397,11 +398,6 @@ class Game(cgame.Game):
             players[actual_player].points -= players[actual_player].get_col_value(1)
             players[actual_player].columns[player_launch +3] = (f'{hit}', 'str')
             
-        
-        
-        
-        
-
     def set_random(self, players, actual_round, actual_player, player_launch, data):
         '''
         Set Random things, while received by master in case of a network game
@@ -410,7 +406,7 @@ class Game(cgame.Game):
         for player in players:
             if player.kinito:
                 kinito_open = True
-                self.logs.log("DEBUG", "KINITO is open ! We wait for random score via network :)")
+                self.logs.debug("KINITO is open ! We wait for random score via network :)")
         if kinito_open and 'KINITOSCORES' in data:
             scores = data['KINITOSCORES']
             for player in players:

@@ -98,19 +98,6 @@ class Game(cgame.Game):
         self.infos = ""
         self.winner = None
         
-        self.colors = [display.colorset['player1'],
-                       display.colorset['player2'],
-                       display.colorset['player3'],
-                       display.colorset['player4'],
-                       display.colorset['player5'],
-                       display.colorset['player6'],
-                       display.colorset['player7'],
-                       display.colorset['player8'],
-                       display.colorset['player9'],
-                       display.colorset['player10'],
-                       display.colorset['player11'],
-                       display.colorset['player12']]
-        
         # DEBUG dictionnary special for developer
         self.debug_info = False # par default
         self.debug_record = False
@@ -135,8 +122,7 @@ class Game(cgame.Game):
                     self.debug_record = False
         
         if nb_players != 4 and self.league:
-            self.logs.log("ERROR", \
-                    "League option can only be used with 4 players! Disabling league play!")
+            self.logs.error("League option can only be used with 4 players! Disabling league play!")
             
         elif self.league:
             self.display.teaming = True
@@ -170,7 +156,7 @@ class Game(cgame.Game):
             try:
                 lst = self.check_handicap(players)
             except Exception as exception: # pylint: disable=broad-except
-                self.logs.log("ERROR", f"Handicap failed : {exception}")
+                self.logs.error(f"Handicap failed : {exception}")
             for player in players:
                 # Init score
                 if self.league:
@@ -225,7 +211,7 @@ class Game(cgame.Game):
                 other_team_score += players[2].score
             #if teammatescore is not lower than other_team_score, freeze rule is active
             if mate_score >= other_team_score:
-                self.logs.log("DEBUG", 'FROZEN!!!')
+                self.logs.debug('FROZEN!!!')
                 self.frozen = True
                 players[actual_player].columns[3] = ('FRZ', 'str', 'game-red')
             else:
@@ -242,14 +228,14 @@ class Game(cgame.Game):
                     if self.debug_replay:
                         self.actual_round = self.debug.load_debug(players,self.post_dart_check, self.nb_darts, self.Sugestions_cible)
         # Print debug output
-        self.logs.log("DEBUG", self.infos)
+        self.logs.debug(self.infos)
         return return_code
 
     def Sugestions_cible(self,players,actual_player,player_launch):
         # Get Playing Suggestions
         # Double IN or Master IN
         leds = []
-        suggestion_color = self.colors[actual_player]
+        suggestion_color = players[actual_player].color
         if None != self.display.colorset['suggestion-color-allplayer']:
             suggestion_color = self.display.colorset['suggestion-color-allplayer']
         if players[actual_player].points == 0 and (self.double_in or self.master_in):
@@ -269,7 +255,7 @@ class Game(cgame.Game):
                     if actual_player != p.ident and p.score < players[actual_player].score:
                         zapping = self.search_possibilities(players[actual_player].score - p.score, player_launch)
                         if len(zapping) > 0: #ne prend en compte que si existe une solution
-                            leds.extend(f'{key}#{self.colors[p.ident]}' for key in zapping)
+                            leds.extend(f'{key}#{players[p.ident].color}' for key in zapping)
                             self.possible_zaps.extend(f'{key}' for key in zapping)
                             self.possible_zaps.append(f'@{p.ident}|')
             # Possible win ?
@@ -358,7 +344,7 @@ class Game(cgame.Game):
         possible_hits = self.search_possibilities(players[actual_player].score, player_launch)
         target_value = ''
         number = ''
-        self.logs.log("DEBUG", f"possible_hits={possible_hits}")
+        self.logs.debug(f"possible_hits={possible_hits}")
 
         # Compute value to strike
         if len(possible_hits) > 0 :
@@ -540,7 +526,6 @@ class Game(cgame.Game):
                 and player_launch == int(self.nb_darts):
             self.infos += f"Last round reached ({actual_round}){self.lf}"
             handler['return_code'] = 2
-            #Ajout d'un gagnant au point by Manu
             self.winner = self.check_winner(players)
             if self.winner is not None:
                 handler['return_code'] = 3
@@ -551,6 +536,9 @@ class Game(cgame.Game):
         #debug
         if self.debug_info and handler['return_code'] > 1:
             self.debug.closeFile()
+
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
 
         return handler
     
@@ -580,8 +568,8 @@ class Game(cgame.Game):
         '''
         return_code = 0
         players[actual_player].add_dart(actual_round, player_launch, 'MISS', hit_value=0)
-        self.display.play_sound('treasure_crane_jaune')
-        self.logs.log("DEBUG", f"MissButtonPressed : {player_launch}")
+        self.display.play_sound('miss')
+        self.logs.debug(f"MissButtonPressed : {player_launch}")
         players[actual_player].columns[player_launch - 1] = ('tyre', 'image')
         if player_launch == int(self.nb_darts):
             if self.debug_info and self.debug_record:
@@ -712,7 +700,7 @@ class Game(cgame.Game):
         '''
         Check for handicap and record appropriate marks for player
         '''
-        self.logs.log("DEBUG", "Checking for handicaps!")
+        self.logs.debug("Checking for handicaps!")
         list_ppd = []
         for player in players:
             name = player.name
@@ -894,8 +882,7 @@ class Game(cgame.Game):
                     player_x += int(player_width / 2)
 
                 self.display.blit_rect(player_x, player_y, player_width, heading_height, heading_color)
-#                self.display.blit_rect(player_x, player_y + heading_height, player_width, player_height - heading_height, player_color)
-                self.display.blit_rect(player_x, player_y + heading_height, player_width, player_height - heading_height, self.colors[player.ident])
+                self.display.blit_rect(player_x, player_y + heading_height, player_width, player_height - heading_height, players[player.ident].color)
 
                 if self.display.colorset['game-bg'] is not None:
                     pygame.draw.line(self.display.screen, self.display.colorset['game-bg'], (player_x, player_y + heading_height), (player_x + player_width, player_y + heading_height), 2)
@@ -957,7 +944,10 @@ class Game(cgame.Game):
 
         if len(self.possible_hits) > 0 and not end_of_game:
             text = ' / '.join(self.possible_hits)
-            self.display.blit_text(f'{text}', right_x, right_y + 3 * right_height, right_width, right_height * 2, color=self.colors[8], dafont='Impact', align='Left', margin=False, Alpha = 255)
+            possibilities_color=self.display.colorset['player9'] 
+            if self.display.colorset['suggestion-color-allplayer'] is not None:
+                possibilities_color=self.display.colorset['suggestion-color-allplayer']
+            self.display.blit_text(f'{text}', right_x, right_y + 3 * right_height, right_width, right_height * 2, color=possibilities_color, dafont='Impact', align='Left', margin=False, Alpha = 255)
             
 
         # Game's options
@@ -966,18 +956,16 @@ class Game(cgame.Game):
 
         if self.display.colorset['game-option'] is not None:
             for option, value in self.options.items():
-                if option == 'theme':
+                if option == 'theme' or value is False:
                     continue
                 if value is True:
                     self.display.blit_text(f'{game}-{option}', right_x, option_y, right_width, option_height, color=self.display.colorset['menu-ok'], dafont='Impact', align='Right', margin=False, divider=1, game=game)
-                elif value is False:
-                    self.display.blit_text(f'{game}-{option}', right_x, option_y, right_width, option_height, color=self.display.colorset['menu-ko'], dafont='Impact', align='Right', margin=False, divider=1, game=game)
                 else:
                     self.display.blit_text(f'{self.display.lang.translate(game + "-" + option, game)} : {value}', right_x, option_y, right_width, option_height, color=self.display.colorset['game-option'], dafont='Impact', align='Right', margin=False, divider=1, game=game)
                 option_y -= option_height
         self.display.blit_text(f"{game.replace('_', ' ')}", right_x, option_y - option_height, right_width, option_height * 2, color=(255, 0, 0), dafont='Impact', align='Right', margin=False, game=game)
 
-        # Dartts' scores
+        # Darts' scores
         mid_x = int(self.display.res['x'] / 4) + self.margin
         mid_y = int(self.display.res['y'] * 3 / 4) + self.margin
         mid_width = self.display.mid_x - self.margin_2
@@ -1014,7 +1002,8 @@ class Game(cgame.Game):
         old_score = -100
         for player in t_players:
             score = player.score
-            color = self.colors[player.ident] #player.color
+            #color = t_players[player.ident].color
+            color = player.color
 
             round_pos_y = min_pos_y + int((max_pos_y - min_pos_y) * score / self.starting_at)
             text_pos_y = round_pos_y
@@ -1038,7 +1027,7 @@ class Game(cgame.Game):
                 ou = text.find("|") # position du pipe
                 aff = text[:text.find("@")-2]
                 whois = int(text[text.find("@")+1:ou]) # p.ident
-                self.display.blit_text(f'{aff}', 250, (posy - 2 * right_height) + 3 * right_height, right_width, right_height, color=self.colors[whois], dafont='Impact', align='Left', margin=False, Alpha = 255)
+                self.display.blit_text(f'{aff}', 250, (posy - 2 * right_height) + 3 * right_height, right_width, right_height, color=t_players[whois].color, dafont='Impact', align='Left', margin=False, Alpha = 255)
                 text = text[ou+4:] # car suivant sera /  exemple sur 2 lignes:  S12 / | / S15 / | 
                 lignes = text.count("|") # mise à jour
                 posy += right_height # on saute une ligne à l'écran pour écrire la suite au cas ou

@@ -9,7 +9,7 @@ import subprocess
 import pygame
 
 # Dictionnay of options - Text format only
-OPTIONS = {'theme': 'default', 'win_points':'2', 'fleche':'3', 'regenere': True}
+OPTIONS = {'theme': 'default', 'win_points':'2', 'fleche':'2', 'regenere': True}
 # background image - relative to images folder - Name it like the game itself
 GAME_LOGO = 'Puissance4.png' # background image
 # Columns headers - Better as a string
@@ -112,6 +112,8 @@ class Game(cgame.Game):
 
    # Actions done before each dart throw - for example, check if the player is allowed to play
    def pre_dart_check(self, players, actual_round, actual_player, player_launch):
+        
+        handler = self.init_handler()
         return_code = 0
 
         # Set score at startup
@@ -198,11 +200,42 @@ class Game(cgame.Game):
  
         self.rpi.set_target_leds('|'.join(f"{mult}{segment}" for mult in ('S', 'D', 'T') for segment in self.leds))         
         
-        return return_code
+        
+        # test for a winner
+        if self.nb_players == 2 :
+            if players[actual_player].score >= self.winpoints:
+                self.winner =  players[actual_player].ident
+                return_code = 3
+        elif self.nb_players == 4 :
+            scoreJ1 = 0
+            scoreJ2 = 0
+            for player in players :
+                if player.ident == 0 :
+                    scoreJ1 += player.score 
+                if player.ident == 2 :
+                    scoreJ1 += player.score
+                if player.ident == 1 :
+                    scoreJ2 += player.score 
+                if player.ident == 3 :
+                    scoreJ2 += player.score    
+                    
+            if scoreJ1 >= self.winpoints :
+                self.winner = players[actual_player].ident
+                return_code = 3
+            elif scoreJ2 >= self.winpoints :
+                self.winner = players[actual_player].ident    
+                return_code = 3      
+                
+        handler['return_code'] = return_code
+        return handler
+                
+        #return return_code
 
 
    def post_dart_check(self,hit,players,actual_round,actual_player,player_launch):
         return_code = 0
+        
+        handler = self.init_handler()
         self.show_hit = True
 
         # Record total dart thrown, total hits (S=1, D=2, T=3) and refresh players stats
@@ -224,14 +257,19 @@ class Game(cgame.Game):
                         if players[actual_player].ident == 0 or players[actual_player].ident == 2:
                           self.grille[ligne][colonne] = 1
                           self.jeton += 1
-                          self.display.play_sound('p4_hit')
+                          #self.display.play_sound('p4_hit')
+                          handler['sound'] = 'p4_hit'
+                          
                           ### quitte le while
                           stop = True
                         
                         if players[actual_player].ident == 1 or players[actual_player].ident == 3:
                           self.grille[ligne][colonne] = -1
                           self.jeton += 1
-                          self.display.play_sound('p4_hit')
+                          #self.display.play_sound('p4_hit')
+                          handler['sound'] = 'p4_hit'
+                          
+                          
                           stop = True
                       ### remonte d une ligne si un jeton est deja present  
                       ligne = ligne - 1 
@@ -249,21 +287,27 @@ class Game(cgame.Game):
                         if players[actual_player].ident == 0 or players[actual_player].ident == 2:
                           self.grille[ligne][colonne] = 1
                           self.jeton += 1
-                          self.display.play_sound('p4_hit')
+                          #self.display.play_sound('p4_hit')
+                          handler['sound'] = 'p4_hit'
+                          
                           ### quitte le while 
                           stop = True
                           
                         if players[actual_player].ident == 1 or players[actual_player].ident == 3 :
                           self.grille[ligne][colonne] = -1
                           self.jeton += 1
-                          self.display.play_sound('p4_hit')
+                          #self.display.play_sound('p4_hit')
+                          handler['sound'] = 'p4_hit'
+                          
+                          
                           ### quitte le while 
                           stop = True
                       ### remonte d une ligne si un jeton est deja present  
                       ligne = ligne - 1 
         
         if str(hit[1:]) not in (self.miss) :    
-              self.display.play_sound('p4_miss')
+              #self.display.play_sound('p4_miss')
+              handler['sound'] = 'p4_miss'
               
         ### verifie si il y a un gagnant en H-V-D
         self.verif_horiz()
@@ -325,7 +369,12 @@ class Game(cgame.Game):
             if self.touche == 2 :
                 return_code = 1
 
-        return return_code
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        handler['return_code'] = return_code
+        return handler
+
+        #return return_code
 
    def creategrid(self):
       self.grid.clear()
@@ -410,7 +459,7 @@ class Game(cgame.Game):
    def miss_button(self, players, actual_player, actual_round, player_launch):
 
       players[actual_player].segments[player_launch-1] = 'MISS'
-      self.display.play_sound('treasure_crane_jaune')
+      self.display.play_sound('miss')
       players[actual_player].darts_thrown += 1
 
         

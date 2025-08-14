@@ -24,7 +24,7 @@ def get_version(logs):
     with open (VERSION_FILE, 'r', encoding="utf-8") as version_file:
         data = version_file.readlines()
 
-    logs.log("INFO", f"Version of raspydarts is {data[0].strip()}")
+    logs.info(f"Version of raspydarts is {data[0].strip()}")
 
     return data[0].strip()
 
@@ -32,11 +32,11 @@ def set_version(logs, version):
     """
     Update VERSION file with version
     """
-    
+
     with open(VERSION_FILE, 'w', encoding="utf-8") as version_file:
         version_file.write(f'{version}')
     version_file.close()
-    logs.log("DEBUG", f"Version set : {version}")
+    logs.debug(f"Version set : {version}")
 
 def get_list(logs, host, port, actual_version, last=True):
     """
@@ -61,10 +61,10 @@ def get_list(logs, host, port, actual_version, last=True):
     try:
         query.perform()
         query.close()
-        logs.log("DEBUG", f"Get updates list : {output.getvalue().decode('UTF-8')}")
+        logs.debug(f"Get updates list : {output.getvalue().decode('UTF-8')}")
         return ast.literal_eval(output.getvalue().decode('UTF-8'))['response']
     except pycurl.error as exc:
-        logs.log("ERROR", f"Unable to reach {url} ({exc})")
+        logs.error(f"Unable to reach {url} ({exc})")
 
     return None
 
@@ -97,11 +97,11 @@ def download(logs, host, port, filename, expected_size):
 
     file_size = os.path.getsize(backup_name)
     if file_size != expected_size:
-        logs.log("ERROR", f"{filename} downloaded but size differs from announced \
+        logs.error(f"{filename} downloaded but size differs from announced \
             ({file_size} vs {expected_size}")
         return False
 
-    logs.log("DEBUG", f"{filename} correctly downloaded ({file_size} bytes)")
+    logs.debug(f"{filename} correctly downloaded ({file_size} bytes)")
     return True
 
 def get_last(logs, host, port, actual_version):
@@ -112,7 +112,7 @@ def get_last(logs, host, port, actual_version):
     get = get_list(logs, host, port, last=True, actual_version=actual_version)
 
     if get is None or (len(get) == 0):
-        logs.log("DEBUG", "NO availables update or error")
+        logs.debug("NO availables update or error")
         return None, None, None
 
     available_update = get[0]
@@ -135,11 +135,11 @@ def apply_update(logs, file_name, version):
 
     set_version(logs, version)
 
-    logs.log("DEBUG", f"{version} restored")
+    logs.debug(f"{version} restored")
 
     return get_version(logs)
 
-def send_infos(logs, game, nb_players, options, rpi_version, rpi_serial, action, competition_mode, play_id):
+def send_infos(logs, game, nb_players, options, rpi_version, rpi_serial, action, competition_mode, play_id, version):
 
     if ISCONNECTED == False:
         return
@@ -151,7 +151,7 @@ def send_infos(logs, game, nb_players, options, rpi_version, rpi_serial, action,
 
     data_1 = {"game": f"{game}", "nb_players":nb_players, "options": f"{options}", \
             "rpi_version": f"{rpi_version}", "rpi_serial": f"{rpi_serial}", "action": f"{action}", \
-            "play_id": f"{play_id}", "play_mode": f"{mode}"}
+            "play_id": f"{play_id}", "play_mode": f"{mode}", "version": f"{version}"}
     url= 'http://raspydarts.fr:8080/api/plays'
 
     headers = {"Content-Type": "application/json", "accept": "*/*"}
@@ -159,10 +159,10 @@ def send_infos(logs, game, nb_players, options, rpi_version, rpi_serial, action,
     try:
         res = requests.post(url, json=data_1, headers=headers, timeout=(1,1))
         response_code = res.status_code
-        logs.log("DEBUG", f"Response code is {response_code}")
+        logs.debug(f"Response code is {response_code}")
     except Exception as exception:
-        logs.log("ERROR", f"Unable to reach {url}")
-        logs.log("ERROR", f"Exception is {exception}")
+        logs.error(f"Unable to reach {url}")
+        logs.error(f"Exception is {exception}")
 
 def connected_to_the_web():
     try:
@@ -172,6 +172,5 @@ def connected_to_the_web():
     except:
         pass
     return False   
-
 
 ISCONNECTED = connected_to_the_web()

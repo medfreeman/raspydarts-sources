@@ -225,7 +225,7 @@ class Game(cgame.Game):
         # It is recommanded to update stats evry dart thrown
         self.refresh_stats(players, actual_round)
 
-        self.infos += f"Hit: {players[actual_player].get_touch_type(hit)} - Active Columns: \
+        self.infos += f"Hit: {hit} - Active Columns: \
                 {self.headers}{self.lf}"
         self.infos += f"Total number of hits for this player: \
                 {players[actual_player].get_total_hit()}{self.lf}"
@@ -251,7 +251,10 @@ class Game(cgame.Game):
             handler['return_code'] = 2
 
         # Display Recap text
-        self.logs.log("DEBUG", self.infos)
+        self.logs.debug(self.infos)
+
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
 
         # And return code
         return handler
@@ -463,7 +466,7 @@ class Game(cgame.Game):
             players[actual_player].reset_darts()
 
             self.infos += f"Active columns : {self.headers}"
-            self.logs.log("DEBUG", self.infos)
+            self.logs.debug(self.infos)
             self.save_turn(players)
 
         leds = []
@@ -795,9 +798,9 @@ class Game(cgame.Game):
         Check for handicap and record appropriate marks for player
         """
         if len(players) != 4:
-            self.logs.log("WARNING", "Handicap is available in Cricket only for 4 players.")
+            self.logs.warning("Handicap is available in Cricket only for 4 players.")
         else:
-            self.logs.log("DEBUG", "Looking for handicaps")
+            self.logs.debug("Looking for handicaps")
             handimarks = []
             mpr = []
             maxid = 0
@@ -813,7 +816,7 @@ class Game(cgame.Game):
             # load handicaps into players
             for column in range(0, int(self.nbcol + 1)):
                 for handmark in range(handimarks[column] + 1):
-                    self.logs.log("DEBUG", f"Handicap : Column = {column}, handmark = {handmark}")
+                    self.logs.debug(f"Handicap : Column = {column}, handmark = {handmark}")
                     if maxid == 0:
                         if handmark == 0:
                             pass
@@ -831,10 +834,10 @@ class Game(cgame.Game):
         """
         Miss button pressed
         """
-        self.logs.log("DEBUG", "MissButtonPressed")
+        self.logs.debug("MissButtonPressed")
         players[actual_player].darts_thrown += 1
         players[actual_player].add_dart(actual_round, player_launch, 'MISS', hit_value=0)
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
 
     def check_players_allowed(self, nb_players):
         """
@@ -1151,19 +1154,16 @@ class Game(cgame.Game):
 
         if self.display.colorset['game-option'] is not None:
             for option, value in self.options.items():
-                if option == 'theme':
+                if option == 'theme' or value is False:
                     continue
                 text = self.display.lang.translate(f'{game}-{option}')
 
                 if value is True:
                     self.display.blit_text(f'{text}', right_x, option_y, right_width, option_height, color=self.display.colorset['game-green'], dafont='Impact', align='Right')
-                elif value is False:
-                    self.display.blit_text(f'{text}', right_x, option_y, right_width, option_height, color=self.display.colorset['game-red'], dafont='Impact', align='Right')
                 else:
                     self.display.blit_text(f'{text} : {value}', right_x, option_y, right_width, option_height, color=self.display.colorset['game-option'], dafont='Impact', align='Right')
                 option_y -= option_height
         self.display.blit_text(f"{game.replace('_', ' ')}  ", right_x, option_y - option_height, right_width, option_height * 2, color=(255, 0, 0), dafont='Impact', align='Right')
-
 
         self.display.save_background()
         self.display.update_screen()

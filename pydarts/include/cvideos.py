@@ -26,7 +26,7 @@ class Videos():
         """
         Set video level
         """
-        self.logs.log("DEBUG", f"Set video level to {level}")
+        self.logs.debug(f"Set video level to {level}")
         self.level = int(level)
 
     def set_volume(self, volume):
@@ -34,7 +34,7 @@ class Videos():
         Set volume
         """
         log = int(4000 - math_log(max(int(volume / 3 * self.multiplier), 1), 10) * 2000)
-        self.logs.log("DEBUG", f"Set volume to {-log}")
+        self.logs.debug(f"Set volume to {-log}")
 
         self.volume = -log
 
@@ -45,10 +45,10 @@ class Videos():
         if video is None:
             return False
 
-        self.logs.log("DEBUG", f"Play {video} wait={wait}")
+        self.logs.debug(f"Play {video} wait={wait}")
         msg = f'omxplayer --vol {self.volume} -o alsa "{video}"'
 
-        self.logs.log("DEBUG", f"{msg}")
+        self.logs.debug(f"{msg}")
         if wait:
             with subp.Popen(['omxplayer', '--vol', f'{self.volume}', '-o', 'alsa', f'{video}'], stdout=subp.DEVNULL, stderr=subp.DEVNULL) as process :
                 process.wait()
@@ -142,7 +142,7 @@ class Videos():
             elif dart is not None and dart[0] in ['S', 'D', 'T']:
                 somme += self.dart_value(dart, True)
 
-        self.logs.log("DEBUG", f"Search for move ({play_special}/{self.level}) : {sorted_darts}")
+        self.logs.debug(f"Search for move ({play_special}/{self.level}) : {sorted_darts}")
 
         if all(x == 'T20' for x in darts):
             special_move = 'MAXIMUM_TON_80'

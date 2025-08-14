@@ -24,7 +24,7 @@ gamecontext = {
          ,'b' : 'BACKUPBUTTON'
          ,'j' : 'JOKER'
          ,'c' : 'CHEAT'
-         ,'m' : 'MISSDART'
+         ,'m' : 'MISS'
          ,'p' : 'BACK'
          ,'x' : 'DEBUG'
          ,'g' : 'GAMEBUTTON'
@@ -79,7 +79,7 @@ shiftmath = {
 
 buttons_list = ['NEXTPLAYER', 'BACK', 'GAMEBUTTON', 'VALIDATE', 'CANCEL', 'UP',
             'DOWN', 'LEFT', 'RIGHT', 'PLUS', 'MINUS', 'VOLUME_UP',
-            'VOLUME_DOWN', 'VOLUME_MUTE', 'MISSDART', 'CPTPLAYER']
+            'VOLUME_DOWN', 'VOLUME_MUTE', 'MISSDART', 'SHOCKSENSOR', 'CPTPLAYER']
 
 events_list = {
          'LIGHT_FLASH': 1,
@@ -112,7 +112,7 @@ def wake_up(video_process, sound_process):
         except Exception as error:
             print(f"exception is {error}")
 
-    if SCREENSAVER == True :
+    if SCREENSAVER:
         try:
             subprocess.Popen(['xscreensaver-command', '-deactivate'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except Exception as error:
@@ -140,37 +140,45 @@ class Craspberry():
         self.logs = logs
         self.shift = False
         self.config = config
-        #self.myDisplay = myDisplay
         self.event = event
 
-        self.pins = {}
-        for button in buttons_list:
-            self.pins[button] = False
+        # Usefull for GPIO usage
+        gpio.setwarnings(False)
+        gpio.setmode(gpio.BCM)
 
-        self.extended_gpio = False
+        # Leds configuration
         self.pin_stripled = 0
         self.nbr_stripled = 0
         self.bri_stripled = 0.5
         self.pin_targetled = 0
         self.nbr_target_leds = 0
         self.bri_targetled = 0.5
-        self.inputs = []
-        self.outputs = []
-
-        self.keys = config.config['SectionKeys']
-        self.buttons = config.config['Raspberry']
-        self.conf_outputs = config.config['Raspberry_BoardPinsOuts']
-        self.conf_inputs = config.config['Raspberry_BoardPinsIns']
         self.leds = config.leds
-        self.last_click = 0
         self.conf_target_led = conf_target_led
         self.target_leds = ""
         self.target_leds_blink = ""
+
+        # Inputs/Outputs
+        self.inputs = []
+        self.outputs = []
+
+        # For target detection : S12 = 1310 (13 = in / 10 = out)
+        self.keys = {}
+        # For button detection : NEXTPLAYER / MISSDART ...
+        self.pins = {}
+
+        # MCP buttons
+        self.buttons = config.config['Raspberry']
+        # List of outputs
+        self.conf_outputs = config.config['Raspberry_BoardPinsOuts']
+        # List of inputs
+        self.conf_inputs = config.config['Raspberry_BoardPinsIns']
+
         self.newresolution = []
         self.banned_gpio = None
 
         if config.file_exists:
-            # Apply config file configuration
+            # Apply configuration
             for pin_gpio in [pin for pin in self.conf_inputs.values() if pin != '']:
                 self.set_inputs(pin_gpio)
 
@@ -195,14 +203,26 @@ class Craspberry():
                 elif key == 'bri_targetled':
                     self.bri_targetled = float(value)
 
-        if int(self.buttons['EXTENDED_GPIO']) == 1:
-            self.gpio = cgpio_extender.Gpio_extender(self.buttons)
-        else:
-            self.gpio = None
+            for segment in config.config['SectionKeys']:
+                if config.config['SectionKeys'][segment] == '':
+                    continue
+                if segment in config.GPIO_BUTTONS_CONFIG:
+                        if 0 < int(config.config['SectionKeys'][segment]) <= MAX_GPIO:
+                            self.pins[segment] = int(config.config['SectionKeys'][segment])
+                        else:
+                            self.logs.error("Unexpected GPIO pin : {config.config['SectionKeys'][segment]}")
+                elif segment in config.default_SectionKeys:
+                    self.keys[config.config['SectionKeys'][segment]] = segment
+                else:
+                    self.logs.error(f"Unknown {segment} configuration in [SectionKeys]")
 
-        self.logs.log("DEBUG", f"self.buttons={self.buttons}")
+            self.reset_gpio()
 
-        self.set_buttons(self.buttons)
+        self.gpio = cgpio_extender.Gpio_extender(self.logs, self.buttons)
+
+        # Init MCP according to configuration
+
+        self.set_io(self.buttons)
         self.play_sound = None
         self.send_insult = None
         self.t_event = t_event
@@ -237,19 +257,16 @@ class Craspberry():
         for pin in self.outputs:
             gpio.setup(pin, gpio.OUT)
 
-        if not self.extended_gpio:
-            for pin in [pin for pin in self.pins]:
-                if self.pins[pin] is not False:
-                    if 0 < int(self.pins[pin]) <= MAX_GPIO and pin not in ('PIN_MISSDART', 'MISSDART'):
-                        self.logs.log("DEBUG", f"GPIO {pin} set to input")
-                        gpio.setup(self.pins[pin], gpio.IN, pull_up_down=gpio.PUD_UP)
-                    if 0 < int(self.pins[pin]) <= MAX_GPIO and pin in ('PIN_MISSDART', 'MISSDART'):
-                        self.logs.log("DEBUG", f"GPIO {pin} set to input")
-                        gpio.setup(self.pins[pin], gpio.IN, pull_up_down=gpio.PUD_DOWN)
+        for pin in [pin for pin in self.pins]:
+            # default : NO button, connected between GPIO and GND
+            if 0 < int(self.pins[pin]) <= MAX_GPIO:
+                self.logs.debug(f"GPIO {pin} set to input NC")
+                gpio.setup(self.pins[pin], gpio.IN, pull_up_down=gpio.PUD_UP)
 
     def init_gpio(self, pins, direction):
         """
         Init GPIO
+        Used for initial configuration
         """
         for pin in pins:
             if direction == 'OUT':
@@ -260,6 +277,8 @@ class Craspberry():
     def set_inputs(self, pin_gpio):
         """
         Set inputs configuration
+        Used for initial configuration
+        Required for target detection
         """
         if pin_gpio != '' and 0 < int(pin_gpio) <= MAX_GPIO:
             self.inputs.append(int(pin_gpio))
@@ -267,6 +286,8 @@ class Craspberry():
     def set_outputs(self, pin_gpio):
         """
         Set outputs configuration
+        Used for initial configuration
+        Required for target detection
         """
         if pin_gpio != '' and 0 < int(pin_gpio) <= MAX_GPIO:
             self.outputs.append(int(pin_gpio))
@@ -274,6 +295,7 @@ class Craspberry():
     def set_buttons_conf(self, conf_buttons):
         """
         Set buttons configuration
+        Used for initial configuration
         """
         for key in conf_buttons:
             self.buttons[key] = conf_buttons[key]
@@ -281,21 +303,23 @@ class Craspberry():
     def set_keys_conf(self, conf_keys):
         """
         Set keys configuration
+        Used for initial configuration
         """
         for key in conf_keys:
-            self.keys[key] = conf_keys[key]
+            self.keys[conf_keys[key]] = key
 
     def set_inputs_conf(self, conf_inputs):
         """
         Set input pin's configuration
+        Used for initial configuration
         """
         for key in conf_inputs:
             self.conf_inputs[key] = conf_inputs[key]
             self.config.inputs[key] = conf_inputs[key]
 
-        self.logs.log("DEBUG", f"conf_inputs[key]={conf_inputs[key]}")
-        self.logs.log("DEBUG", f"self.conf_inputs[key]={self.conf_inputs[key]}")
-        self.logs.log("DEBUG", f"self.config.inputs[key]={self.config.inputs[key]}")
+        self.logs.debug(f"conf_inputs[key]={conf_inputs[key]}")
+        self.logs.debug(f"self.conf_inputs[key]={self.conf_inputs[key]}")
+        self.logs.debug(f"self.config.inputs[key]={self.config.inputs[key]}")
 
     def set_outputs_conf(self, conf_outputs):
         """
@@ -317,37 +341,11 @@ class Craspberry():
 
         self.config.config['Raspberry_Leds'] = config_leds
 
-    def set_buttons(self, buttons):
+    def set_io(self, buttons):
         """
         set buttons
         """
-        if int(buttons['EXTENDED_GPIO']) == 1:
-            self.extended_gpio = True
-            if self.gpio is None:
-                try:
-                    self.gpio = cgpio_extender.Gpio_extender(self.buttons)
-                    self.gpio.set_buttons(buttons)
-                except:
-                    self.extended_gpio = False
-                    return False
-            else:
-                self.gpio.set_buttons(buttons)
-        else:
-            self.extended_gpio = False
-            if self.gpio:
-                del self.gpio
-            self.gpio = None
-            for button in buttons_list:
-                pin = f'PIN_{button}'
-                if buttons[pin] == '0':
-                    self.pins[pin] = False
-                else:
-                    try:
-                        self.pins[pin] = int(buttons[pin])
-                        gpio.setup(self.pins[pin], gpio.IN, pull_up_down=gpio.PUD_UP)
-                    except: # pylint: disable=bare-except
-                        self.pins[pin] = False
-        return True
+        return self.gpio.set_io(buttons)
 
     def set_target_leds(self, valeur):
         """
@@ -361,20 +359,13 @@ class Craspberry():
         """
         self.target_leds_blink = valeur
 
-    def gpio_connect(self):
-        """
-        Not realy need to connect like Serial port
-        """
-        gpio.setwarnings(False)
-        gpio.setmode(gpio.BCM)
-
     def gpio_flush(self):
         """
         Flush GPIO values
         """
         gpio.cleanup()
 
-    def test_gpio(self):
+    def test_target(self):
         """
         Test GPIO inputs (Target's)
         """
@@ -394,20 +385,18 @@ class Craspberry():
         if gpio_input:
             # Return all possible values
             segments = []
-            for segment, pin_gpio in self.keys.items():
-                for gpio_in in gpio_input:
-                    if pin_gpio == gpio_in:
-                        segments.append(segment)
+            if self.keys.get(gpio_input[0], None) is not None:
+                segments = [self.keys.get(gpio_input[0])]
 
             if len(segments) == 0:
-                return [1, f'ERREUR : Code : {gpio_input}']
+                return [1, f'ERREUR : Code : {gpio_input[0]}']
             if len(segments) > 1:
                 return [2, f"ATTENTION : {'/'.join(segments)}"]
             return [0, segments[0]]
 
         return gpio_input
 
-    def listen_gpio(self):
+    def read_target(self):
         """
         Read GPIO inputs (Target's)
         """
@@ -448,15 +437,9 @@ class Craspberry():
 
                     gpio.output(pinout, gpio.LOW)
 
+        return self.keys.get(gpio_input, None)
 
-        if gpio_input:
-            for segment, pin_gpio in self.keys.items():
-                if pin_gpio == gpio_input:
-                    return segment
-
-        return gpio_input
-
-    def read_gpio(self):
+    def read_buttons(self):
         """
         Read GPIO (Button's)
         """
@@ -466,10 +449,11 @@ class Craspberry():
         gpio_read = None
         p_key = None
         for key in self.pins:
-            if ((self.pins[key] is not False and gpio.input(self.pins[key]) == gpio.LOW and key not in ('PIN_MISSDART', 'MISSDART'))
-                    or
-                (self.pins[key] is not False and gpio.input(self.pins[key]) == gpio.HIGH and key in ('PIN_MISSDART', 'MISSDART'))):
-                # Button pressed
+            if ((gpio.input(self.pins[key]) == gpio.LOW and key != 'SHOCKSENSOR')
+                or
+                (key == 'SHOCKSENSOR' and gpio.input(self.pins[key]) == gpio.HIGH)):
+                # NO Button pressed (connected between GPIO and GND)
+                # NC Piezzo case (connected between GPIO and +5V)
                 if key != self.banned_gpio:
                     gpio_read = key
                 else:
@@ -481,7 +465,7 @@ class Craspberry():
                 COUNT_GPIO += 1
                 if COUNT_GPIO > 30:
                     self.banned_gpio = gpio_read
-                    print(f"[WARNING] Gpio {gpio_read} is banned !")
+                    self.logs.warning(f"Gpio {gpio_read} is banned !")
                 else:
                     return gpio_read.replace('PIN_','BTN_')
             elif self.banned_gpio is None:
@@ -491,7 +475,7 @@ class Craspberry():
             LAST_GPIO = None
             COUNT_GPIO = 0
             self.banned_gpio = None
-            return False
+        return None
 
     def test_buttons(self):
         """
@@ -499,7 +483,7 @@ class Craspberry():
         Used in Test Buttons Menu
         """
 
-        if not self.extended_gpio:
+        if self.gpio is None:
             return 'nogpio'
 
         key_pressed = None
@@ -512,15 +496,23 @@ class Craspberry():
             key_pressed = self.gpio.test_entries()
 
             if len(key_pressed) > 0:
-                self.logs.log("DEBUG", f"Input debug (GPIO) : {key_pressed}")
+                self.logs.debug(f"Input debug (MCP) : {key_pressed}")
                 pygame.time.set_timer(USEREVENT, 0)
                 return key_pressed
 
-            key_pressed = self.keyboard_mouse(['num', 'alpha', 'fx', 'arrows'],['enter', 'tab', 'backspace', 'left shift', 'escape', 'space', 'double-click', 'single-click', 'resize'],'menue')
-            if key_pressed:
-                self.logs.log("DEBUG", f"Input debug (pyGame) : {key_pressed}")
+            key_pressed = self.read_buttons()
+            if key_pressed is None:
+                key_pressed = self.keyboard_mouse(['num', 'alpha', 'fx', 'arrows'],['enter', 'tab', 'backspace', 'left shift', 'escape', 'space', 'double-click', 'single-click', 'resize'],'menue')
+            else:
+                self.logs.debug(f"Input debug (GPIO) : {key_pressed}")
                 pygame.time.set_timer(USEREVENT, 0)
                 return key_pressed
+
+            if key_pressed:
+                self.logs.debug(f"Input debug (pyGame) : {key_pressed}")
+                pygame.time.set_timer(USEREVENT, 0)
+                return key_pressed
+
             if key_pressed is False:
                 return False
 
@@ -531,14 +523,15 @@ class Craspberry():
         for index in (5, 6, 7):
             pygame.time.set_timer(USEREVENT + index, 0)
 
-    def listen_inputs(self, k_type=['num', 'alpha', 'fx', 'arrows'], specials=['enter', 'tab', 'backspace', 'left shift', 'escape', 'space', 'double-click', 'single-click', 'resize'], wait_for=None, context='menus', timeout=0, light=None, events=None, firstname=None, video_process=None, sound_process=None):
+    def listen_inputs(self, k_type=['num', 'alpha', 'fx', 'arrows'], 
+                      specials=['enter', 'tab', 'backspace', 'left shift', 'escape', 'space', 'double-click', 'single-click', 'resize'],
+                      wait_for=None, context='menus', timeout=0, light=None, events=None, 
+                      firstname=None, video_process=None, sound_process=None, camera=None):
         """
         Read input : MXP, GPIO, keyboard, mouse, ...
         """
 
         inputs = None
-        gpio.setmode(gpio.BCM)
-        self.reset_gpio()
 
         if timeout > 0:
             pygame.time.set_timer(USEREVENT, 0)
@@ -546,64 +539,71 @@ class Craspberry():
 
         if events is not None:
             for event in events:
-                if event[1] == 'STROBE' and self.extended_gpio and event[0] > 0:
-                    self.logs.log("DEBUG", f"Event {event[2]} initialized every {event[0]}ms")
+                if event[1] == 'STROBE' and self.gpio is not None and event[0] > 0:
+                    self.logs.debug(f"Event {event[2]} initialized every {event[0]}ms")
                     pygame.time.set_timer(USEREVENT + events_list['STROBE'], event[0])
                 elif event[1] in ('EVENT', 'SOUND', 'DMD') and event[0] > 0:
-                    self.logs.log("DEBUG", f"Event {event[2]} initialized every {event[0]}ms")
+                    self.logs.debug(f"Event {event[2]} initialized every {event[0]}ms")
                     pygame.time.set_timer(USEREVENT + events_list[event[1]], event[0])
 
+        if self.sleep:
+            time.sleep(self.config.delay)
+            self.sleep = False
+        if self.gpio is not None and light is not None:
+            self.gpio.light(light)
+
         count = 0
+        miss = 0
         while True:
-            if self.sleep:
-                time.sleep(self.config.delay)
-                self.sleep = False
             count += 1
             if count % 1000 == 0:
                 count = 0
                 pygame.mouse.set_visible(False)
-            # Read buttons
-            if self.extended_gpio:
-                if light is not None:
-                    self.gpio.light(light)
 
-                # Read button from extend card
+            # Read buttons connected to GPIO
+            inputs = self.read_buttons()
+            if inputs and miss == 0:
+                self.logs.debug(f"Input debug (GPIO) : {inputs}")
+                self.reset_timers()
+                wake_up(video_process, sound_process)
+                if inputs in ('MISSDART', 'SHOCKSENSOR'):
+                    miss = 1
+                else:
+                    return inputs
+
+            # Read buttons from MCP
+            if self.gpio.mcp1 is not None and miss == 0:
                 if context == 'test':
                     inputs = self.gpio.test_entries()
                 else:
                     inputs = self.gpio.read_entries()
 
-                if inputs and isinstance(inputs, str):
-                    self.logs.log("DEBUG",f"Input debug (ext GPIO) : {inputs.replace('PIN_', 'BTN_')}")
+                if inputs:
+                    self.logs.debug(f"Input debug (ext GPIO) : {(inputs.replace('PIN_', 'BTN_') if not isinstance(inputs, list) else inputs[0].replace('PIN_', 'BTN_'))}")
                     if timeout > 0:
                         pygame.time.set_timer(USEREVENT, 0)
                     if inputs in ('PIN_LEFT', 'PIN_RIGHT', 'PIN_UP', 'PIN_DOWN', 'PIN_VALIDATE'):
-                        self.gpio.strobe_buttons(['LIGHT_NAVIGATE'], iterations=2)
+                        self.gpio.strobe_toys(['LIGHT_NAVIGATE'], iterations=2)
                     if inputs in ('PIN_PLUS', 'PIN_MINUS'):
-                        self.gpio.strobe_buttons(['LIGHT_PLAYERS'], iterations=2)
+                        self.gpio.strobe_toys(['LIGHT_PLAYERS'], iterations=2)
                     self.reset_timers()
                     self.sleep = True
                     wake_up(video_process, sound_process)
-                    return inputs.replace('PIN_', 'BTN_')
-            else:
-                # Wihout extend card
-                inputs = self.read_gpio()
-                if inputs:
-                    self.logs.log("DEBUG", f"Input debug (GPIO) : {inputs}")
-                    self.reset_timers()
-                    wake_up(video_process, sound_process)
-                    return inputs
+                    if inputs == 'PIN_MISSDART':
+                        miss = 1
+                    else:
+                        return (inputs.replace('PIN_', 'BTN_') if not isinstance(inputs, list) else inputs[0].replace('PIN_', 'BTN_'))
 
             # Read target
             if context == 'test':
-                inputs = self.test_gpio()
+                inputs = self.test_target()
             else:
-                inputs = self.listen_gpio()
+                inputs = self.read_target()
 
             if inputs:
-                self.logs.log("DEBUG", f"Input debug (Serial) : {inputs}")
+                self.logs.debug(f"Input debug (Serial) : {inputs}")
                 self.reset_timers()
-                if not self.extended_gpio:
+                if self.gpio is None:
                     self.sleep = True
                 wake_up(video_process, sound_process)
                 return inputs
@@ -611,7 +611,7 @@ class Craspberry():
             # If serial returns false, try to read keyboard
             inputs = self.keyboard_mouse(k_type, specials, context, events, firstname)
             if inputs is not None:
-                self.logs.log("DEBUG", f"Input debug (pyGame) : {inputs}")
+                self.logs.debug(f"Input debug (pyGame) : {inputs}")
                 if inputs is not False:
                     wake_up(video_process, sound_process)
 
@@ -619,6 +619,20 @@ class Craspberry():
             if inputs is False or (inputs is not None and (wait_for is None or str(inputs) in wait_for)):
                 self.reset_timers()
                 return inputs
+            
+            # On affiche la camera a la zone que l'on veut avec la resolution d'affichage que l'on veut
+            if camera is not None:
+                # On ne choisit pas une dimension (dimension native de la webcam pour les photos)
+                if len(camera) == 4:
+                    camera[0].show_camera(camera[1], posX=camera[2], posY=camera[3])
+                # On force la dimension de la webcam
+                elif len(camera) == 6:                    
+                    camera[0].show_camera(camera[1], posX=camera[2], posY=camera[3], resW=camera[4], resH=camera[5])
+
+            if miss > 10:
+                return 'MISS'
+            if miss > 0:
+                miss += 1
 
     def keyboard_mouse(self, k_type, specials, context=None, wait_events=None, firstname=None):
         """ KEYBOARD & MOUSE (from pygame)
@@ -638,21 +652,21 @@ class Craspberry():
                 return False
 
             if event.type == USEREVENT + 1:
-                self.light_buttons(['LIGHT_FLASH'], False)
+                self.light_toys(['LIGHT_FLASH'], False)
 
             #elif event.type == USEREVENT + events_list['SCREEN']:
             #    self.t_event.set()
 
             elif event.type == USEREVENT + 2:
-                self.light_buttons(['LIGHT_CELEBRATION'], False)
+                self.light_toys(['LIGHT_CELEBRATION'], False)
 
             elif event.type == USEREVENT + 3:
-                self.light_buttons(['LIGHT_CELEBRATION2'], False)
+                self.light_toys(['LIGHT_CELEBRATION2'], False)
 
             elif event.type == USEREVENT + events_list['STROBE'] and wait_events is not None:
                 for wait_event in wait_events:
                     if wait_event[1] == 'STROBE':
-                        self.gpio.strobe_buttons(wait_event[2], 1)
+                        self.gpio.strobe_toys(wait_event[2], 1)
 
             elif event.type == USEREVENT + events_list['EVENT'] and wait_events is not None:
                 for wait_event in wait_events:
@@ -671,7 +685,7 @@ class Craspberry():
 
             # If pyGame return Exit
             elif event.type == pygame.QUIT:
-                self.logs.log("DEBUG","Please exit any network game before killing pyDarts :)")
+                self.logs.debug("Please exit any network game before killing pyDarts :)")
                 if context in ('game', 'waitcomputer'):
                     return 'GAMEBUTTON'
                 return 'escape'
@@ -698,13 +712,19 @@ class Craspberry():
                 self.newresolution = [event.w, event.h]
                 return 'resize'
             # Case of MOUSE BUTTON PRESSED
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif (event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.FINGERDOWN):
                 pygame.mouse.set_visible(True)
                 #on click
                 if 'single-click' in specials:
-                    position = pygame.mouse.get_pos()
+                    if(event.type == pygame.FINGERDOWN):
+                        w, h = pygame.display.get_surface().get_size()
+                        x_finger = event.x * w
+                        y_finger = event.y * h
+                        position = (int(x_finger), int(y_finger))
+                    else:
+                        position = pygame.mouse.get_pos()
                     return position
-            elif event.type == pygame.MOUSEMOTION:
+            elif (event.type == pygame.MOUSEMOTION or  event.type == pygame.FINGERMOTION):
                 pygame.mouse.set_visible(True)
         # Everything above failed, return -1 (0 is a valid char)
         return None
@@ -785,13 +805,14 @@ class Craspberry():
         """
         return events_list.get(light, None)
 
-    def light_buttons(self, buttons, state=True, delay=None):
+    def light_toys(self, buttons, state=True, delay=None):
         """
         Put OFF or ON a light, and, if applicable, start a timer to OFF the light
         """
-        self.logs.log("DEBUG", f"light_buttons : {state} : {buttons}")
-        if self.extended_gpio and buttons:
-            self.gpio.light_buttons(buttons, state)
+        self.logs.debug(f"light_toys : {state} : {buttons}")
+        self.logs.debug(f"buttons={buttons}")
+        if self.gpio is not None and buttons:
+            self.gpio.light_toys(buttons, state)
 
             for button in buttons:
                 event = self.get_user_event(button)
@@ -801,12 +822,14 @@ class Craspberry():
                     if state and delay:
                         pygame.time.set_timer(USEREVENT + event, delay)
 
-    def strobe_buttons(self, buttons, iterations=3, delay=10, delay_off=100):
+    def strobe_toys(self, buttons, iterations=3, delay_on=10, delay_off=100):
         """
         Make light strobe blink times
+        Return the array of threads returned by gpio.strobe_toys
         """
-        if self.extended_gpio and buttons:
-            self.gpio.strobe_buttons(buttons, iterations, delay, delay_off)
+        if self.gpio is not None and buttons:
+            return self.gpio.strobe_toys(buttons, iterations, delay_on, delay_off)
+        return []
 
     def get_defaults(self):
         """

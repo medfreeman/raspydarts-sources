@@ -131,7 +131,7 @@ class Game(cgame.Game):
         self.raspberry.set_target_leds('|'.join([f'{key}#{self.colors[0]}' for key in targ]))
 
         # Print debug output
-        self.logs.log('DEBUG', self.infos)
+        self.logs.debug(self.infos)
         return return_code
 
     def pnj_score(self, players, actual_player, level, player_launch):
@@ -221,7 +221,10 @@ class Game(cgame.Game):
         #players[actual_player].columns[0] = (score, 'int')
 
         # Print debug
-        self.logs.log('DEBUG', self.infos)
+        self.logs.debug(self.infos)
+
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
 
         # Next please !
         return handler
@@ -271,7 +274,7 @@ class Game(cgame.Game):
         '''
         #pass
         players[actual_player].columns[player_launch-1] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         players[actual_player].darts_thrown += 1
         check = False
         players[actual_player].columns[player_launch - 1] = ('cross-mark', 'image')

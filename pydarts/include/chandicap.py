@@ -14,7 +14,7 @@ class Handicap:
         # Get team average MPR
         self.LSTteammpr.append(round((float(lstmpr[0]) + float(lstmpr[2])) / 2, 2))
         self.LSTteammpr.append(round((float(lstmpr[1]) + float(lstmpr[3])) / 2, 2))
-        self.logs.log("DEBUG", "List mpr: {}, self.LSTteammpr: {}".format(lstmpr, self.LSTteammpr))
+        self.logs.debug("List mpr: {}, self.LSTteammpr: {}".format(lstmpr, self.LSTteammpr))
         for i in self.LSTteammpr:
             if i <= 1.99:
                 handicol += 0.5
@@ -22,13 +22,13 @@ class Handicap:
                 handicol += 1
             elif i >= 3.0:
                 handicol += 1.5
-        self.logs.log("DEBUG", "Handicap col: {}".format(handicol))
+        self.logs.debug("Handicap col: {}".format(handicol))
         # figure out difference in MPR between both teams
         maxval = max(self.LSTteammpr)
         self.maxid = self.LSTteammpr.index(maxval)
         minval = min(self.LSTteammpr)
         diff = maxval - minval
-        self.logs.log("DEBUG", "maxval: {}. minval: {}, maxid: {}, diff: {}".format(maxval, minval, self.maxid, diff))
+        self.logs.debug("maxval: {}. minval: {}, maxid: {}, diff: {}".format(maxval, minval, self.maxid, diff))
         # Load new marks into a list
         if handicol < 1.5:
             if 0.10 <= diff <= 0.19:
@@ -157,11 +157,11 @@ class Handicap:
                         self.LSTHandiPoints.append(minstartscore)
                 else:
                     # Something went way wrong
-                    self.logs.log("ERROR", "The value for setting the 01 start score is throwing an error!")
+                    self.logs.error("The value for setting the 01 start score is throwing an error!")
             elif idx == self.maxid:
                 # If player has the highest PPD, they start at original start score
                 self.LSTHandiPoints.append(int(ogstartscore))
                 playerstartscore = ogstartscore
-            self.logs.log("DEBUG", "Team {} start score: {}, ogstartscore: {}, val: {}, maxval: {}".format(
+            self.logs.debug("Team {} start score: {}, ogstartscore: {}, val: {}, maxval: {}".format(
                 idx + 1, playerstartscore, ogstartscore, val, maxval))
         return self.LSTHandiPoints

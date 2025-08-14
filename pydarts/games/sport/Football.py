@@ -64,6 +64,7 @@ class Game(cgame.Game):
         Actions done before each dart throw - for example, check if the player is allowed to play
         """
 
+        handler = self.init_handler()
         self.show_hit = True
         return_code = 0
         # infos Can be used to create a per-player debug output
@@ -71,7 +72,9 @@ class Game(cgame.Game):
         # You will probably save the turn to be used in case of backup turn (each first launch) :
         if player_launch == 1:
             self.display.play_sound('whistle')
+            #handler['sound'] = 'whistle'
             self.video_player.play_video(self.display.file_class.get_full_filename('football/arbitre', 'videos'))
+            #handler['video'] = 'football/arbitre'
             # Clean actual_players' columns
             i = 0
             for column in players[actual_player].columns:
@@ -86,7 +89,7 @@ class Game(cgame.Game):
         # Backuping scores
         self.save_turn(players)
         # Send debug output to log system. Use DEBUG or WARNING or ERROR or FATAL
-        self.logs.log("DEBUG",self.infos)
+        self.logs.debug(self.infos)
 
         if players[actual_player].ball :
             doubles = [f'D{number}#{self.colors[0]}' for number in range(1,21)]
@@ -97,24 +100,31 @@ class Game(cgame.Game):
         else :
             self.rpi.set_target_leds(f'SB#{self.colors[0]}|DB#{self.colors[0]}')
 
-        return return_code
+        #return return_code
+        handler['return_code'] = return_code
+        return handler
 
     def post_dart_check(self, hit, players, actual_round, actual_player, player_launch):
         """
         Function run after each dart throw - for example, add points to player
         """
+        
+        handler = self.init_handler()
+        
 
         return_code = 0
         if ((hit[1:] == 'B' and not self.master) or (hit == 'DB' and self.master)) \
                 and not players[actual_player].ball:
             self.video_player.play_video(self.display.file_class.get_full_filename('football/defense', 'videos'))
+            #handler['video'] = 'football/defense'
             # Remove balloon to other players
             for player in players:
                 player.ball = False
                 player.columns[6] = ['', 'txt']
             # Give the ballon to actual player (drible)
             self.infos += f"Player {players[actual_player].name} get the ball !{self.lf}"
-            self.display.play_sound('youllneverwalkalone')
+            #self.display.play_sound('youllneverwalkalone')
+            handler['sound'] = 'youllneverwalkalone'
             players[actual_player].ball = True
             players[actual_player].dribbles += 1
             players[actual_player].columns[6] = ['balloon', 'image']
@@ -125,7 +135,8 @@ class Game(cgame.Game):
             self.show_hit = False
             scored = True
             if self.defense:
-                self.dmd.send_text("Défense")
+                #self.dmd.send_text("Défense")
+                handler['dmd'] = 'Défense'
                 opponent = players[(actual_player + 1) % len(players)].name
 
                 self.display.message([
@@ -145,22 +156,28 @@ class Game(cgame.Game):
                 self.infos += f'{opponent} stroke {hit}{self.lf}'
                 if dart_stroke == hit:
                     if not self.video_player.play_video(self.display.file_class.get_full_filename('football/gardien', 'videos')):
-                        self.display.message([f"{self.translate('Football-stopped')}"], 2000, None, 'middle', 'big')
+                        handler['message'] = 'Football-stopped'
+                        #self.display.message([f"{self.translate('Football-stopped')}"], 2000, None, 'middle', 'big')
                         
                         
                     self.infos += f"Player {opponent} stopped the goal !"
                     scored = False
-                    self.display.play_sound('football/supporters')
+                    #self.display.play_sound('football/supporters')
+                    handler['sound'] = 'supporter'
                     players[actual_player].ball = False
                     players[actual_player].columns[6] = ['', 'image']
                     players[(actual_player + 1) % len(players)].ball = True
 
             if scored:
-                self.dmd.send_text("Goal", sens='flip')
+                #self.dmd.send_text("Goal", sens='flip')
+                handler['dmd'] = 'Goal'
 
                 if not self.video_player.play_video(self.display.file_class.get_full_filename('football/goal', 'videos')):
-                    self.display.play_sound('goal')
-                    self.display.message([f"Gooooooaaaaaaaal !!!"], 2000, None, 'middle', 'big')
+					
+                    #self.display.play_sound('goal')
+                    handler['sound'] = 'goal'
+                    #self.display.message([f"Gooooooaaaaaaaal !!!"], 2000, None, 'middle', 'big')
+                    handler['message'] = 'Goooooooaaaallllll !!!'
                 self.infos += f"Player {players[actual_player].name} scored !"
                 players[actual_player].score += 1
 
@@ -180,10 +197,17 @@ class Game(cgame.Game):
         # If the actual player wins
         if int(players[actual_player].score) == self.goals:
             self.winner = players[actual_player].ident
-            self.video_player.play_video(self.display.file_class.get_full_filename('football/victory', 'videos'))
+            #self.video_player.play_video(self.display.file_class.get_full_filename('football/victory', 'videos'))
+            handler['video'] = 'football/victoire'
             return_code = 3
+            
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        handler['return_code'] = return_code
+        return handler
+        
         # Return code to main
-        return return_code
+        #return return_code
 
     def refresh_stats(self, players, actual_round):
         """
@@ -199,7 +223,7 @@ class Game(cgame.Game):
         Miss button
         '''
         players[actual_player].columns[player_launch-1] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         players[actual_player].darts_thrown += 1
         
     def display_segment(self):

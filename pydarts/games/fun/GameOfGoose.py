@@ -110,15 +110,21 @@ class Game(cgame.Game):
         self.alea = options['alea']
     
     def advance(self, player, spaces): # player can move
-        #self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['advance'], 'videos'))
+        self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['advance'], 'videos'))
         initPos = self.positions[player]
         self.positions[player] += spaces
         self.checkPos(player, initPos, self.positions[player])
         
     def specialFirstTurn(self, player, dart1, dart2):
+		
+        handler = self.init_handler()
         initPos = self.positions[player]
-        self.dmd.send_text("BOOST !", sens=None, iteration=None)
+        #self.dmd.send_text("BOOST !")
+        handler['dmd'] = ("BOOST !")
+        
         self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['boost'], 'videos'))
+        #handler['video'] = 'gameofgoose/' + self.videos['boost']
+        
         if (dart1 == 6 and dart2 == 3) or (dart1 == 3 and dart2 == 6):
             self.positions[player] = 26
         if (dart1 == 5 and dart2 == 4) or (dart1 == 4 and dart2 == 5):
@@ -127,6 +133,8 @@ class Game(cgame.Game):
         
     def checkPos(self, player, startPosition, newPosition): # define events based on new position
         # Square 63+ : We go back
+        handler = self.init_handler()
+                
         if newPosition > 63:
             backwards = newPosition - 63
             newPosition = 63 - backwards
@@ -135,16 +143,19 @@ class Game(cgame.Game):
         # Square 6 : The bridge - Shortcut to 12
         if newPosition == 6:
             self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['6'], 'videos'))
+            #handler['video'] = 'gameofgoose/' + self.videos['6']
             newPosition = 12
             self.positions[player] = newPosition
         # Square 42 : The maze - Lost, go back to 30
         if newPosition == 42:
             self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['42'], 'videos'))
+            #handler['video'] = 'gameofgoose/' + self.videos['42']
             newPosition = 30
             self.positions[player] = newPosition
         # Goose square : advance again of same amount of spaces
         if newPosition in [9, 18, 27, 36, 45, 54] and startPosition % 9 != 0 : # avoid scenario Death > Start > Goose > Loop
             self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['square'], 'videos'))
+            #handler['video'] = 'gameofgoose/' + self.videos['square']
             spaces = newPosition - startPosition
             newPosition += spaces
             self.positions[player] = newPosition
@@ -152,14 +163,20 @@ class Game(cgame.Game):
         if self.tour:
             # Square 19 : The hotel - wait 2 turns there
             if newPosition == 19:
-                self.dmd.send_text("A L'HOTEL !", sens=None, iteration=None)
+                #self.dmd.send_text("A L'HOTEL !")
+                handler['dmd'] = ("A L'HOTEL !")
+                
                 self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['19'], 'videos'))
+                #handler['video'] = 'gameofgoose/' + self.videos['19']
                 self.hotel['Resident'] = player
                 self.hotel['RemainingTurns'] = 2
             # Square 31 : The well : wait until someone takes you out
             if newPosition == 31:
-                self.dmd.send_text("LE PUITS !", sens=None, iteration=None)
+                #self.dmd.send_text("LE PUITS !")
+                handler['dmd'] = ("LE PUITS !")
+                
                 self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['31'], 'videos'))
+                #handler['video'] = 'gameofgoose/' + self.videos['31']
                 self.well['Resident'] = player
                 self.well['RemainingTurns'] = 2
             # Check if a player was already present on the new position. If yes, switch positions
@@ -170,7 +187,10 @@ class Game(cgame.Game):
             if newPosition == 52:
                 #if self.prison['Prisoner'] == 'Nobody':
                 self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['52'], 'videos'))
-                self.dmd.send_text("EN PRISON !", sens=None, iteration=None)
+                #handler['video'] = 'gameofgoose/' + self.videos['52']
+                #self.dmd.send_text("EN PRISON !")
+                handler['dmd'] = ("EN PRISON !")
+                
                 self.prison['Resident'] = player
                 self.prison['RemainingTurns'] = 2
                # else:
@@ -178,14 +198,20 @@ class Game(cgame.Game):
         else:
             # Square 19 : The hotel - wait 2 turns there
             if newPosition == 19:
-                self.dmd.send_text("A L'HOTEL !", sens=None, iteration=None)
+                #self.dmd.send_text("A L'HOTEL !")
+                handler['dmd'] = ("A L'HOTEL !")
+                
                 self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['19'], 'videos'))
+                #handler['video'] = 'gameofgoose/' + self.videos['19']
                 self.hotel['Resident'] = player
                 self.hotel['RemainingTurns'] = 2
             # Square 31 : The well : wait until someone takes you out
             if newPosition == 31:
-                self.dmd.send_text("LE PUITS !", sens=None, iteration=None)
+                #self.dmd.send_text("LE PUITS !")
+                handler['dmd'] = ("LE PUITS !")
+                
                 self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['31'], 'videos'))
+                #handler['video'] = 'gameofgoose/' + self.videos['31']
                 self.well['Victim'] = player
             # Check if a player was already present on the new position. If yes, switch positions
             for pl, pos in self.positions.items():
@@ -195,19 +221,27 @@ class Game(cgame.Game):
             if newPosition == 52:
                 if self.prison['Prisoner'] == 'Nobody':
                     self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['52'], 'videos'))
-                    self.dmd.send_text("EN PRISON !", sens=None, iteration=None)
+                    #handler['video'] = 'gameofgoose/' + self.videos['52']
+                    
+                    
+                    #self.dmd.send_text("EN PRISON !")
+                    handler['dmd'] = ("EN PRISON !")
+                    
                     self.prison['Prisoner'] = player
                 else:
                     self.prison['Prisoner'] = 'Nobody'
             
             
-            
+        return handler            
             
             
         # Square 58 : Death - Go back to start
         if newPosition == 58:
             self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['58'], 'videos'))
-            self.dmd.send_text("MORT !", sens=None, iteration=None)
+            #handler['video'] = 'gameofgoose/' + self.videos['58']
+            #self.dmd.send_text("MORT !")
+            handler['dmd'] = ("A L'HOTEL !")
+            
             newPosition = 0
             self.positions[player] = newPosition
 
@@ -215,6 +249,8 @@ class Game(cgame.Game):
         """
         Actions done before each dart throw - for example, check if the player is allowed to play
         """
+
+        handler = self.init_handler()
 
         self.show_hit = False # Don't show hit segment
         return_code = 0
@@ -242,9 +278,8 @@ class Game(cgame.Game):
     
                 #tour -= 1 
                 # Video
-                self.display.message([
-                        f"{joueur} : {self.translate('GameofGoose-hotel')} {tour} {self.translate('GameofGoose-hotel2')}"
-                        ], 2000, None, 'middle', 'big')
+                ###self.display.message([
+                handler['message'] = ([f"{joueur} : {self.translate('GameofGoose-hotel')} {tour} {self.translate('GameofGoose-hotel2')}"], 2000, None, 'middle', 'big')
                 return_code = 4 # Go to next player
                 
             # We check the well to skip turn
@@ -255,9 +290,8 @@ class Game(cgame.Game):
                 joueur = players[actual_player].name 
                 
                 # Video
-                self.display.message([
-                        f"{joueur} : {self.translate('GameofGoose-well')} {tour} {self.translate('GameofGoose-well2')}"
-                        ], 2000, None, 'middle', 'big')
+                #self.display.message
+                handler['message'] =([f"{joueur} : {self.translate('GameofGoose-well')} {tour} {self.translate('GameofGoose-well2')}"], 2000, None, 'middle', 'big')
                 return_code = 4 # Go to next player
                 
              # We check the prison to skip turn
@@ -267,9 +301,8 @@ class Game(cgame.Game):
                 tour = ' '.join(tour2)
                 joueur = players[actual_player].name 
                 # Video
-                self.display.message([
-                        f"{joueur} : {self.translate('GameofGoose-prison')} {tour} {self.translate('GameofGoose-prison2')}"
-                        ], 2000, None, 'middle', 'big')
+                ##self.display.message
+                handler['message'] =([f"{joueur} : {self.translate('GameofGoose-prison')} {tour} {self.translate('GameofGoose-prison2')}"], 2000, None, 'middle', 'big')
                 return_code = 4 # Go to next player           
         else:
             # We check the hotel to skip turn
@@ -326,14 +359,19 @@ class Game(cgame.Game):
         # Backuping scores
         self.save_turn(players)
         # Send debug output to log system. Use DEBUG or WARNING or ERROR or FATAL
-        self.logs.log("DEBUG",self.infos)
+        self.logs.debug(self.infos)
          
-        return return_code
+        handler['return_code'] = return_code 
+        return handler
+        
+        #return return_code
 
     def post_dart_check(self, hit, players, actual_round, actual_player, player_launch):
         """
         Function run after each dart throw - for example, add points to player
         """
+        
+        handler = self.init_handler()
 
         return_code = 0
         
@@ -355,13 +393,16 @@ class Game(cgame.Game):
             if hit in targ: # check if valid throw (one dart is one die)
                 self.dartScore = int(hit[1:])
                 self.display.play_sound('DiceRoll')
+                handler['sound'] = 'DiceRoll'
+                
             else:
                 self.dartScore = 0
         if self.alea:
         ####### aleatoire
             if hit : # check if valid throw (one dart is one die)
                 self.dartScore = random.randint(1, 6)
-                self.display.play_sound('DiceRoll') 
+                #self.display.play_sound('DiceRoll') 
+                handler['sound'] = 'DiceRoll'
         
         # increment total
         self.totalTurn += self.dartScore
@@ -387,6 +428,7 @@ class Game(cgame.Game):
         # Victory for current player
         if self.positions[players[actual_player].name] == 63:
             self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['victory'], 'videos'))
+            #handler['video'] = 'gameofgoose/' + self.videos['victory']
             self.winner = players[actual_player].ident
             return_code = 3
                         
@@ -400,8 +442,14 @@ class Game(cgame.Game):
         # It is recommanded to update stats every dart thrown
         self.refresh_stats(players, actual_round)
 
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        handler['return_code'] = return_code
+        
+        return handler
+
         # Return code to main
-        return return_code
+        #return return_code
         
     def refresh_game_screen(self, Players, actual_round, max_round, RemDarts, nb_darts, logo, headers, actual_player,TxtOnLogo=False, Wait=False, OnScreenButtons=None, showScores=True, end_of_game=False, endOfSet=None, Set=None, MaxSet=None):
        
@@ -536,14 +584,13 @@ class Game(cgame.Game):
         # Victory for current player
         if self.positions[players[actual_player].name] == 63:
             self.video_player.play_video(self.display.file_class.get_full_filename('gameofgoose/' + self.videos['victory'], 'videos'))
+            #handler['video'] = 'gameofgoose/' + self.videos['victory']
             self.winner = players[actual_player].ident
             return_code = 3
         
         if actual_round == int(self.max_round) and actual_player == self.nb_players - 1:
-            self.logs.log(
-                "DEBUG", "At last round, default action is to return game over.")
-            self.logs.log(
-                "DEBUG", "If it's not what you expect, raise a bug please.")
+            self.logs.debug("At last round, default action is to return game over.")
+            self.logs.debug("If it's not what you expect, raise a bug please.")
             # If its a early_player_button just at the last round - return GameOver
             return_code = 2
         return return_code
@@ -559,7 +606,7 @@ class Game(cgame.Game):
             self.secondDart  = True
         self.dartScore = 0
         players[actual_player].darts_thrown += 1   
-        self.display.play_sound('treasure_crane_jaune')     
+        self.display.play_sound('miss')     
         
  
 

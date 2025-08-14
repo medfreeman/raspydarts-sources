@@ -3,7 +3,13 @@
 Game by LaDite
 """
 
+# -*- coding: utf-8 -*-
+"""
+Game by LaDite
+"""
+
 import random
+import threading  # <-- ajout pour thread
 from include import cplayer
 from include import cgame
 
@@ -61,12 +67,19 @@ class Game(cgame.Game):
 
         self.bull = False
         self.first = True
-        
+
+    # *** AJOUT THREAD POUR targets_led ***
+    def targets_led_thread(self, targets_str):
+        """
+        Threaded method to update LEDs via rpi.set_target_leds
+        """
+        self.rpi.set_target_leds(targets_str)
+
     def post_dart_check(self, hit, players, actual_round, actual_player, player_launch):
         """
         After eah row : valid launch ? winner ? ...
         """
-
+        handler = self.init_handler()
         play_hit = False
         players[actual_player].add_dart(actual_round, player_launch, hit)
 
@@ -140,7 +153,7 @@ class Game(cgame.Game):
                 return_code = -1
         elif player_launch == 3:
             self.display.play_sound('pan-rate')
-        
+
         players[actual_player].increment_hits(hit)
         self.tirsrestant -= 1
 
@@ -149,7 +162,7 @@ class Game(cgame.Game):
             players[actual_player].columns[5] = (self.tirsrestant, 'int')
         else:
             players[actual_player].columns[5] = ('0', 'int')
-            
+
         if play_hit:
             if super().play_show(players[actual_player].darts, hit, play_special=True):
                 self.display.sound_for_touch(hit) # Play hit sound
@@ -177,9 +190,11 @@ class Game(cgame.Game):
         # It is recommanded to update stats every dart thrown
         self.refresh_stats(players, actual_round)
 
-        self.logs.log("DEBUG", self.infos)
+        self.logs.debug(self.infos)
 
-        return return_code
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        return handler
 
     def post_round_check(self, players, actual_round, actual_player):
 
@@ -202,7 +217,7 @@ class Game(cgame.Game):
             players[actual_player].columns[5] = (self.tirsrestant, 'int')
         else:
             players[actual_player].columns[5] = ('0', 'str')
-    
+
         # First round, first player, first dart
         if player_launch == 1 and actual_round == 1 and actual_player == 0 and self.first:
             for player in players:
@@ -270,16 +285,25 @@ class Game(cgame.Game):
             players[actual_player].columns[0] = (f'{players[actual_player].goals[players[actual_player].next]}', 'str')
             players[actual_player].actual_hit = players[actual_player].goals[players[actual_player].next]
             self.targets_list = [f'{mult}{players[actual_player].goals[players[actual_player].next]}' for mult in ['S', 's', 'D', 'T']]
+        
+        # Lancement du thread pour l'update LED
         if not self.bull:
-            # Return S20#green|D20#red|T20#blue
-            self.rpi.set_target_leds('|'.join([f'{value}#{self.colors[0]}' \
-                    for value in self.targets_list]))
+            targets_str = '|'.join([f'{value}#{self.colors[0]}' for value in self.targets_list])
         else:
-            self.rpi.set_target_leds(f'SB#{self.colors[0]}|DB#{self.colors[0]}')
+            targets_str = f'SB#{self.colors[0]}|DB#{self.colors[0]}'
+
+        threading.Thread(target=self.targets_led_thread, args=(targets_str,), daemon=True).start()
 
         if self.first:
             self.first = False
 
+        return return_code
+           
+        print('predarts- target_list')
+        print(self.targets_list)
+        
+
+        
         return return_code
 
     def check_winner(self, players):
@@ -330,5 +354,5 @@ class Game(cgame.Game):
         Miss button
         '''
         players[actual_player].columns[player_launch+1] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         players[actual_player].darts_thrown += 1

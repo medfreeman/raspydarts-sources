@@ -80,7 +80,7 @@ class Game(cgame.Game):
             try:
                 self.check_handicap(players)
             except Exception as exception: # pylint: disable=broad-except
-                self.logs.log("ERROR", f"Handicap failed : {exception}")
+                self.logs.error(f"Handicap failed : {exception}")
 
             for player in players:
                 # Init score
@@ -112,7 +112,7 @@ class Game(cgame.Game):
             return_code = 3
 
         # Print debug output
-        self.logs.log("DEBUG",self.infos)
+        self.logs.debug(self.infos)
         return return_code
 
     def pnj_score(self, players, actual_player, level, player_launch):
@@ -142,12 +142,12 @@ class Game(cgame.Game):
                 best_score = player.score
                 best_player = player.ident
                 best_count = 1
-                self.logs.log("DEBUG", \
+                self.logs.debug(\
                         f"Best found : {best_score} / Count={best_count} / player = {best_player}")
             elif player.score == best_score:
                 best_count += 1
 
-        self.logs.log("DEBUG", \
+        self.logs.debug(\
                 f"Best score : {best_score} / Count={best_count} / Player = {best_player}")
 
         if best_count == 1:
@@ -158,6 +158,9 @@ class Game(cgame.Game):
         """
         Function run after each dart throw - for example, add points to player
         """
+        
+        handler = self.init_handler()
+        
         ### dit le chiffre touche
         self.display.sound_for_touch(hit)
 
@@ -199,9 +202,14 @@ class Game(cgame.Game):
         if self.winner is not None:
             return_code = 3
 
-        self.logs.log("DEBUG", self.infos)
+        self.logs.debug(self.infos)
         
-        return return_code
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        handler['return_code'] = return_code
+        return handler
+        
+        #return return_code
 
        
 
@@ -252,7 +260,7 @@ class Game(cgame.Game):
         """  
         print('miss boutton - pass')
         players[actual_player].columns[player_launch-1] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         #self.points = 0
         players[actual_player].columns[4] = (self.points, 'int')
         players[actual_player].darts_thrown += 1

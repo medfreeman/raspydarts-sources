@@ -66,6 +66,8 @@ class Game(cgame.Game):
         """
         After eah row : valid launch ? winner ? ...
         """
+        handler = self.init_handler()
+        
         score = 0
         
         play_hit = False
@@ -99,7 +101,8 @@ class Game(cgame.Game):
             elif str(hit[1:]) == str(self.corps[3]) :
                 score = 5 * multi   
                 
-            self.display.play_sound('pan-touche')
+            #self.display.play_sound('pan-touche')
+            handler['sound'] = 'pan-touche'
                         
                         
         elif hit+'#green' in self.targets_list_tete :            
@@ -108,10 +111,12 @@ class Game(cgame.Game):
             
             score = 10 * multi  
 
-            self.display.play_sound('pan-cloche')
+            #self.display.play_sound('pan-cloche')
+            handler['sound'] = 'pan-cloche'
 
         else :
-            self.display.play_sound('plouf')    
+            #self.display.play_sound('plouf')   
+            handler['sound'] = 'pan-touche'
         
         players[actual_player].score += score
         players[actual_player].round_points += score
@@ -147,9 +152,14 @@ class Game(cgame.Game):
         # It is recommanded to update stats every dart thrown
         self.refresh_stats(players, actual_round)
 
-        self.logs.log("DEBUG", self.infos)
+        self.logs.debug(self.infos)
 
-        return return_code
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        handler['return_code'] = return_code
+        return handler
+
+        #return return_code
 
     def post_round_check(self, players, actual_round, actual_player):
 
@@ -270,6 +280,6 @@ class Game(cgame.Game):
     def miss_button(self, players, actual_player, actual_round, player_launch):
 
         players[actual_player].columns[player_launch-1] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
           
         players[actual_player].darts_thrown += 1

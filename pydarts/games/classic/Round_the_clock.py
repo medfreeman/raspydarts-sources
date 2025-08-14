@@ -138,7 +138,10 @@ class Game(cgame.Game):
         # It is recommanded to update stats every dart thrown
         self.refresh_stats(players, actual_round)
 
-        self.logs.log('DEBUG', self.infos)
+        self.logs.debug(self.infos)
+
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
 
         return handler
 
@@ -299,7 +302,7 @@ class Game(cgame.Game):
         print('miss')
         #players[actual_player].columns[6] = (self.moyenne, 'int')
         players[actual_player].columns[player_launch] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         players[actual_player].darts_thrown += 1
         # play penality sound
         self.display.play_sound('penality')

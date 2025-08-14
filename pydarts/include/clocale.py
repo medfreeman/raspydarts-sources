@@ -21,23 +21,24 @@ class Locale:
                 'es_EC', 'es_GT', 'es_HN', 'es_MX', 'es_NI', 'es_PA', 'es_PE', 'es_PR', 'es_PY', \
                 'es_SV', 'es_US', 'es_UY', 'es_VE']
         localias['de_DE'] = ['de_DE', 'de_CH']
+        localias['it_IT'] = ['it_IT', 'it_CH']
 
         if config.get_value('SectionGlobals', 'locale'):
             paramloc = config.get_value('SectionGlobals', 'locale')
-            self.logs.log("DEBUG", f"You requested to load following locale {paramloc}")
+            self.logs.debug(f"You requested to load following locale {paramloc}")
         else:
             paramloc = locale.getdefaultlocale() # get current user locale
             paramloc = paramloc[0]#Get only first part (remove char encoding)
-            self.logs.log("DEBUG", "Your detected locale name is \"{paramloc}\".")
+            self.logs.debug("Your detected locale name is \"{paramloc}\".")
 
         for alloc, alias in localias.items(): #Search which main locale it belongs
             if paramloc and paramloc in alias: # And load it
                 toloadloc = f"{alloc}.UTF-8"
-                self.logs.log("DEBUG", f"Your locale is mapped on locale : \"{toloadloc}\".")
+                self.logs.debug(f"Your locale is mapped on locale : \"{toloadloc}\".")
         # If at this stage toloadloc is not defined, use fallback (english)
         if not toloadloc:
             toloadloc = self.localefallback
-            self.logs.log("WARNING",
+            self.logs.warning(
                     f"Unable to map your locale. Using fallback locale : \"{toloadloc}\".")
         kwargs = {}
         if sys.version_info[0] < 3:

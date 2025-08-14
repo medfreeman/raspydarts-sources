@@ -94,7 +94,7 @@ class Game(cgame.Game):
         self.num_set = 1
         #test
         self.my_hits = []
-        self.swap = 0 # by Manu swap terrain
+        self.swap = 0
 
         if self.nb_players == 4:
             self.display.teaming = True
@@ -201,8 +201,8 @@ class Game(cgame.Game):
         self.leds_out = [f'{hit}#red' for hit in self.hits_out]
 
         ####
-        self.logs.log("DEBUG", f"game={self.nb_game} cote={cote} self.my_hits = {self.my_hits}")
-        self.logs.log("DEBUG", f"return {leds_j1 + leds_j2 + self.leds_bull + self.leds_out}")
+        self.logs.debug(f"game={self.nb_game} cote={cote} self.my_hits = {self.my_hits}")
+        self.logs.debug(f"return {leds_j1 + leds_j2 + self.leds_bull + self.leds_out}")
 
         return leds_j1 + leds_j2 + self.leds_bull + self.leds_out + self.leds_net
 
@@ -227,7 +227,7 @@ class Game(cgame.Game):
             try:
                 self.check_handicap(players)
             except Exception as exception: # pylint: disable=broad-except
-                self.logs.log("ERROR", f"Handicap failed : {exception}")
+                self.logs.error(f"Handicap failed : {exception}")
 
             for player in players:
                 # Init score
@@ -271,7 +271,7 @@ class Game(cgame.Game):
         self.update_columns(players)
 
         # Print debug output
-        self.logs.log("DEBUG", self.infos)
+        self.logs.debug(self.infos)
         return return_code
 
     def mate_name(self, players, player_id):
@@ -422,14 +422,14 @@ class Game(cgame.Game):
                 message = f'Jeu, Set et Match {players[0].name}'
                 self.display.speech(message, speed=self.speed)
                 self.winner = 0
-                self.logs.log("DEBUG", message)
+                self.logs.debug(message)
                 return 3, None, None
             
             elif players[1].score >= self.nb_set:
                 message = f'Jeu, Set et Match {players[1].name}'
                 self.display.speech(message, speed=self.speed)
                 self.winner = 1
-                self.logs.log("DEBUG", message)
+                self.logs.debug(message)
                 return 3, None, None
             # Joueur suivant
             #self.display.speech(message, speed=self.speed)
@@ -501,12 +501,12 @@ class Game(cgame.Game):
                 best_score = player.score
                 best_player = player.ident
                 best_count = 1
-                self.logs.log("DEBUG", \
+                self.logs.debug(\
                         f"Best found : {best_score} / Count={best_count} / player = {best_player}")
             elif player.score == best_score:
                 best_count += 1
 
-        self.logs.log("DEBUG", \
+        self.logs.debug(\
                 f"Best score : {best_score} / Count={best_count} / Player = {best_player}")
 
         if best_count == 1:
@@ -563,8 +563,8 @@ class Game(cgame.Game):
             color = 'blue'
             team = 2
 
-        self.logs.log("DEBUG", f"hit is {hit} / points123 = {points123} / points135 = {points135}")
-        self.logs.log("DEBUG", f"color is {color} / team = {team}")
+        self.logs.debug(f"hit is {hit} / points123 = {points123} / points135 = {points135}")
+        self.logs.debug(f"color is {color} / team = {team}")
 
         #### DMD - TOUCHE LE SEGMENT WHITE / RED
         if hit in self.hits_bull + self.hits_net:
@@ -674,6 +674,9 @@ class Game(cgame.Game):
             # Tiebreak, le joueur 1 lance 1 flechette puis c'est au joueur 2 d'en lancer 2
             handler['return_code'] = 1
 
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+
         return handler
 
     def update_columns(self, players):
@@ -764,7 +767,7 @@ class Game(cgame.Game):
     def miss_button(self, players, actual_player, actual_round, player_launch):
 
         #players[actual_player].columns[player_launch] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         players[actual_player].darts_thrown += 1
         if player_launch == 1:
             # 1ère fléchette : je joueur touche le bon segment

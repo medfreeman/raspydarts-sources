@@ -17,9 +17,9 @@ SON = None
 
 def usage(msg):
     print("")
-    print("TargetLeds_Server.py [-host={}] [-leds=raspyleds] [-bgcolors={}] [-bgbrightness={}] <DMA_CHANNEL> <TOPIC> <CONFIG> <PIN> <BRIGHTNESS>".format(MQTT_HOST, 'blue,red,white', 10))
+    print(f"TargetLeds_Server.py [-host={MQTT_HOST}] [-type='grb'] [-leds=raspyleds] [-bgcolors='blue,red,white'] [-bgbrightness=10] <DMA_CHANNEL> <TOPIC> <CONFIG> <PIN> <BRIGHTNESS>")
     print("")
-    print(" ERROR : {}".format(msg))
+    print(f" ERROR : {msg}")
     print("")
     sys.exit(9)
 
@@ -58,7 +58,7 @@ def animation(t_event, msg):
             wait_time = int(msg.split(",")[1]) * int(msg.split(",")[3])
         except:
             wait_time = 500
-    elif msg[0:4:1] != 'leds' and msg[0:4:1] != 'goal':
+    elif msg[0:4:1] != 'leds' and msg[0:4:1] != 'goal' and msg[0:6:1] != 'reload':
         try:
             animation = msg.split(',')[0]
             iterations = int(msg.split(',')[1])
@@ -81,7 +81,6 @@ def animation(t_event, msg):
             C = Colors.GetColor(color)
         except:
             C = Colors.GetColor()
-
     
     print(f"[DEBUG] TargetLeds_Server : Launch {animation}", flush=True)
     try:
@@ -120,10 +119,8 @@ def animation(t_event, msg):
             CStrip.TA_Hue(t_event, delay, C, iterations)
         elif animation == 'Light':
             CStrip.TA_Light(C)
-# Added by Manu script
         elif animation == 'Lotus':
             CStrip.TA_Lotus(t_event, delay, C, iterations)
-# End added by Manu script.
         elif animation == 'Mireille':
             CStrip.TA_Mireille(t_event, delay, C, iterations)
         elif animation == 'Pacman':
@@ -164,6 +161,8 @@ def animation(t_event, msg):
             CStrip.SimpleBull(t_event, 5, C, 2)
         elif animation.split('|')[0] == 'leds' :
             CStrip.TestSegment(animation.split('|')[1])
+        elif animation.split('|')[0] == 'reload' :
+            CStrip.ReloadSegmentsColors(animation.split('|')[1:])
 
         elif animation == 'Debug':
             CStrip.Debug(delay,C,1)
@@ -227,11 +226,12 @@ def on_message(client, userdata, msg):
 MQTT_HOST = "localhost"
 MQTT_TOPIC = "pydarts/TargetLeds"
 DMA = 10
-leds_type = None
+LEDS_TYPE = None
 BGBRIGHTNESS = None
 BGCOLORS = None
+STRIP_TYPE = 'grb'
 
-if len(sys.argv) < 5 or len(sys.argv) > 9 :
+if len(sys.argv) < 5 or len(sys.argv) > 10:
     usage("Bad number of arguments : {}".format(len(sys.argv)))
 else :
     Colors = CColors.CColors()
@@ -241,15 +241,23 @@ else :
         MQTT_HOST = sys.argv[i].split('=')[1]
         i += 1
 
+    if sys.argv[i][0:6] == '-type=' :
+        if sys.argv[i].split('=')[1] == 'rgb':
+            STRIP_TYPE = 'rgb'
+        if sys.argv[i].split('=')[1] == 'grb':
+            STRIP_TYPE = 'grb'
+        i += 1
+
     if sys.argv[i][0:6] == '-leds=' :
         if sys.argv[i].split('=')[1] == 'raspyleds':
-            leds_type = 'raspyleds'
-
-        LEDS_TYPE = sys.argv[i].split('=')[1]
+            LEDS_TYPE = 'raspyleds'
         i += 1
 
     if sys.argv[i][0:10] == '-bgcolors=':
-        colors = sys.argv[i].split('=')[1].split(',')
+        if sys.argv[i].split('=')[1].find("_") >= 0:
+            colors = sys.argv[i].split('=')[1].split('_')
+        else:
+            colors = sys.argv[i].split('=')[1].split(',')
         BGCOLORS = []
 
         for color in colors:
@@ -306,7 +314,7 @@ else :
             if pixel != '' and int(pixel) >= NB_PIXELS:
                 NB_PIXELS = int(pixel)+1
 
-    CStrip = CStrip.CStrip(PIN, NB_PIXELS, BRIGHTNESS, DMA, 'TARGET', configuration=CONFIG, leds_type=leds_type, bgcolors=BGCOLORS, bgbrightness=BGBRIGHTNESS)
+    CStrip = CStrip.CStrip(PIN, NB_PIXELS, BRIGHTNESS, DMA, 'TARGET', configuration=CONFIG, leds_type=LEDS_TYPE, bgcolors=BGCOLORS, bgbrightness=BGBRIGHTNESS, strip_type=STRIP_TYPE)
 
     if CStrip.target_leds_count == 0:
         print("[WARNING] No leds configured")
@@ -316,6 +324,7 @@ else :
     print(f"[DEBUG] TargetLeds_Server : host={MQTT_HOST}")
     print(f"[DEBUG] TargetLeds_Server : Dma channel={DMA}")
     print(f"[DEBUG] TargetLeds_Server : Pin={PIN}")
+    print(f"[DEBUG] TargetLeds_Server : Type={STRIP_TYPE}")
     print(f"[DEBUG] TargetLeds_Server : Topic={MQTT_TOPIC}")
     print(f"[DEBUG] TargetLeds_Server : Nb pixels={NB_PIXELS}")
     print(f"[DEBUG] TargetLeds_Server : Brightness={BRIGHTNESS}")

@@ -29,7 +29,7 @@ class Scores:
         try:
             self.cx = sqlite3.connect(self.db)
         except Exception as exception:
-            self.logs.log("ERROR", f"{exception}")
+            self.logs.error(f"{exception}")
 
     def DBChecks(self):
         """
@@ -41,7 +41,7 @@ class Scores:
         self.connect()
         # Purge if requested
         if self.config.get_value('SectionAdvanced', 'clear-local-db'):
-            self.logs.log("WARNING", f"Squeezing any existing table in {self.db}")
+            self.logs.warning(f"Squeezing any existing table in {self.db}")
             sql='DROP table scores'
             cur = self.cx.cursor()
             cur.execute(sql)

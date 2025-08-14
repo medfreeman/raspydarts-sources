@@ -135,7 +135,9 @@ class Game(cgame.Game):
                 hint.append("-")
             self.hintWord = "".join(hint)
             
-        self.dmd.send_text(self.hintWord, sens=None, iteration=None)    
+        #self.dmd.send_text(self.hintWord, sens=None, iteration=None)   
+        handler['dmd'] = (self.hintWord, sens=None, iteration=None)
+         
         
         """
         
@@ -176,7 +178,7 @@ class Game(cgame.Game):
         # Backuping scores
         self.save_turn(players)
         # Send debug output to log system. Use DEBUG or WARNING or ERROR or FATAL
-        self.logs.log("DEBUG",self.infos)
+        self.logs.debug(self.infos)
          
         return return_code
         
@@ -194,6 +196,8 @@ class Game(cgame.Game):
         """
         Function run after each dart throw - for example, add points to player
         """
+        
+        handler = self.init_handler()
 
         return_code = 0
         
@@ -205,19 +209,27 @@ class Game(cgame.Game):
         hit = int(hit[1:])
         if (self.listAlphabet[hit - 1] in self.currentWord):
             self.goodLetters.append(hit)
-            self.display.play_sound('chalkSound')
+            #self.display.play_sound('chalkSound')
+            handler['sound'] = 'chalkSound'
+            
             self.hintWord = self.updateHint(self.listAlphabet[hit - 1], list(self.hintWord)) # letter found, update hint on screen
-            self.dmd.send_text(self.hintWord, sens=None, iteration=None)
+            #self.dmd.send_text(self.hintWord, sens=None, iteration=None)
+            handler['dmd'] = (self.hintWord, sens=None, iteration=None)
+            
             if (self.hintWord == self.currentWord) :
                 # video successWord to add ?
-                self.display.play_sound('HangmanFound')
+                #self.display.play_sound('HangmanFound')
+                handler['sound'] = 'HangmanFound'
+                
                 self.scoreHangman = self.scoreHangman + 1
                 self.goodLetters = []
                 self.badLetters = []
                 self.currentWord = self.newWordRound(self.scoreHangman) 
         else :
             self.currentAttempts += 1 # letter not in word, update attempts + hangmangraphic
-            self.display.play_sound('errorSound')
+            #self.display.play_sound('errorSound')
+            handler['sound'] = 'errorSound'
+            
             self.badLetters.append(hit)
             if (self.currentAttempts == 6) :
                 # video failure to add ?
@@ -234,8 +246,13 @@ class Game(cgame.Game):
         # It is recommanded to update stats every dart thrown
         self.refresh_stats(players, actual_round)
 
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        handler['return_code'] = return_code
+        return handler
+
         # Return code to main
-        return return_code
+        #return return_code
         
     def refresh_game_screen(self, Players, actual_round, max_round, RemDarts, nb_darts, logo, headers, actual_player,TxtOnLogo=False, Wait=False, OnScreenButtons=None, showScores=True, end_of_game=False, endOfSet=None, Set=None, MaxSet=None):
        
@@ -335,10 +352,8 @@ class Game(cgame.Game):
         return_code = 3
         
         if actual_round == int(self.max_round) and actual_player == self.nb_players - 1:
-            self.logs.log(
-                "DEBUG", "At last round, default action is to return game over.")
-            self.logs.log(
-                "DEBUG", "If it's not what you expect, raise a bug please.")
+            self.logs.debug("At last round, default action is to return game over.")
+            self.logs.debug("If it's not what you expect, raise a bug please.")
             # If its a early_player_button just at the last round - return GameOver
             return_code = 2
         return return_code

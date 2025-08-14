@@ -13,6 +13,7 @@ import re
 import time
 
 import paho.mqtt.client as mqtt
+#from threading import Thread
 
 class Event:
     """
@@ -56,20 +57,24 @@ class Event:
 
         self.dispatcher = preferences
         self.logs = logs
+        self.rpi = None
 
-        self.logs.log("DEBUG", f"self.dispatcher={self.dispatcher}")
-        self.logs.log("DEBUG", f"broker={broker}")
+        self.logs.debug(f"self.dispatcher={self.dispatcher}")
+        self.logs.debug(f"broker={broker}")
         try:
             self.mqtt_client = mqtt.Client(client_id)
             self.mqtt_client.connect(broker, port)
         except: # pylint: disable=bare-except
             self.mqtt_client = None
 
+    def add_rpi(self, rpi):
+        self.rpi = rpi
+
     def get_events(self):
         """
         returns list of available events
         """
-        return ['launch', 'menu', 'newgame', 'wait', 'SB', 'DB', 'pressure', \
+        return ['launch', 'menu', 'newgame', 'wait', 'SB', 'DB', '180', 'pressure', \
                 'release', 'nextplayer', 'touch', 'miss', 'setwinner', 'winner', \
                 'gameover', 'interrupt', 'quit']
 
@@ -119,7 +124,7 @@ class Event:
                 if self.continue_list[i] == msg.topic:
                     del self.continue_list[i]
                     break
-            self.logs.log("DEBUG", f"Wait for ack on {self.continue_list}")
+            self.logs.debug(f"Wait for ack on {self.continue_list}")
 
     def wait_acks(self, topics, timeout):
         """
@@ -136,7 +141,7 @@ class Event:
 
         self.mqtt_client.on_message = self.__message_is_ack
         self.mqtt_client.subscribe(topic_list)
-        self.logs.log("DEBUG", f"Wait for ack on {self.continue_list}")
+        self.logs.debug(f"Wait for ack on {self.continue_list}")
 
         i = 0
         while i <= timeout and len(self.continue_list) > 0:
@@ -144,11 +149,11 @@ class Event:
             i += 1
             time.sleep(0.5)
         if i == timeout:
-            self.logs.log("DEBUG", f"Timeout reached on {topic}")
+            self.logs.debug(f"Timeout reached on {topic}")
         if len(self.continue_list) == 0:
-            self.logs.log("DEBUG", "Ack received")
+            self.logs.debug("Ack received")
         else:
-            self.logs.log("DEBUG", f"Missing acks : {self.continue_list}")
+            self.logs.debug(f"Missing acks : {self.continue_list}")
 
     def mqtt_publish(self, topic, message):
         """
@@ -156,12 +161,12 @@ class Event:
         Retry on error, 50 times max
         """
         if len(message) < 1:
-            self.logs.log("WARNING", f"Cannot publish on 0 length message")
+            self.logs.warning(f"Cannot publish on 0 length message")
             return
-        self.logs.log("DEBUG", f"Publish on {topic} : {message}")
+        self.logs.debug(f"Publish on {topic} : {message}")
         ret = self.mqtt_client.publish(topic, message)
         if ret[0] != 0 :
-            self.logs.log("DEBUG", f"publish ret={ret}")
+            self.logs.debug(f"publish ret={ret}")
         i = 0
         while ret[0] != 0 and i < 50 :
             time.sleep(0.01)
@@ -169,13 +174,13 @@ class Event:
             ret = self.mqtt_client.connect(self.broker, self.port)
             if ret == 0 :
                 ret = self.mqtt_client.publish(topic, message)
-                self.logs.log("DEBUG", f"Send {message} on {topic}")
+                self.logs.debug(f"Send {message} on {topic}")
             else :
-                self.logs.log("DEBUG", f"Cannot reconnect to {self.broker}:{self.port}")
+                self.logs.debug(f"Cannot reconnect to {self.broker}:{self.port}")
 
             i += 1
         if i == 50 :
-            self.logs.log("ERROR", "Mqtt Send error")
+            self.logs.error("Mqtt Send error")
 
 
     def send(self, device, topic, available, event, data, ack=False):
@@ -183,6 +188,11 @@ class Event:
         Sent a message on a topic
         """
         self.continue_list = []
+        messages = []
+
+        if device == 'DMD':
+            self.mqtt_publish(topic, event)
+            return
 
         if event == 'wait':
             thread = True
@@ -194,16 +204,29 @@ class Event:
 
             if event == 'quit':
                 shutdown = True
-            elif event == 'stroke':
-                if data in ('SB', 'DB'):
-                    event = data
-                else:
-                    event = 'touch'
-            try:
-                messages = self.dispatcher[event][device][::]
-                #if event in ('SB','DB','touch') and device == 'TARGET':
-                if event == 'touch' and device == 'TARGET':
-                    raise Exception     # Overide animation definition in configuration file
+
+            if event == 'stroke':
+                # Special event for segment stroke ?
+                try:
+                    messages = self.dispatcher[data][device][::]
+                except:
+                    if data[:1:] in ('s', 'S') and device == 'STRIP':
+                        messages.append('simple')
+                    if data[:1:] == 'D' and device == 'STRIP':
+                        messages.append('double')
+                    if data[:1:] == 'T' and device == 'STRIP':
+                        messages.append('triple')
+
+                if device == 'TARGET' and len(messages) == 0:
+                    messages.append(f"stroke:{data}")
+
+            if len(messages) == 0:
+                try:
+                    messages = self.dispatcher[event][device][::]
+                except:
+                    pass
+
+            if len(messages) == 0:
                 if event == 'wait' and len(messages) > 1:
                     # Keep one message
                     # I hope the animation will change at every execution
@@ -222,12 +245,8 @@ class Event:
                     elif event == 'quit':
                         messages = ['quit']
 
-            except: # pylint: disable=bare-except
-                if event in ('SB','DB','touch'):
-                    event = 'stroke'
-
+            if len(messages) == 0:
                 # Not found, send as receveid
-                messages = []
                 if data:
                     messages.append(f"{event}:{data}")
                 else:
@@ -256,14 +275,20 @@ class Event:
         Used by other modules
         Send data on various topics
         """
-        if self.mqtt_client is not None:
+        threads = []
+        self.logs.debug(f"Received {event} / {data} / limit = {limit}")
+        if self.mqtt_client is not None and event is not None:
             if event == 'leds':
                 self.mqtt_publish(self.target_topic, f"leds|{data}")
+                
+            elif event == 'reload':  
+                self.mqtt_publish(self.target_topic, f"reload|{data}")
 
             elif event == 'special':
                 for element in data.split('-'):
                     if len(element) == 0:
                         continue
+                    
                     destination = element.split(':')[0]
                     anims = element.split(':')[1].split(';')
 
@@ -307,7 +332,45 @@ class Event:
                 if event == 'quit':
                     self.mqtt_client.disconnect()
         else:
-            self.logs.log("ERROR", "Mqtt client not initialized")
+            self.logs.error("Mqtt client not initialized")
+
+        if event == 'stroke':
+            event = data
+        try:
+            if limit is None or 'LIGHT' in limit:
+                if self.dispatcher[event] == {} and (data not in ['SB', 'DB'] and data[:1] in ['S', 'D', 'T']):
+                    if data[:1] == 'S':
+                        event = 'simple'
+                    elif data[:1] == 'D':
+                        event = 'double'
+                    elif data[:1] == 'T':
+                        event = 'triple'
+                for light in self.dispatcher[event]['LIGHT']:
+                    self.rpi.light_toys([light.split(',')[0]], delay=int(light.split(',')[1]))
+        except:
+            pass
+
+        try:
+            if limit is None or 'STROBE' in limit:
+                if self.dispatcher[event] == {} and (data not in ['SB', 'DB'] and data[:1] in ['S', 'D', 'T']):
+                    if data[:1] == 'S':
+                        event = 'simple'
+                    elif data[:1] == 'D':
+                        event = 'double'
+                    elif data[:1] == 'T':
+                        event = 'triple'
+                for strobe in self.dispatcher[event].get('STROBE', []):
+                    opts = strobe.split(',')
+                    if len(opts) == 2:
+                        threads += self.rpi.strobe_toys([opts[0]], iterations=int(opts[1]))
+                    if len(opts) == 3:
+                        threads += self.rpi.strobe_toys([opts[0]], iterations=int(opts[1]), delay_on=int(opts[2]))
+                    if len(opts) == 4:
+                        threads += self.rpi.strobe_toys([opts[0]], iterations=int(opts[1]), delay_on=int(opts[2]), delay_off=int(opts[3]))
+        except Exception as error:
+            self.logs.error(f"Error is {error}")
+            pass
+        return threads
 
 
     def string_to_pref(self, prefs):

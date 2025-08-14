@@ -14,20 +14,8 @@ class Player:
         self.position = None
         self.interior = interior    # Manage interioir and exterior simple segments
 
-        # Init value of each column for this player
-        self.columns = []
-        for _ in range(0, self.nb_columns + 1):
-            self.columns.append(('', 'txt', None))
         # Init Player name
         self.name = f"Player {self.ident + 1}"
-        # Stats table
-        self.stats = {}
-
-        # Still in game
-        self.alive = True
-        self.lives = 0
-        # Number of sets win
-        self.sets = 0
 
         ############################
         #### Player Computer
@@ -45,12 +33,25 @@ class Player:
         self.position = None
         # Team number
         self.team = 1 + (self.ident % 2)
+
+        self.reset()
+
+    def print(self):
+        """
+        Print player's informations
+        """
+        return f"{self.ident}/{self.name}/{self.hits}/{self.darts_thrown}/{self.score}/{self.computer}/{self.level}/{self.color}"
+
+    def reset(self):
+        """
+        Reset previous game data
+        """
         # Score is the value displayed in the last column. "Current"
         self.score = 0
         # points is the total count of point accumulated by the player,
         # even if it is not equal to score
         self.points = 0
-        # Count how many valid hits the player reached for the whoel game
+        # Count how many valid hits the player reached for the whole game
         self.hits = 0
         # Count how many valid hits the player reached in this round
         self.roundhits = 0
@@ -58,48 +59,35 @@ class Player:
         self.round_points = 0
         # Count total of dart thrown. In some games it could differents from max_round*3.
         self.darts_thrown = 0
-        # Touches of the round
-        self.darts = []
-        # All touched
-        self.all_darts = {}
-
-        for key in ['MISS','SB','DB'] + \
-                [f"{mult}{num}" for mult in ('S', 'D', 'T') for num in range(1,21)]:
-            # Nb touche, pct
-            self.all_darts[key] = [0, 0, 0, 0]
-        if self.interior:
-            for key in [f's{num}' for num in range(1,21)]:
-                self.all_darts[key] = [0, 0, 0, 0]
-
-    def print(self):
-        """
-        Print player's informations
-        """
-        return f"{self.ident}/{self.name}/{self.hits}/{self.darts_thrown}/{self.score}"
-
-    def reset(self):
-        """
-        Reset previous game data
-        """
-        self.score = 0
-        self.points = 0
-        self.hits = 0
-        self.roundhits = 0
-        self.round_points = 0
-        self.darts_thrown = 0
-        self.darts = []
+        # Stats table
         self.stats = {}
+        # Still in game
         self.alive = True
+        # Number of remaining lives
         self.lives = 0
+        # Number of sets win
         self.sets = 0
+
+        # Init value of each column for this player
         self.columns = []
+
         for _ in range(0, self.nb_columns + 1):
             self.columns.append(('', 'txt', None))
 
+        # Touches of the round
+        self.darts = []
+
+        # all_darts['S1'] = [a, b, c, d]
+        # a : Number of touch
+        # b : Percent of hits (Number of S1 / Total darts thrown) * 100
+        # c :
+        # d : 
         self.all_darts = {}
+
         for hit in ['MISS', 'SB', 'DB'] + \
                 [f"{mult}{num}" for mult in ('S','D','T') for num in range(1,21)]:
             self.all_darts[hit] = [0, 0, 0, 0]
+
         if self.interior:
             for key in [f's{num}' for num in range(1,21)]:
                 self.all_darts[key] = [0, 0, 0, 0]
@@ -198,7 +186,6 @@ class Player:
         """
         Add dart to the round
         """
-        print(f"Etat de launch {launch}")
         self.darts[launch - 1] = hit
         self.rounds[actual_round - 1][launch - 1] = hit
         if score is not None:
@@ -277,7 +264,7 @@ class Player:
             self.hits += 2
         elif str(hit)[:1] == 'T':
             self.hits += 3
-        elif hit != 'MISSDART':
+        elif hit != 'MISS':
             self.hits += hit
         self.darts_thrown += 1
 
@@ -298,33 +285,6 @@ class Player:
             color = self.columns[column][2]
             old_value = self.columns[column][0]
             self.columns[column] = (old_value - value, 'int', color)
-
-    def get_touch_type(self, touch):
-        """
-        Find if a touch is a Simple, Double, Triple
-        """
-        if touch[:1] in ('s', 'S'):
-            value = "Simple "
-        elif touch[:1] == 'D':
-            value = "Double "
-        elif touch[:1] == 'T':
-            value = "Triple "
-
-        if touch[1:] == "B":
-            return f'{value} Bull'
-        return f'{value} {touch[1:]}'
-
-    def get_touch_unit(self, touch):
-        """
-        Return touch unit (1 for simple, 2 for double, and 3 for triple)
-        """
-        if touch[:1] in ('s', 'S'):
-            return 1
-        if touch[:1] == 'D':
-            return 2
-        if touch[:1] == 'T':
-            return 3
-        return 0
 
     def get_total_hit(self):
         """

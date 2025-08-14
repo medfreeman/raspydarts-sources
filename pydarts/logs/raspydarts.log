@@ -1,49 +1,1559 @@
-[DEBUG] 2024-09-30 09:13:13.775724 - Config file /home/pi/.pydarts/pydarts.cfg exists. We use it so...
-[DEBUG] 2024-09-30 09:13:13.776736 - Working on section SectionGlobals of your config file.
-[DEBUG] 2024-09-30 09:13:13.796746 - Config[SectionGlobals]={'locale': 'fr_FR', 'colorset': 'remi', 'font': 'Kamikzon.ttf', 'soundvolume': '100', 'videos': '2', 'blinktime': '500', 'pnj_time': '2000', 'releasedartstime': '0', 'nextplayer_sound_duration': '10000', 'waitevent_time': '15000', 'resx': '1000', 'resy': '700', 'fullscreen': True, 'nbcol': '6', 'onscreenbuttons': False, 'startpercent': '0.4', 'endgamestats': '1', 'keeporder': False, 'play_firstname': True, 'print_dartstroke': True, 'light_target': False, 'light_strip': False, 'netgamecreator': 'Rémi', 'debuglevel': '0', 'exhibition_mode': False, 'competition_mode': False, 'videosound_multiplier': '1', 'sound_multiplier': '100', 'illumination_mode': False, 'illumination_color': 'white'}
-[DEBUG] 2024-09-30 09:13:13.797440 - Working on section SectionAdvanced of your config file.
-[DEBUG] 2024-09-30 09:13:13.816473 - Config[SectionAdvanced]={'bypass-stats': '1', 'selectedgame': False, 'gametype': False, 'netgamename': False, 'servername': 'raspydarts.synology.me', 'serverport': 5005, 'masterserver': 'raspydarts.synology.me', 'masterport': '5006', 'serveralias': False, 'listen': 'eth0', 'clientpolltime': '5', 'masterclientpolltime': 32, 'animationduration': 5, 'clear-local-db': False, 'localplayers': 'Maité,Rémi,Murielle,JeanMarie,Jervé,Myriam,Yves,Anna,AnneLise', 'stats-format': 'old', 'use-matrix': False, 'use-dmd': True, 'use-other': False, 'use-hue': False, 'mqtt-broker': 'localhost', 'interior': False, 'target-bgcolor1': 'blue', 'target-bgcolor2': 'red', 'target-bgcolor3': 'white', 'target-bgbrightness': '10', 'preferedclassicgame': '', 'preferedfungame': '', 'preferedsportgame': '', 'preferedcategory': 'classic', 'nb_sets': '1', 'db-celebration-delay': '10', 'set-celebration-delay': '10', 'victory-celebration-delay': '10', 'launch-game-celebration': False, 'game-options-list': '', 'richard-mode': False}
-[DEBUG] 2024-09-30 09:13:13.817153 - Working on section SectionKeys of your config file.
-[DEBUG] 2024-09-30 09:13:13.839379 - Config[SectionKeys]={'s1': '', 's2': '', 's3': '', 's4': '', 's5': '', 's6': '', 's7': '', 's8': '', 's9': '', 's10': '', 's11': '', 's12': '', 's13': '', 's14': '', 's15': '', 's16': '', 's17': '', 's18': '', 's19': '', 's20': '', 'S1': '2410', 'S2': '1627', 'S3': '827', 'S4': '810', 'S5': '1910', 'S6': '1610', 'S7': '2427', 'S8': '1927', 'S9': '610', 'S10': '2010', 'S11': '1327', 'S12': '1310', 'S13': '710', 'S14': '627', 'S15': '2027', 'S16': '2627', 'S17': '727', 'S18': '2510', 'S19': '2527', 'S20': '2610', 'D1': '249', 'D2': '1617', 'D3': '817', 'D4': '89', 'D5': '199', 'D6': '169', 'D7': '2417', 'D8': '1917', 'D9': '69', 'D10': '209', 'D11': '1317', 'D12': '139', 'D13': '79', 'D14': '617', 'D15': '2017', 'D16': '2617', 'D17': '717', 'D18': '259', 'D19': '2517', 'D20': '269', 'T1': '2411', 'T2': '1615', 'T3': '815', 'T4': '811', 'T5': '1911', 'T6': '1611', 'T7': '2415', 'T8': '1915', 'T9': '611', 'T10': '2011', 'T11': '1315', 'T12': '1311', 'T13': '711', 'T14': '615', 'T15': '2015', 'T16': '2615', 'T17': '715', 'T18': '2511', 'T19': '2515', 'T20': '2611', 'SB': '1322', 'DB': '622'}
-[DEBUG] 2024-09-30 09:13:13.840083 - Working on section Raspberry of your config file.
-[DEBUG] 2024-09-30 09:13:13.859436 - Config[Raspberry]={'EXTENDED_GPIO': '1', 'PIN_UP': 'A0', 'PIN_DOWN': 'A1', 'PIN_LEFT': 'A2', 'PIN_RIGHT': 'A3', 'PIN_MINUS': 'A5', 'PIN_PLUS': 'A4', 'PIN_VALIDATE': 'A6', 'PIN_CANCEL': 'B4', 'PIN_NEXTPLAYER': 'B0', 'PIN_BACK': 'A7', 'PIN_GAMEBUTTON': '', 'PIN_VOLUME_UP': '', 'PIN_VOLUME_DOWN': '', 'PIN_VOLUME_MUTE': '', 'PIN_CPTPLAYER': '', 'PIN_MISSDART': '', 'LIGHT_NEXTPLAYER': 'B1', 'LIGHT_NAVIGATE': 'B2', 'LIGHT_VALIDATE': '', 'LIGHT_BACK': '', 'LIGHT_PLAYERS': '', 'LIGHT_LASER': '', 'LIGHT_FLASH': '', 'LIGHT_CELEBRATION': 'B3', 'LIGHT_CELEBRATION2': '', 'LIGHT_LIGHT': ''}
-[DEBUG] 2024-09-30 09:13:13.860136 - Working on section Raspberry_Leds of your config file.
-[DEBUG] 2024-09-30 09:13:13.878212 - Config[Raspberry_Leds]={'PIN_TARGETLED': '21', 'BRI_TARGETLED': '80', 'PIN_STRIPLED': '12', 'NBR_STRIPLED': '144', 'BRI_STRIPLED': '30'}
-[DEBUG] 2024-09-30 09:13:13.878897 - Working on section LEDTarget of your config file.
-[DEBUG] 2024-09-30 09:13:13.901528 - Config[LEDTarget]={'S1': '99,98,97,95,94,93,92', 'S2': '29,28,27,25,24,23,22', 'S3': '9,8,7,5,4,3,2', 'S4': '79,78,77,75,74,73,72', 'S5': '110,111,112,114,116,115,117', 'S6': '59,58,57,55,54,53,52', 'S7': '180,181,182,184,186,185,187', 'S8': '160,161,162,164,166,165,167', 'S9': '130,131,132,134,136,135,137', 'S10': '49,48,47,45,44,43,42', 'S11': '159,158,157,155,154,153,152', 'S12': '129,128,127,125,124,123,122', 'S13': '60,61,62,64,66,65,67', 'S14': '149,148,147,145,144,143,142', 'S15': '30,31,32,34,36,35,37', 'S16': '179,178,177,175,174,173,172', 'S17': '10,11,12,14,16,15,17', 'S18': '80,81,82,84,86,85,87', 'S19': '199,198,197,195,194,193,192', 'S20': '109,108,107,105,104,103,102', 'D1': '91,90', 'D2': '21,20', 'D3': '1,0', 'D4': '71,70', 'D5': '119,118', 'D6': '51,50', 'D7': '189,188', 'D8': '169,168', 'D9': '139,138', 'D10': '41,40', 'D11': '151,150', 'D12': '121,120', 'D13': '69,68', 'D14': '141,140', 'D15': '39,38', 'D16': '171,170', 'D17': '19,18', 'D18': '89,88', 'D19': '191,190', 'D20': '101,100', 'T1': '96', 'T2': '26', 'T3': '6', 'T4': '76', 'T5': '113', 'T6': '56', 'T7': '183', 'T8': '163', 'T9': '133', 'T10': '46', 'T11': '156', 'T12': '126', 'T13': '63', 'T14': '146', 'T15': '33', 'T16': '176', 'T17': '13', 'T18': '83', 'T19': '196', 'T20': '106', 'E1': '', 'E2': '', 'E3': '', 'E4': '', 'E5': '', 'E6': '', 'E7': '', 'E8': '', 'E9': '', 'E10': '', 'E11': '', 'E12': '', 'E13': '', 'E14': '', 'E15': '', 'E16': '', 'E17': '', 'E18': '', 'E19': '', 'E20': '', 'SB': '200,201,202', 'DB': '203'}
-[DEBUG] 2024-09-30 09:13:13.902244 - Working on section Favorites of your config file.
-[DEBUG] 2024-09-30 09:13:13.919924 - Config[Favorites]={'servers': 'raspydarts.synology.me:5005', 'firstnames': 'Maité,Rémi', 'games': ''}
-[DEBUG] 2024-09-30 09:13:13.920562 - Working on section Events of your config file.
-[DEBUG] 2024-09-30 09:13:13.944553 - Config[Events]={'launch': {'TARGET': ['FadeRGB,1,random,10', 'Snake,100,random,50', 'Sparkle,10,gold,20'], 'STRIP': ['Strobe,5,red,20', 'Strobe,3,blue,50'], 'DMD': [], 'MATRIX': [''], 'OTHER': []}, 'off': {'TARGET': ['off,,,'], 'STRIP': ['off,,,'], 'DMD': ['off,,,'], 'MATRIX': ['off,,,'], 'OTHER': []}, 'menu': {'TARGET': ['Strobe,3,gold,50'], 'STRIP': ['Strobe,3,gold,50'], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'wait': {'TARGET': ['Rainbow,10,random,20'], 'STRIP': ['Fireworks,1,random,1'], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'quit': {'TARGET': ['Rainbow2,50,random,50'], 'STRIP': ['Rainbow,50,random,50'], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'newgame': {'TARGET': [''], 'STRIP': [''], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'ready': {'TARGET': [''], 'STRIP': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'release': {'TARGET': [''], 'STRIP': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'nextplayer': {'TARGET': ['Ring,20,random,50'], 'STRIP': ['Cylon,2,red,1'], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'SB': {'STRIP': [''], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'DB': {'STRIP': [], 'DMD': [''], 'MATRIX': [''], 'OTHER': [], 'TARGET': ['DoubleBull,1,random,10']}, 'winner': {'STRIP': [''], 'TARGET': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'miss': {'STRIP': [''], 'TARGET': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'gameover': {'TARGET': [''], 'STRIP': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'interrupt': {'TARGET': [''], 'STRIP': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'touch': {'STRIP': ['Strobe,2,random,50'], 'TARGET': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'setwinner': {'STRIP': ['Fireworks,1,gold,10'], 'TARGET': ['Wait,15,gold,100', 'Sparkle,10,gold,5'], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'pressure': {'TARGET': ['TheaterChase,10,blue,10'], 'STRIP': ['RunningLights,100,blue,10'], 'DMD': [], 'MATRIX': [], 'OTHER': [',,,']}, 'nopressure': {'TARGET': ['off,,,'], 'STRIP': [''], 'DMD': [], 'MATRIX': [], 'OTHER': [',,,']}}
-[DEBUG] 2024-09-30 09:13:13.945347 - Working on section SectionGlobals of your config file.
-[DEBUG] 2024-09-30 09:13:13.966538 - Config[SectionGlobals]={'locale': 'fr_FR', 'colorset': 'remi', 'font': 'Kamikzon.ttf', 'soundvolume': '100', 'videos': '2', 'blinktime': '500', 'pnj_time': '2000', 'releasedartstime': '0', 'nextplayer_sound_duration': '10000', 'waitevent_time': '15000', 'resx': '1000', 'resy': '700', 'fullscreen': True, 'nbcol': '6', 'onscreenbuttons': False, 'startpercent': '0.4', 'endgamestats': '1', 'keeporder': False, 'play_firstname': True, 'print_dartstroke': True, 'light_target': False, 'light_strip': False, 'netgamecreator': 'Rémi', 'debuglevel': '0', 'exhibition_mode': False, 'competition_mode': False, 'videosound_multiplier': '1', 'sound_multiplier': '100', 'illumination_mode': False, 'illumination_color': 'white'}
-[DEBUG] 2024-09-30 09:13:13.967261 - Working on section SectionAdvanced of your config file.
-[DEBUG] 2024-09-30 09:13:13.986231 - Config[SectionAdvanced]={'bypass-stats': '1', 'selectedgame': False, 'gametype': False, 'netgamename': False, 'servername': 'raspydarts.synology.me', 'serverport': 5005, 'masterserver': 'raspydarts.synology.me', 'masterport': '5006', 'serveralias': False, 'listen': 'eth0', 'clientpolltime': '5', 'masterclientpolltime': 32, 'animationduration': 5, 'clear-local-db': False, 'localplayers': 'Maité,Rémi,Murielle,JeanMarie,Jervé,Myriam,Yves,Anna,AnneLise', 'stats-format': 'old', 'use-matrix': False, 'use-dmd': True, 'use-other': False, 'use-hue': False, 'mqtt-broker': 'localhost', 'interior': False, 'target-bgcolor1': 'blue', 'target-bgcolor2': 'red', 'target-bgcolor3': 'white', 'target-bgbrightness': '10', 'preferedclassicgame': '', 'preferedfungame': '', 'preferedsportgame': '', 'preferedcategory': 'classic', 'nb_sets': '1', 'db-celebration-delay': '10', 'set-celebration-delay': '10', 'victory-celebration-delay': '10', 'launch-game-celebration': False, 'game-options-list': '', 'richard-mode': False}
-[DEBUG] 2024-09-30 09:13:13.986854 - Working on section Raspberry_BoardPinsIns of your config file.
-[DEBUG] 2024-09-30 09:13:14.005378 - Config[Raspberry_BoardPinsIns]={'PIN_1': '24', 'PIN_2': '25', 'PIN_3': '8', 'PIN_4': '7', 'PIN_5': '16', 'PIN_6': '20', 'PIN_7': '26', 'PIN_8': '19', 'PIN_9': '13', 'PIN_10': '6', 'PIN_11': '', 'PIN_12': '', 'PIN_13': '', 'PIN_14': '', 'PIN_15': '', 'PIN_16': ''}
-[DEBUG] 2024-09-30 09:13:14.006073 - Working on section Raspberry_BoardPinsOuts of your config file.
-[DEBUG] 2024-09-30 09:13:14.024280 - Config[Raspberry_BoardPinsOuts]={'PIN_1': '15', 'PIN_2': '17', 'PIN_3': '27', 'PIN_4': '22', 'PIN_5': '10', 'PIN_6': '9', 'PIN_7': '11', 'PIN_8': '', 'PIN_9': '', 'PIN_10': ''}
-[DEBUG] 2024-09-30 09:13:14.024999 - Working on section game- of your config file.
-[WARNING] 2024-09-30 09:13:14.043917 - No default game- section. Use config only
-[DEBUG] 2024-09-30 09:13:14.044126 - Config[game-]={}
-[DEBUG] 2024-09-30 09:13:14.044286 - use-dmd option is set to : True
-[DEBUG] 2024-09-30 09:13:14.044348 - use-matrix option is set to : False
-[DEBUG] 2024-09-30 09:13:14.044404 - use-other option is set to : False
-[DEBUG] 2024-09-30 09:13:14.044459 - mqtt-broker option is set to : localhost
-[DEBUG] 2024-09-30 09:13:14.045004 - self.dispatcher={'launch': {'TARGET': ['FadeRGB,1,random,10', 'Snake,100,random,50', 'Sparkle,10,gold,20'], 'STRIP': ['Strobe,5,red,20', 'Strobe,3,blue,50'], 'DMD': [], 'MATRIX': [''], 'OTHER': []}, 'off': {'TARGET': ['off,,,'], 'STRIP': ['off,,,'], 'DMD': ['off,,,'], 'MATRIX': ['off,,,'], 'OTHER': []}, 'menu': {'TARGET': ['Strobe,3,gold,50'], 'STRIP': ['Strobe,3,gold,50'], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'wait': {'TARGET': ['Rainbow,10,random,20'], 'STRIP': ['Fireworks,1,random,1'], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'quit': {'TARGET': ['Rainbow2,50,random,50'], 'STRIP': ['Rainbow,50,random,50'], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'newgame': {'TARGET': [''], 'STRIP': [''], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'ready': {'TARGET': [''], 'STRIP': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'release': {'TARGET': [''], 'STRIP': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'nextplayer': {'TARGET': ['Ring,20,random,50'], 'STRIP': ['Cylon,2,red,1'], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'SB': {'STRIP': [''], 'DMD': [''], 'MATRIX': [''], 'OTHER': []}, 'DB': {'STRIP': [], 'DMD': [''], 'MATRIX': [''], 'OTHER': [], 'TARGET': ['DoubleBull,1,random,10']}, 'winner': {'STRIP': [''], 'TARGET': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'miss': {'STRIP': [''], 'TARGET': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'gameover': {'TARGET': [''], 'STRIP': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'interrupt': {'TARGET': [''], 'STRIP': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'touch': {'STRIP': ['Strobe,2,random,50'], 'TARGET': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'setwinner': {'STRIP': ['Fireworks,1,gold,10'], 'TARGET': ['Wait,15,gold,100', 'Sparkle,10,gold,5'], 'DMD': [], 'MATRIX': [], 'OTHER': []}, 'pressure': {'TARGET': ['TheaterChase,10,blue,10'], 'STRIP': ['RunningLights,100,blue,10'], 'DMD': [], 'MATRIX': [], 'OTHER': [',,,']}, 'nopressure': {'TARGET': ['off,,,'], 'STRIP': [''], 'DMD': [], 'MATRIX': [], 'OTHER': [',,,']}}
-[DEBUG] 2024-09-30 09:13:14.045121 - broker=localhost
-[DEBUG] 2024-09-30 09:13:14.059358 - target-bgcolor1 option is set to : blue
-[DEBUG] 2024-09-30 09:13:14.059520 - target-bgcolor2 option is set to : red
-[DEBUG] 2024-09-30 09:13:14.059583 - target-bgcolor3 option is set to : white
-[DEBUG] 2024-09-30 09:13:14.059640 - target-bgbrightness option is set to : 10
-[DEBUG] 2024-09-30 09:13:14.059695 - Starting Strip Leds Server
-[DEBUG] 2024-09-30 09:13:14.065400 - Launched sudo python3 /pydarts/addons/StripLeds_Server.py -host=localhost 9 raspydarts/stripLeds 12 144 30
-[DEBUG] 2024-09-30 09:13:14.566315 - Starting Target Leds Server
-[DEBUG] 2024-09-30 09:13:14.577151 - Using this configuration : {'S1': '99,98,97,95,94,93,92', 'S2': '29,28,27,25,24,23,22', 'S3': '9,8,7,5,4,3,2', 'S4': '79,78,77,75,74,73,72', 'S5': '110,111,112,114,116,115,117', 'S6': '59,58,57,55,54,53,52', 'S7': '180,181,182,184,186,185,187', 'S8': '160,161,162,164,166,165,167', 'S9': '130,131,132,134,136,135,137', 'S10': '49,48,47,45,44,43,42', 'S11': '159,158,157,155,154,153,152', 'S12': '129,128,127,125,124,123,122', 'S13': '60,61,62,64,66,65,67', 'S14': '149,148,147,145,144,143,142', 'S15': '30,31,32,34,36,35,37', 'S16': '179,178,177,175,174,173,172', 'S17': '10,11,12,14,16,15,17', 'S18': '80,81,82,84,86,85,87', 'S19': '199,198,197,195,194,193,192', 'S20': '109,108,107,105,104,103,102', 'D1': '91,90', 'D2': '21,20', 'D3': '1,0', 'D4': '71,70', 'D5': '119,118', 'D6': '51,50', 'D7': '189,188', 'D8': '169,168', 'D9': '139,138', 'D10': '41,40', 'D11': '151,150', 'D12': '121,120', 'D13': '69,68', 'D14': '141,140', 'D15': '39,38', 'D16': '171,170', 'D17': '19,18', 'D18': '89,88', 'D19': '191,190', 'D20': '101,100', 'T1': '96', 'T2': '26', 'T3': '6', 'T4': '76', 'T5': '113', 'T6': '56', 'T7': '183', 'T8': '163', 'T9': '133', 'T10': '46', 'T11': '156', 'T12': '126', 'T13': '63', 'T14': '146', 'T15': '33', 'T16': '176', 'T17': '13', 'T18': '83', 'T19': '196', 'T20': '106', 'E1': '', 'E2': '', 'E3': '', 'E4': '', 'E5': '', 'E6': '', 'E7': '', 'E8': '', 'E9': '', 'E10': '', 'E11': '', 'E12': '', 'E13': '', 'E14': '', 'E15': '', 'E16': '', 'E17': '', 'E18': '', 'E19': '', 'E20': '', 'SB': '200,201,202', 'DB': '203'}
-[DEBUG] 2024-09-30 09:13:14.583714 - Launched sudo python3 /pydarts/addons/TargetLeds_Server.py -host=localhost -bgcolors=blue,red,white -bgbrightness=10 10 raspydarts/targetLeds {'S1': '99,98,97,95,94,93,92', 'S2': '29,28,27,25,24,23,22', 'S3': '9,8,7,5,4,3,2', 'S4': '79,78,77,75,74,73,72', 'S5': '110,111,112,114,116,115,117', 'S6': '59,58,57,55,54,53,52', 'S7': '180,181,182,184,186,185,187', 'S8': '160,161,162,164,166,165,167', 'S9': '130,131,132,134,136,135,137', 'S10': '49,48,47,45,44,43,42', 'S11': '159,158,157,155,154,153,152', 'S12': '129,128,127,125,124,123,122', 'S13': '60,61,62,64,66,65,67', 'S14': '149,148,147,145,144,143,142', 'S15': '30,31,32,34,36,35,37', 'S16': '179,178,177,175,174,173,172', 'S17': '10,11,12,14,16,15,17', 'S18': '80,81,82,84,86,85,87', 'S19': '199,198,197,195,194,193,192', 'S20': '109,108,107,105,104,103,102', 'D1': '91,90', 'D2': '21,20', 'D3': '1,0', 'D4': '71,70', 'D5': '119,118', 'D6': '51,50', 'D7': '189,188', 'D8': '169,168', 'D9': '139,138', 'D10': '41,40', 'D11': '151,150', 'D12': '121,120', 'D13': '69,68', 'D14': '141,140', 'D15': '39,38', 'D16': '171,170', 'D17': '19,18', 'D18': '89,88', 'D19': '191,190', 'D20': '101,100', 'T1': '96', 'T2': '26', 'T3': '6', 'T4': '76', 'T5': '113', 'T6': '56', 'T7': '183', 'T8': '163', 'T9': '133', 'T10': '46', 'T11': '156', 'T12': '126', 'T13': '63', 'T14': '146', 'T15': '33', 'T16': '176', 'T17': '13', 'T18': '83', 'T19': '196', 'T20': '106', 'E1': '', 'E2': '', 'E3': '', 'E4': '', 'E5': '', 'E6': '', 'E7': '', 'E8': '', 'E9': '', 'E10': '', 'E11': '', 'E12': '', 'E13': '', 'E14': '', 'E15': '', 'E16': '', 'E17': '', 'E18': '', 'E19': '', 'E20': '', 'SB': '200,201,202', 'DB': '203'} 21 80
-[DEBUG] 2024-09-30 09:13:15.084780 - dispatcher.strip_leds is set to True
-[DEBUG] 2024-09-30 09:13:15.085019 - dispatcher.target_leds is set to True
-[DEBUG] 2024-09-30 09:13:15.085104 - subsribers is set to ['StripLeds', 'TargetLeds', 'Dmd']
+[WARNING] 2025-08-06 12:55:59.092968 - Creating folder /home/pi/.pydarts
+[DEBUG] 2025-08-06 12:55:59.182245 - Working on section SectionGlobals of your config file.
+[WARNING] 2025-08-06 12:55:59.182673 - Your config file does not contain a section named SectionGlobals.
+[WARNING] 2025-08-06 12:55:59.182753 - Will use default section values
+[ERROR] 2025-08-06 12:55:59.182872 - Configuration issue with this option : locale
+[DEBUG] 2025-08-06 12:55:59.182948 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.183006 - Use default:  fr_FR
+[ERROR] 2025-08-06 12:55:59.183097 - Configuration issue with this option : colorset
+[DEBUG] 2025-08-06 12:55:59.183161 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.183218 - Use default:  clear
+[ERROR] 2025-08-06 12:55:59.183307 - Configuration issue with this option : font
+[DEBUG] 2025-08-06 12:55:59.183370 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.183427 - Use default:  Fabrik.ttf
+[ERROR] 2025-08-06 12:55:59.183527 - Configuration issue with this option : soundvolume
+[DEBUG] 2025-08-06 12:55:59.183590 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.183659 - Use default:  100
+[ERROR] 2025-08-06 12:55:59.183749 - Configuration issue with this option : videos
+[DEBUG] 2025-08-06 12:55:59.183812 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.183871 - Use default:  2
+[ERROR] 2025-08-06 12:55:59.183960 - Configuration issue with this option : blinktime
+[DEBUG] 2025-08-06 12:55:59.184023 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.184082 - Use default:  3000
+[ERROR] 2025-08-06 12:55:59.184172 - Configuration issue with this option : pnj_time
+[DEBUG] 2025-08-06 12:55:59.184234 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.184292 - Use default:  2000
+[ERROR] 2025-08-06 12:55:59.184382 - Configuration issue with this option : releasedartstime
+[DEBUG] 2025-08-06 12:55:59.184445 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.184516 - Use default:  1800
+[ERROR] 2025-08-06 12:55:59.184606 - Configuration issue with this option : nextplayer_sound_duration
+[DEBUG] 2025-08-06 12:55:59.184726 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.184788 - Use default:  7000
+[ERROR] 2025-08-06 12:55:59.184879 - Configuration issue with this option : waitevent_time
+[DEBUG] 2025-08-06 12:55:59.184942 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.185000 - Use default:  30000
+[ERROR] 2025-08-06 12:55:59.185090 - Configuration issue with this option : resx
+[DEBUG] 2025-08-06 12:55:59.185152 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.185210 - Use default:  1000
+[ERROR] 2025-08-06 12:55:59.185312 - Configuration issue with this option : resy
+[DEBUG] 2025-08-06 12:55:59.185375 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.185644 - Use default:  700
+[ERROR] 2025-08-06 12:55:59.185779 - Configuration issue with this option : fullscreen
+[DEBUG] 2025-08-06 12:55:59.185873 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.185953 - Use default:  True
+[ERROR] 2025-08-06 12:55:59.186051 - Configuration issue with this option : nbcol
+[DEBUG] 2025-08-06 12:55:59.186114 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.186173 - Use default:  6
+[ERROR] 2025-08-06 12:55:59.186264 - Configuration issue with this option : onscreenbuttons
+[DEBUG] 2025-08-06 12:55:59.186327 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.186388 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.186477 - Configuration issue with this option : startpercent
+[DEBUG] 2025-08-06 12:55:59.186556 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.186651 - Use default:  0.4
+[ERROR] 2025-08-06 12:55:59.186742 - Configuration issue with this option : endgamestats
+[DEBUG] 2025-08-06 12:55:59.186811 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.186870 - Use default:  1
+[ERROR] 2025-08-06 12:55:59.186959 - Configuration issue with this option : keeporder
+[DEBUG] 2025-08-06 12:55:59.187061 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.187120 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.187211 - Configuration issue with this option : play_firstname
+[DEBUG] 2025-08-06 12:55:59.187274 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.187333 - Use default:  True
+[ERROR] 2025-08-06 12:55:59.187423 - Configuration issue with this option : print_dartstroke
+[DEBUG] 2025-08-06 12:55:59.187495 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.187555 - Use default:  True
+[ERROR] 2025-08-06 12:55:59.187653 - Configuration issue with this option : light_target
+[DEBUG] 2025-08-06 12:55:59.187716 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.187775 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.187865 - Configuration issue with this option : light_strip
+[DEBUG] 2025-08-06 12:55:59.189187 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.189467 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.189671 - Configuration issue with this option : netgamecreator
+[DEBUG] 2025-08-06 12:55:59.189755 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.189816 - Use default:  Raspydarts
+[ERROR] 2025-08-06 12:55:59.189931 - Configuration issue with this option : debuglevel
+[DEBUG] 2025-08-06 12:55:59.190005 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.190067 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.190167 - Configuration issue with this option : exhibition_mode
+[DEBUG] 2025-08-06 12:55:59.190230 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.190291 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.190382 - Configuration issue with this option : competition_mode
+[DEBUG] 2025-08-06 12:55:59.190445 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.190504 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.190594 - Configuration issue with this option : videosound_multiplier
+[DEBUG] 2025-08-06 12:55:59.190658 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.190717 - Use default:  1
+[ERROR] 2025-08-06 12:55:59.190807 - Configuration issue with this option : sound_multiplier
+[DEBUG] 2025-08-06 12:55:59.190870 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.190928 - Use default:  100
+[ERROR] 2025-08-06 12:55:59.191018 - Configuration issue with this option : illumination_mode
+[DEBUG] 2025-08-06 12:55:59.191081 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.191140 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.191229 - Configuration issue with this option : illumination_color
+[DEBUG] 2025-08-06 12:55:59.191291 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.191349 - Use default:  white
+[ERROR] 2025-08-06 12:55:59.191439 - Configuration issue with this option : fast_games_mode
+[DEBUG] 2025-08-06 12:55:59.191501 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.191560 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.191649 - Configuration issue with this option : only_favorites_games_mode
+[DEBUG] 2025-08-06 12:55:59.191712 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.191771 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.191860 - Configuration issue with this option : check_for_updates
+[DEBUG] 2025-08-06 12:55:59.191923 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.191982 - Use default:  True
+[DEBUG] 2025-08-06 12:55:59.192187 - Config[SectionGlobals]={'locale': 'fr_FR', 'colorset': 'clear', 'font': 'Fabrik.ttf', 'soundvolume': 100, 'videos': 2, 'blinktime': 3000, 'pnj_time': 2000, 'releasedartstime': 1800, 'nextplayer_sound_duration': 7000, 'waitevent_time': 30000, 'resx': 1000, 'resy': 700, 'fullscreen': True, 'nbcol': 6, 'onscreenbuttons': False, 'startpercent': 0.4, 'endgamestats': 1, 'keeporder': False, 'play_firstname': True, 'print_dartstroke': True, 'light_target': False, 'light_strip': False, 'netgamecreator': 'Raspydarts', 'debuglevel': 0, 'exhibition_mode': False, 'competition_mode': False, 'videosound_multiplier': 1, 'sound_multiplier': 100, 'illumination_mode': False, 'illumination_color': 'white', 'fast_games_mode': False, 'only_favorites_games_mode': False, 'check_for_updates': True}
+[DEBUG] 2025-08-06 12:55:59.195772 - Working on section SectionAdvanced of your config file.
+[WARNING] 2025-08-06 12:55:59.196680 - Your config file does not contain a section named SectionAdvanced.
+[WARNING] 2025-08-06 12:55:59.196774 - Will use default section values
+[ERROR] 2025-08-06 12:55:59.196884 - Configuration issue with this option : bypass-stats
+[DEBUG] 2025-08-06 12:55:59.196955 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.197016 - Use default:  1
+[ERROR] 2025-08-06 12:55:59.197107 - Configuration issue with this option : directplay
+[DEBUG] 2025-08-06 12:55:59.197171 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.197227 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.197317 - Configuration issue with this option : selectedgame
+[DEBUG] 2025-08-06 12:55:59.197380 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.197441 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.197542 - Configuration issue with this option : gametype
+[DEBUG] 2025-08-06 12:55:59.197605 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.197674 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.197763 - Configuration issue with this option : netgamename
+[DEBUG] 2025-08-06 12:55:59.197826 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.197884 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.197974 - Configuration issue with this option : servername
+[DEBUG] 2025-08-06 12:55:59.198036 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.198093 - Use default:  raspydarts.synology.me
+[ERROR] 2025-08-06 12:55:59.198182 - Configuration issue with this option : serverport
+[DEBUG] 2025-08-06 12:55:59.198636 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.198709 - Use default:  5005
+[ERROR] 2025-08-06 12:55:59.198810 - Configuration issue with this option : masterserver
+[DEBUG] 2025-08-06 12:55:59.198875 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.198933 - Use default:  raspydarts.synology.me
+[ERROR] 2025-08-06 12:55:59.199426 - Configuration issue with this option : masterport
+[DEBUG] 2025-08-06 12:55:59.199564 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.199660 - Use default:  5006
+[ERROR] 2025-08-06 12:55:59.199767 - Configuration issue with this option : serveralias
+[DEBUG] 2025-08-06 12:55:59.199833 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.199895 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.199987 - Configuration issue with this option : listen
+[DEBUG] 2025-08-06 12:55:59.200051 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.200108 - Use default:  eth0
+[ERROR] 2025-08-06 12:55:59.200200 - Configuration issue with this option : clientpolltime
+[DEBUG] 2025-08-06 12:55:59.200263 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.200323 - Use default:  5
+[ERROR] 2025-08-06 12:55:59.200415 - Configuration issue with this option : masterclientpolltime
+[DEBUG] 2025-08-06 12:55:59.200479 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.200561 - Use default:  32
+[ERROR] 2025-08-06 12:55:59.200679 - Configuration issue with this option : animationduration
+[DEBUG] 2025-08-06 12:55:59.200745 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.200804 - Use default:  5
+[ERROR] 2025-08-06 12:55:59.200897 - Configuration issue with this option : clear-local-db
+[DEBUG] 2025-08-06 12:55:59.200960 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.201021 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.201111 - Configuration issue with this option : localplayers
+[DEBUG] 2025-08-06 12:55:59.201215 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.201277 - Use default:  
+[ERROR] 2025-08-06 12:55:59.201377 - Configuration issue with this option : stats-format
+[DEBUG] 2025-08-06 12:55:59.201482 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.201566 - Use default:  old
+[ERROR] 2025-08-06 12:55:59.201671 - Configuration issue with this option : use-matrix
+[DEBUG] 2025-08-06 12:55:59.201734 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.201794 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.201884 - Configuration issue with this option : use-dmd
+[DEBUG] 2025-08-06 12:55:59.201947 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.202005 - Use default:  True
+[ERROR] 2025-08-06 12:55:59.202095 - Configuration issue with this option : use-other
+[DEBUG] 2025-08-06 12:55:59.202158 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.202217 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.202307 - Configuration issue with this option : use-hue
+[DEBUG] 2025-08-06 12:55:59.202431 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.202506 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.202597 - Configuration issue with this option : mqtt-broker
+[DEBUG] 2025-08-06 12:55:59.202671 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.202728 - Use default:  localhost
+[ERROR] 2025-08-06 12:55:59.202818 - Configuration issue with this option : interior
+[DEBUG] 2025-08-06 12:55:59.202881 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.202940 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.203030 - Configuration issue with this option : target-bgcolor1
+[DEBUG] 2025-08-06 12:55:59.203092 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.203149 - Use default:  blue
+[ERROR] 2025-08-06 12:55:59.203239 - Configuration issue with this option : target-bgcolor2
+[DEBUG] 2025-08-06 12:55:59.203302 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.203359 - Use default:  red
+[ERROR] 2025-08-06 12:55:59.203448 - Configuration issue with this option : target-bgcolor3
+[DEBUG] 2025-08-06 12:55:59.203528 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.203585 - Use default:  white
+[ERROR] 2025-08-06 12:55:59.203847 - Configuration issue with this option : target-bgbrightness
+[DEBUG] 2025-08-06 12:55:59.203917 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.203978 - Use default:  10
+[ERROR] 2025-08-06 12:55:59.204096 - Configuration issue with this option : prefered_game
+[DEBUG] 2025-08-06 12:55:59.204161 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.204218 - Use default:  
+[ERROR] 2025-08-06 12:55:59.205221 - Configuration issue with this option : preferedclassicgame
+[DEBUG] 2025-08-06 12:55:59.205448 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.205539 - Use default:  
+[ERROR] 2025-08-06 12:55:59.205729 - Configuration issue with this option : preferedfungame
+[DEBUG] 2025-08-06 12:55:59.205814 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.205875 - Use default:  
+[ERROR] 2025-08-06 12:55:59.205992 - Configuration issue with this option : preferedsportgame
+[DEBUG] 2025-08-06 12:55:59.206070 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.206134 - Use default:  
+[ERROR] 2025-08-06 12:55:59.206241 - Configuration issue with this option : preferedcategory
+[DEBUG] 2025-08-06 12:55:59.206308 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.206366 - Use default:  classic
+[ERROR] 2025-08-06 12:55:59.206462 - Configuration issue with this option : nb_sets
+[DEBUG] 2025-08-06 12:55:59.206535 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.206596 - Use default:  1
+[ERROR] 2025-08-06 12:55:59.206693 - Configuration issue with this option : db-celebration-delay
+[DEBUG] 2025-08-06 12:55:59.206758 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.206860 - Use default:  2000
+[ERROR] 2025-08-06 12:55:59.206952 - Configuration issue with this option : set-celebration-delay
+[DEBUG] 2025-08-06 12:55:59.207017 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.207075 - Use default:  3000
+[ERROR] 2025-08-06 12:55:59.207167 - Configuration issue with this option : victory-celebration-delay
+[DEBUG] 2025-08-06 12:55:59.207230 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.207289 - Use default:  5000
+[ERROR] 2025-08-06 12:55:59.207380 - Configuration issue with this option : launch-game-celebration
+[DEBUG] 2025-08-06 12:55:59.207443 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.207507 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.207597 - Configuration issue with this option : game-options-list
+[DEBUG] 2025-08-06 12:55:59.207662 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.207719 - Use default:  
+[ERROR] 2025-08-06 12:55:59.207809 - Configuration issue with this option : richard-mode
+[DEBUG] 2025-08-06 12:55:59.207873 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.207932 - Use default:  False
+[DEBUG] 2025-08-06 12:55:59.208112 - Config[SectionAdvanced]={'bypass-stats': 1, 'directplay': 'False', 'selectedgame': False, 'gametype': False, 'netgamename': False, 'servername': 'raspydarts.synology.me', 'serverport': 5005, 'masterserver': 'raspydarts.synology.me', 'masterport': '5006', 'serveralias': False, 'listen': 'eth0', 'clientpolltime': 5, 'masterclientpolltime': 32, 'animationduration': 5, 'clear-local-db': False, 'localplayers': '', 'stats-format': 'old', 'use-matrix': False, 'use-dmd': True, 'use-other': False, 'use-hue': False, 'mqtt-broker': 'localhost', 'interior': False, 'target-bgcolor1': 'blue', 'target-bgcolor2': 'red', 'target-bgcolor3': 'white', 'target-bgbrightness': 10, 'prefered_game': '', 'preferedclassicgame': '', 'preferedfungame': '', 'preferedsportgame': '', 'preferedcategory': 'classic', 'nb_sets': 1, 'db-celebration-delay': 2000, 'set-celebration-delay': 3000, 'victory-celebration-delay': 5000, 'launch-game-celebration': False, 'game-options-list': '', 'richard-mode': False}
+[DEBUG] 2025-08-06 12:55:59.208859 - Working on section SectionKeys of your config file.
+[WARNING] 2025-08-06 12:55:59.209507 - Your config file does not contain a section named SectionKeys.
+[WARNING] 2025-08-06 12:55:59.209603 - Will use default section values
+[ERROR] 2025-08-06 12:55:59.209712 - Configuration issue with this option : s1
+[DEBUG] 2025-08-06 12:55:59.209783 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.209841 - Use default:  
+[ERROR] 2025-08-06 12:55:59.209934 - Configuration issue with this option : s2
+[DEBUG] 2025-08-06 12:55:59.209997 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.210054 - Use default:  
+[ERROR] 2025-08-06 12:55:59.210145 - Configuration issue with this option : s3
+[DEBUG] 2025-08-06 12:55:59.210207 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.210264 - Use default:  
+[ERROR] 2025-08-06 12:55:59.210354 - Configuration issue with this option : s4
+[DEBUG] 2025-08-06 12:55:59.210417 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.210474 - Use default:  
+[ERROR] 2025-08-06 12:55:59.210566 - Configuration issue with this option : s5
+[DEBUG] 2025-08-06 12:55:59.210631 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.210687 - Use default:  
+[ERROR] 2025-08-06 12:55:59.210778 - Configuration issue with this option : s6
+[DEBUG] 2025-08-06 12:55:59.210841 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.210898 - Use default:  
+[ERROR] 2025-08-06 12:55:59.210990 - Configuration issue with this option : s7
+[DEBUG] 2025-08-06 12:55:59.211064 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.211122 - Use default:  
+[ERROR] 2025-08-06 12:55:59.211216 - Configuration issue with this option : s8
+[DEBUG] 2025-08-06 12:55:59.211281 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.211377 - Use default:  
+[ERROR] 2025-08-06 12:55:59.211479 - Configuration issue with this option : s9
+[DEBUG] 2025-08-06 12:55:59.211677 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.211743 - Use default:  
+[ERROR] 2025-08-06 12:55:59.211854 - Configuration issue with this option : s10
+[DEBUG] 2025-08-06 12:55:59.211921 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.211978 - Use default:  
+[ERROR] 2025-08-06 12:55:59.212076 - Configuration issue with this option : s11
+[DEBUG] 2025-08-06 12:55:59.212140 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.212197 - Use default:  
+[ERROR] 2025-08-06 12:55:59.212289 - Configuration issue with this option : s12
+[DEBUG] 2025-08-06 12:55:59.212353 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.212410 - Use default:  
+[ERROR] 2025-08-06 12:55:59.212503 - Configuration issue with this option : s13
+[DEBUG] 2025-08-06 12:55:59.212571 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.212636 - Use default:  
+[ERROR] 2025-08-06 12:55:59.212731 - Configuration issue with this option : s14
+[DEBUG] 2025-08-06 12:55:59.212797 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.212854 - Use default:  
+[ERROR] 2025-08-06 12:55:59.212951 - Configuration issue with this option : s15
+[DEBUG] 2025-08-06 12:55:59.213018 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.213074 - Use default:  
+[ERROR] 2025-08-06 12:55:59.213173 - Configuration issue with this option : s16
+[DEBUG] 2025-08-06 12:55:59.213241 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.213300 - Use default:  
+[ERROR] 2025-08-06 12:55:59.213416 - Configuration issue with this option : s17
+[DEBUG] 2025-08-06 12:55:59.213483 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.213546 - Use default:  
+[ERROR] 2025-08-06 12:55:59.213652 - Configuration issue with this option : s18
+[DEBUG] 2025-08-06 12:55:59.213726 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.213800 - Use default:  
+[ERROR] 2025-08-06 12:55:59.213938 - Configuration issue with this option : s19
+[DEBUG] 2025-08-06 12:55:59.214023 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.214100 - Use default:  
+[ERROR] 2025-08-06 12:55:59.214239 - Configuration issue with this option : s20
+[DEBUG] 2025-08-06 12:55:59.214323 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.214397 - Use default:  
+[ERROR] 2025-08-06 12:55:59.214525 - Configuration issue with this option : S1
+[DEBUG] 2025-08-06 12:55:59.214605 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.214679 - Use default:  
+[ERROR] 2025-08-06 12:55:59.214805 - Configuration issue with this option : S2
+[DEBUG] 2025-08-06 12:55:59.214895 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.214974 - Use default:  
+[ERROR] 2025-08-06 12:55:59.215088 - Configuration issue with this option : S3
+[DEBUG] 2025-08-06 12:55:59.215156 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.215232 - Use default:  
+[ERROR] 2025-08-06 12:55:59.215938 - Configuration issue with this option : S4
+[DEBUG] 2025-08-06 12:55:59.216102 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.216182 - Use default:  
+[ERROR] 2025-08-06 12:55:59.216337 - Configuration issue with this option : S5
+[DEBUG] 2025-08-06 12:55:59.216421 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.216481 - Use default:  
+[ERROR] 2025-08-06 12:55:59.216603 - Configuration issue with this option : S6
+[DEBUG] 2025-08-06 12:55:59.216681 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.216740 - Use default:  
+[ERROR] 2025-08-06 12:55:59.216841 - Configuration issue with this option : S7
+[DEBUG] 2025-08-06 12:55:59.216907 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.216963 - Use default:  
+[ERROR] 2025-08-06 12:55:59.217058 - Configuration issue with this option : S8
+[DEBUG] 2025-08-06 12:55:59.217124 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.217241 - Use default:  
+[ERROR] 2025-08-06 12:55:59.217366 - Configuration issue with this option : S9
+[DEBUG] 2025-08-06 12:55:59.217434 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.217510 - Use default:  
+[ERROR] 2025-08-06 12:55:59.217648 - Configuration issue with this option : S10
+[DEBUG] 2025-08-06 12:55:59.217739 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.217814 - Use default:  
+[ERROR] 2025-08-06 12:55:59.217927 - Configuration issue with this option : S11
+[DEBUG] 2025-08-06 12:55:59.218006 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.218072 - Use default:  
+[ERROR] 2025-08-06 12:55:59.218198 - Configuration issue with this option : S12
+[DEBUG] 2025-08-06 12:55:59.218284 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.218358 - Use default:  
+[ERROR] 2025-08-06 12:55:59.218487 - Configuration issue with this option : S13
+[DEBUG] 2025-08-06 12:55:59.218561 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.218623 - Use default:  
+[ERROR] 2025-08-06 12:55:59.218747 - Configuration issue with this option : S14
+[DEBUG] 2025-08-06 12:55:59.218839 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.218903 - Use default:  
+[ERROR] 2025-08-06 12:55:59.219345 - Configuration issue with this option : S15
+[DEBUG] 2025-08-06 12:55:59.219508 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.219584 - Use default:  
+[ERROR] 2025-08-06 12:55:59.219738 - Configuration issue with this option : S16
+[DEBUG] 2025-08-06 12:55:59.219813 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.219874 - Use default:  
+[ERROR] 2025-08-06 12:55:59.220003 - Configuration issue with this option : S17
+[DEBUG] 2025-08-06 12:55:59.220079 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.220142 - Use default:  
+[ERROR] 2025-08-06 12:55:59.220257 - Configuration issue with this option : S18
+[DEBUG] 2025-08-06 12:55:59.220323 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.220383 - Use default:  
+[ERROR] 2025-08-06 12:55:59.220500 - Configuration issue with this option : S19
+[DEBUG] 2025-08-06 12:55:59.220573 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.220633 - Use default:  
+[ERROR] 2025-08-06 12:55:59.220729 - Configuration issue with this option : S20
+[DEBUG] 2025-08-06 12:55:59.220794 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.220851 - Use default:  
+[ERROR] 2025-08-06 12:55:59.220942 - Configuration issue with this option : D1
+[DEBUG] 2025-08-06 12:55:59.221006 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.221063 - Use default:  
+[ERROR] 2025-08-06 12:55:59.221152 - Configuration issue with this option : D2
+[DEBUG] 2025-08-06 12:55:59.221215 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.221273 - Use default:  
+[ERROR] 2025-08-06 12:55:59.221364 - Configuration issue with this option : D3
+[DEBUG] 2025-08-06 12:55:59.221427 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.221484 - Use default:  
+[ERROR] 2025-08-06 12:55:59.221578 - Configuration issue with this option : D4
+[DEBUG] 2025-08-06 12:55:59.221643 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.221700 - Use default:  
+[ERROR] 2025-08-06 12:55:59.221792 - Configuration issue with this option : D5
+[DEBUG] 2025-08-06 12:55:59.221854 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.221912 - Use default:  
+[ERROR] 2025-08-06 12:55:59.222002 - Configuration issue with this option : D6
+[DEBUG] 2025-08-06 12:55:59.222065 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.222122 - Use default:  
+[ERROR] 2025-08-06 12:55:59.222212 - Configuration issue with this option : D7
+[DEBUG] 2025-08-06 12:55:59.222275 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.222331 - Use default:  
+[ERROR] 2025-08-06 12:55:59.222422 - Configuration issue with this option : D8
+[DEBUG] 2025-08-06 12:55:59.222525 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.222583 - Use default:  
+[ERROR] 2025-08-06 12:55:59.222676 - Configuration issue with this option : D9
+[DEBUG] 2025-08-06 12:55:59.222740 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.222797 - Use default:  
+[ERROR] 2025-08-06 12:55:59.222887 - Configuration issue with this option : D10
+[DEBUG] 2025-08-06 12:55:59.222950 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.223008 - Use default:  
+[ERROR] 2025-08-06 12:55:59.223101 - Configuration issue with this option : D11
+[DEBUG] 2025-08-06 12:55:59.223172 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.223235 - Use default:  
+[ERROR] 2025-08-06 12:55:59.223328 - Configuration issue with this option : D12
+[DEBUG] 2025-08-06 12:55:59.223392 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.223450 - Use default:  
+[ERROR] 2025-08-06 12:55:59.223544 - Configuration issue with this option : D13
+[DEBUG] 2025-08-06 12:55:59.223607 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.223668 - Use default:  
+[ERROR] 2025-08-06 12:55:59.223762 - Configuration issue with this option : D14
+[DEBUG] 2025-08-06 12:55:59.223826 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.223884 - Use default:  
+[ERROR] 2025-08-06 12:55:59.223978 - Configuration issue with this option : D15
+[DEBUG] 2025-08-06 12:55:59.224042 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.224099 - Use default:  
+[ERROR] 2025-08-06 12:55:59.224190 - Configuration issue with this option : D16
+[DEBUG] 2025-08-06 12:55:59.224253 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.224310 - Use default:  
+[ERROR] 2025-08-06 12:55:59.224401 - Configuration issue with this option : D17
+[DEBUG] 2025-08-06 12:55:59.224463 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.224523 - Use default:  
+[ERROR] 2025-08-06 12:55:59.224617 - Configuration issue with this option : D18
+[DEBUG] 2025-08-06 12:55:59.224680 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.224739 - Use default:  
+[ERROR] 2025-08-06 12:55:59.224833 - Configuration issue with this option : D19
+[DEBUG] 2025-08-06 12:55:59.224898 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.224955 - Use default:  
+[ERROR] 2025-08-06 12:55:59.225047 - Configuration issue with this option : D20
+[DEBUG] 2025-08-06 12:55:59.225110 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.225167 - Use default:  
+[ERROR] 2025-08-06 12:55:59.225259 - Configuration issue with this option : T1
+[DEBUG] 2025-08-06 12:55:59.225322 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.225380 - Use default:  
+[ERROR] 2025-08-06 12:55:59.225474 - Configuration issue with this option : T2
+[DEBUG] 2025-08-06 12:55:59.225553 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.225618 - Use default:  
+[ERROR] 2025-08-06 12:55:59.225716 - Configuration issue with this option : T3
+[DEBUG] 2025-08-06 12:55:59.225780 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.225838 - Use default:  
+[ERROR] 2025-08-06 12:55:59.226315 - Configuration issue with this option : T4
+[DEBUG] 2025-08-06 12:55:59.226420 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.226482 - Use default:  
+[ERROR] 2025-08-06 12:55:59.226587 - Configuration issue with this option : T5
+[DEBUG] 2025-08-06 12:55:59.226662 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.226722 - Use default:  
+[ERROR] 2025-08-06 12:55:59.226826 - Configuration issue with this option : T6
+[DEBUG] 2025-08-06 12:55:59.226893 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.226950 - Use default:  
+[ERROR] 2025-08-06 12:55:59.227047 - Configuration issue with this option : T7
+[DEBUG] 2025-08-06 12:55:59.227111 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.227168 - Use default:  
+[ERROR] 2025-08-06 12:55:59.227262 - Configuration issue with this option : T8
+[DEBUG] 2025-08-06 12:55:59.227357 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.227415 - Use default:  
+[ERROR] 2025-08-06 12:55:59.227512 - Configuration issue with this option : T9
+[DEBUG] 2025-08-06 12:55:59.227575 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.227634 - Use default:  
+[ERROR] 2025-08-06 12:55:59.227725 - Configuration issue with this option : T10
+[DEBUG] 2025-08-06 12:55:59.227789 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.227845 - Use default:  
+[ERROR] 2025-08-06 12:55:59.227936 - Configuration issue with this option : T11
+[DEBUG] 2025-08-06 12:55:59.227999 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.228056 - Use default:  
+[ERROR] 2025-08-06 12:55:59.228147 - Configuration issue with this option : T12
+[DEBUG] 2025-08-06 12:55:59.228209 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.228267 - Use default:  
+[ERROR] 2025-08-06 12:55:59.228359 - Configuration issue with this option : T13
+[DEBUG] 2025-08-06 12:55:59.228430 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.228488 - Use default:  
+[ERROR] 2025-08-06 12:55:59.228581 - Configuration issue with this option : T14
+[DEBUG] 2025-08-06 12:55:59.228645 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.228702 - Use default:  
+[ERROR] 2025-08-06 12:55:59.228792 - Configuration issue with this option : T15
+[DEBUG] 2025-08-06 12:55:59.228854 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.228912 - Use default:  
+[ERROR] 2025-08-06 12:55:59.229182 - Configuration issue with this option : T16
+[DEBUG] 2025-08-06 12:55:59.229319 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.229379 - Use default:  
+[ERROR] 2025-08-06 12:55:59.229471 - Configuration issue with this option : T17
+[DEBUG] 2025-08-06 12:55:59.229537 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.229594 - Use default:  
+[ERROR] 2025-08-06 12:55:59.229688 - Configuration issue with this option : T18
+[DEBUG] 2025-08-06 12:55:59.229751 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.229808 - Use default:  
+[ERROR] 2025-08-06 12:55:59.229899 - Configuration issue with this option : T19
+[DEBUG] 2025-08-06 12:55:59.229962 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.230022 - Use default:  
+[ERROR] 2025-08-06 12:55:59.230114 - Configuration issue with this option : T20
+[DEBUG] 2025-08-06 12:55:59.230177 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.230234 - Use default:  
+[ERROR] 2025-08-06 12:55:59.230326 - Configuration issue with this option : SB
+[DEBUG] 2025-08-06 12:55:59.230391 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.230449 - Use default:  
+[ERROR] 2025-08-06 12:55:59.230545 - Configuration issue with this option : DB
+[DEBUG] 2025-08-06 12:55:59.230611 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.230671 - Use default:  
+[ERROR] 2025-08-06 12:55:59.230772 - Configuration issue with this option : PLAYERBUTTON
+[DEBUG] 2025-08-06 12:55:59.230840 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.230902 - Use default:  
+[ERROR] 2025-08-06 12:55:59.231003 - Configuration issue with this option : GAMEBUTTON
+[DEBUG] 2025-08-06 12:55:59.231069 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.231127 - Use default:  
+[ERROR] 2025-08-06 12:55:59.231222 - Configuration issue with this option : BACKUPBUTTON
+[DEBUG] 2025-08-06 12:55:59.231286 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.231342 - Use default:  
+[ERROR] 2025-08-06 12:55:59.231434 - Configuration issue with this option : EXTRABUTTON
+[DEBUG] 2025-08-06 12:55:59.231497 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.231558 - Use default:  
+[ERROR] 2025-08-06 12:55:59.231740 - Configuration issue with this option : MISSDART
+[DEBUG] 2025-08-06 12:55:59.231810 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.231868 - Use default:  
+[ERROR] 2025-08-06 12:55:59.231996 - Configuration issue with this option : SHOCKSENSOR
+[DEBUG] 2025-08-06 12:55:59.232059 - Error was:  No section: 'SectionKeys'
+[DEBUG] 2025-08-06 12:55:59.232116 - Use default:  
+[DEBUG] 2025-08-06 12:55:59.232337 - Config[SectionKeys]={'s1': '', 's2': '', 's3': '', 's4': '', 's5': '', 's6': '', 's7': '', 's8': '', 's9': '', 's10': '', 's11': '', 's12': '', 's13': '', 's14': '', 's15': '', 's16': '', 's17': '', 's18': '', 's19': '', 's20': '', 'S1': '', 'S2': '', 'S3': '', 'S4': '', 'S5': '', 'S6': '', 'S7': '', 'S8': '', 'S9': '', 'S10': '', 'S11': '', 'S12': '', 'S13': '', 'S14': '', 'S15': '', 'S16': '', 'S17': '', 'S18': '', 'S19': '', 'S20': '', 'D1': '', 'D2': '', 'D3': '', 'D4': '', 'D5': '', 'D6': '', 'D7': '', 'D8': '', 'D9': '', 'D10': '', 'D11': '', 'D12': '', 'D13': '', 'D14': '', 'D15': '', 'D16': '', 'D17': '', 'D18': '', 'D19': '', 'D20': '', 'T1': '', 'T2': '', 'T3': '', 'T4': '', 'T5': '', 'T6': '', 'T7': '', 'T8': '', 'T9': '', 'T10': '', 'T11': '', 'T12': '', 'T13': '', 'T14': '', 'T15': '', 'T16': '', 'T17': '', 'T18': '', 'T19': '', 'T20': '', 'SB': '', 'DB': '', 'PLAYERBUTTON': '', 'GAMEBUTTON': '', 'BACKUPBUTTON': '', 'EXTRABUTTON': '', 'MISSDART': '', 'SHOCKSENSOR': ''}
+[DEBUG] 2025-08-06 12:55:59.233092 - Working on section Raspberry of your config file.
+[WARNING] 2025-08-06 12:55:59.233494 - Your config file does not contain a section named Raspberry.
+[WARNING] 2025-08-06 12:55:59.233623 - Will use default section values
+[ERROR] 2025-08-06 12:55:59.233754 - Configuration issue with this option : PIN_UP
+[DEBUG] 2025-08-06 12:55:59.233831 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.233892 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.233992 - Configuration issue with this option : PIN_DOWN
+[DEBUG] 2025-08-06 12:55:59.234056 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.234114 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.234205 - Configuration issue with this option : PIN_LEFT
+[DEBUG] 2025-08-06 12:55:59.234270 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.234327 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.234418 - Configuration issue with this option : PIN_RIGHT
+[DEBUG] 2025-08-06 12:55:59.234481 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.234543 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.234638 - Configuration issue with this option : PIN_MINUS
+[DEBUG] 2025-08-06 12:55:59.234701 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.234758 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.234849 - Configuration issue with this option : PIN_PLUS
+[DEBUG] 2025-08-06 12:55:59.234913 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.234970 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.235061 - Configuration issue with this option : PIN_VALIDATE
+[DEBUG] 2025-08-06 12:55:59.235126 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.235183 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.235274 - Configuration issue with this option : PIN_CANCEL
+[DEBUG] 2025-08-06 12:55:59.235336 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.235394 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.235485 - Configuration issue with this option : PIN_NEXTPLAYER
+[DEBUG] 2025-08-06 12:55:59.235551 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.235654 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.235756 - Configuration issue with this option : PIN_BACK
+[DEBUG] 2025-08-06 12:55:59.235841 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.235905 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.236000 - Configuration issue with this option : PIN_GAMEBUTTON
+[DEBUG] 2025-08-06 12:55:59.236065 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.236122 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.236213 - Configuration issue with this option : PIN_VOLUME_UP
+[DEBUG] 2025-08-06 12:55:59.236277 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.236333 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.236465 - Configuration issue with this option : PIN_VOLUME_DOWN
+[DEBUG] 2025-08-06 12:55:59.236533 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.236590 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.236683 - Configuration issue with this option : PIN_VOLUME_MUTE
+[DEBUG] 2025-08-06 12:55:59.236748 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.236805 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.236896 - Configuration issue with this option : PIN_CPTPLAYER
+[DEBUG] 2025-08-06 12:55:59.236959 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.237017 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.237108 - Configuration issue with this option : PIN_MISSDART
+[DEBUG] 2025-08-06 12:55:59.237174 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.237235 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.237333 - Configuration issue with this option : LIGHT_NEXTPLAYER
+[DEBUG] 2025-08-06 12:55:59.237407 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.237467 - Use default:  
+[ERROR] 2025-08-06 12:55:59.237578 - Configuration issue with this option : LIGHT_NAVIGATE
+[DEBUG] 2025-08-06 12:55:59.237652 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.237712 - Use default:  
+[ERROR] 2025-08-06 12:55:59.237807 - Configuration issue with this option : LIGHT_VALIDATE
+[DEBUG] 2025-08-06 12:55:59.237874 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.237932 - Use default:  
+[ERROR] 2025-08-06 12:55:59.238037 - Configuration issue with this option : LIGHT_BACK
+[DEBUG] 2025-08-06 12:55:59.238115 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.238180 - Use default:  
+[ERROR] 2025-08-06 12:55:59.238301 - Configuration issue with this option : LIGHT_PLAYERS
+[DEBUG] 2025-08-06 12:55:59.238378 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.238437 - Use default:  
+[ERROR] 2025-08-06 12:55:59.238539 - Configuration issue with this option : LIGHT_LASER
+[DEBUG] 2025-08-06 12:55:59.238604 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.238665 - Use default:  
+[ERROR] 2025-08-06 12:55:59.238763 - Configuration issue with this option : LIGHT_FLASH
+[DEBUG] 2025-08-06 12:55:59.238830 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.238888 - Use default:  
+[ERROR] 2025-08-06 12:55:59.239166 - Configuration issue with this option : LIGHT_CELEBRATION
+[DEBUG] 2025-08-06 12:55:59.239388 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.239455 - Use default:  
+[ERROR] 2025-08-06 12:55:59.239570 - Configuration issue with this option : LIGHT_CELEBRATION2
+[DEBUG] 2025-08-06 12:55:59.239640 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.239698 - Use default:  
+[ERROR] 2025-08-06 12:55:59.239793 - Configuration issue with this option : LIGHT_LIGHT
+[DEBUG] 2025-08-06 12:55:59.239860 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.239918 - Use default:  
+[ERROR] 2025-08-06 12:55:59.240014 - Configuration issue with this option : TOY1
+[DEBUG] 2025-08-06 12:55:59.240078 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.240136 - Use default:  
+[ERROR] 2025-08-06 12:55:59.240226 - Configuration issue with this option : TOY2
+[DEBUG] 2025-08-06 12:55:59.240290 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.240347 - Use default:  
+[ERROR] 2025-08-06 12:55:59.240438 - Configuration issue with this option : TOY3
+[DEBUG] 2025-08-06 12:55:59.240504 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.240561 - Use default:  
+[ERROR] 2025-08-06 12:55:59.240656 - Configuration issue with this option : TOY4
+[DEBUG] 2025-08-06 12:55:59.240719 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.240777 - Use default:  
+[ERROR] 2025-08-06 12:55:59.240868 - Configuration issue with this option : TOY5
+[DEBUG] 2025-08-06 12:55:59.240931 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.240989 - Use default:  
+[ERROR] 2025-08-06 12:55:59.241079 - Configuration issue with this option : TOY6
+[DEBUG] 2025-08-06 12:55:59.241181 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.241239 - Use default:  
+[ERROR] 2025-08-06 12:55:59.241331 - Configuration issue with this option : TOY7
+[DEBUG] 2025-08-06 12:55:59.241397 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.241456 - Use default:  
+[ERROR] 2025-08-06 12:55:59.241569 - Configuration issue with this option : TOY8
+[DEBUG] 2025-08-06 12:55:59.241642 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.241701 - Use default:  
+[ERROR] 2025-08-06 12:55:59.241803 - Configuration issue with this option : TOY9
+[DEBUG] 2025-08-06 12:55:59.241870 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.241928 - Use default:  
+[ERROR] 2025-08-06 12:55:59.242028 - Configuration issue with this option : TOY10
+[DEBUG] 2025-08-06 12:55:59.242093 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.242153 - Use default:  
+[ERROR] 2025-08-06 12:55:59.242248 - Configuration issue with this option : TOY11
+[DEBUG] 2025-08-06 12:55:59.242314 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.242373 - Use default:  
+[ERROR] 2025-08-06 12:55:59.242468 - Configuration issue with this option : TOY12
+[DEBUG] 2025-08-06 12:55:59.242539 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.242599 - Use default:  
+[ERROR] 2025-08-06 12:55:59.242701 - Configuration issue with this option : TOY13
+[DEBUG] 2025-08-06 12:55:59.242768 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.242827 - Use default:  
+[ERROR] 2025-08-06 12:55:59.242922 - Configuration issue with this option : TOY14
+[DEBUG] 2025-08-06 12:55:59.242988 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.243046 - Use default:  
+[ERROR] 2025-08-06 12:55:59.243143 - Configuration issue with this option : TOY15
+[DEBUG] 2025-08-06 12:55:59.243208 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.243268 - Use default:  
+[ERROR] 2025-08-06 12:55:59.243363 - Configuration issue with this option : TOY16
+[DEBUG] 2025-08-06 12:55:59.243427 - Error was:  No section: 'Raspberry'
+[DEBUG] 2025-08-06 12:55:59.243486 - Use default:  
+[DEBUG] 2025-08-06 12:55:59.243701 - Config[Raspberry]={'PIN_UP': '0', 'PIN_DOWN': '0', 'PIN_LEFT': '0', 'PIN_RIGHT': '0', 'PIN_MINUS': '0', 'PIN_PLUS': '0', 'PIN_VALIDATE': '0', 'PIN_CANCEL': '0', 'PIN_NEXTPLAYER': '0', 'PIN_BACK': '0', 'PIN_GAMEBUTTON': '0', 'PIN_VOLUME_UP': '0', 'PIN_VOLUME_DOWN': '0', 'PIN_VOLUME_MUTE': '0', 'PIN_CPTPLAYER': '0', 'PIN_MISSDART': '0', 'LIGHT_NEXTPLAYER': '', 'LIGHT_NAVIGATE': '', 'LIGHT_VALIDATE': '', 'LIGHT_BACK': '', 'LIGHT_PLAYERS': '', 'LIGHT_LASER': '', 'LIGHT_FLASH': '', 'LIGHT_CELEBRATION': '', 'LIGHT_CELEBRATION2': '', 'LIGHT_LIGHT': '', 'TOY1': '', 'TOY2': '', 'TOY3': '', 'TOY4': '', 'TOY5': '', 'TOY6': '', 'TOY7': '', 'TOY8': '', 'TOY9': '', 'TOY10': '', 'TOY11': '', 'TOY12': '', 'TOY13': '', 'TOY14': '', 'TOY15': '', 'TOY16': ''}
+[DEBUG] 2025-08-06 12:55:59.244468 - Working on section Raspberry_Leds of your config file.
+[WARNING] 2025-08-06 12:55:59.244834 - Your config file does not contain a section named Raspberry_Leds.
+[WARNING] 2025-08-06 12:55:59.244970 - Will use default section values
+[ERROR] 2025-08-06 12:55:59.245103 - Configuration issue with this option : PIN_TARGETLED
+[DEBUG] 2025-08-06 12:55:59.245181 - Error was:  No section: 'Raspberry_Leds'
+[DEBUG] 2025-08-06 12:55:59.245245 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.245718 - Configuration issue with this option : BRI_TARGETLED
+[DEBUG] 2025-08-06 12:55:59.245824 - Error was:  No section: 'Raspberry_Leds'
+[DEBUG] 2025-08-06 12:55:59.245913 - Use default:  0.5
+[ERROR] 2025-08-06 12:55:59.246038 - Configuration issue with this option : TYP_TARGETLED
+[DEBUG] 2025-08-06 12:55:59.246115 - Error was:  No section: 'Raspberry_Leds'
+[DEBUG] 2025-08-06 12:55:59.246177 - Use default:  grb
+[ERROR] 2025-08-06 12:55:59.246279 - Configuration issue with this option : PIN_STRIPLED
+[DEBUG] 2025-08-06 12:55:59.246344 - Error was:  No section: 'Raspberry_Leds'
+[DEBUG] 2025-08-06 12:55:59.246447 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.246551 - Configuration issue with this option : NBR_STRIPLED
+[DEBUG] 2025-08-06 12:55:59.246620 - Error was:  No section: 'Raspberry_Leds'
+[DEBUG] 2025-08-06 12:55:59.246679 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.246772 - Configuration issue with this option : BRI_STRIPLED
+[DEBUG] 2025-08-06 12:55:59.246836 - Error was:  No section: 'Raspberry_Leds'
+[DEBUG] 2025-08-06 12:55:59.246911 - Use default:  0.5
+[ERROR] 2025-08-06 12:55:59.247007 - Configuration issue with this option : TYP_STRIPLED
+[DEBUG] 2025-08-06 12:55:59.247071 - Error was:  No section: 'Raspberry_Leds'
+[DEBUG] 2025-08-06 12:55:59.247130 - Use default:  grb
+[DEBUG] 2025-08-06 12:55:59.247241 - Config[Raspberry_Leds]={'PIN_TARGETLED': 0, 'BRI_TARGETLED': 0.5, 'TYP_TARGETLED': 'grb', 'PIN_STRIPLED': 0, 'NBR_STRIPLED': 0, 'BRI_STRIPLED': 0.5, 'TYP_STRIPLED': 'grb'}
+[DEBUG] 2025-08-06 12:55:59.248018 - Working on section LEDTarget of your config file.
+[WARNING] 2025-08-06 12:55:59.248466 - Your config file does not contain a section named LEDTarget.
+[WARNING] 2025-08-06 12:55:59.248584 - Will use default section values
+[ERROR] 2025-08-06 12:55:59.248709 - Configuration issue with this option : S1
+[DEBUG] 2025-08-06 12:55:59.248784 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.248843 - Use default:  
+[ERROR] 2025-08-06 12:55:59.248940 - Configuration issue with this option : S2
+[DEBUG] 2025-08-06 12:55:59.249313 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.249454 - Use default:  
+[ERROR] 2025-08-06 12:55:59.249642 - Configuration issue with this option : S3
+[DEBUG] 2025-08-06 12:55:59.249742 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.249809 - Use default:  
+[ERROR] 2025-08-06 12:55:59.249933 - Configuration issue with this option : S4
+[DEBUG] 2025-08-06 12:55:59.250005 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.250063 - Use default:  
+[ERROR] 2025-08-06 12:55:59.250161 - Configuration issue with this option : S5
+[DEBUG] 2025-08-06 12:55:59.250229 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.250290 - Use default:  
+[ERROR] 2025-08-06 12:55:59.250387 - Configuration issue with this option : S6
+[DEBUG] 2025-08-06 12:55:59.250454 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.250519 - Use default:  
+[ERROR] 2025-08-06 12:55:59.250623 - Configuration issue with this option : S7
+[DEBUG] 2025-08-06 12:55:59.250693 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.250753 - Use default:  
+[ERROR] 2025-08-06 12:55:59.250854 - Configuration issue with this option : S8
+[DEBUG] 2025-08-06 12:55:59.250922 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.250980 - Use default:  
+[ERROR] 2025-08-06 12:55:59.251075 - Configuration issue with this option : S9
+[DEBUG] 2025-08-06 12:55:59.251142 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.251202 - Use default:  
+[ERROR] 2025-08-06 12:55:59.251303 - Configuration issue with this option : S10
+[DEBUG] 2025-08-06 12:55:59.251371 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.251430 - Use default:  
+[ERROR] 2025-08-06 12:55:59.251536 - Configuration issue with this option : S11
+[DEBUG] 2025-08-06 12:55:59.251606 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.251668 - Use default:  
+[ERROR] 2025-08-06 12:55:59.251773 - Configuration issue with this option : S12
+[DEBUG] 2025-08-06 12:55:59.251963 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.252031 - Use default:  
+[ERROR] 2025-08-06 12:55:59.252157 - Configuration issue with this option : S13
+[DEBUG] 2025-08-06 12:55:59.252232 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.252301 - Use default:  
+[ERROR] 2025-08-06 12:55:59.252431 - Configuration issue with this option : S14
+[DEBUG] 2025-08-06 12:55:59.252515 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.252593 - Use default:  
+[ERROR] 2025-08-06 12:55:59.252731 - Configuration issue with this option : S15
+[DEBUG] 2025-08-06 12:55:59.252857 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.252925 - Use default:  
+[ERROR] 2025-08-06 12:55:59.253045 - Configuration issue with this option : S16
+[DEBUG] 2025-08-06 12:55:59.253123 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.253182 - Use default:  
+[ERROR] 2025-08-06 12:55:59.253294 - Configuration issue with this option : S17
+[DEBUG] 2025-08-06 12:55:59.253367 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.253428 - Use default:  
+[ERROR] 2025-08-06 12:55:59.253562 - Configuration issue with this option : S18
+[DEBUG] 2025-08-06 12:55:59.253653 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.253714 - Use default:  
+[ERROR] 2025-08-06 12:55:59.253829 - Configuration issue with this option : S19
+[DEBUG] 2025-08-06 12:55:59.253901 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.253963 - Use default:  
+[ERROR] 2025-08-06 12:55:59.254080 - Configuration issue with this option : S20
+[DEBUG] 2025-08-06 12:55:59.254158 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.254222 - Use default:  
+[ERROR] 2025-08-06 12:55:59.254349 - Configuration issue with this option : D1
+[DEBUG] 2025-08-06 12:55:59.254427 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.254493 - Use default:  
+[ERROR] 2025-08-06 12:55:59.254626 - Configuration issue with this option : D2
+[DEBUG] 2025-08-06 12:55:59.254702 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.254762 - Use default:  
+[ERROR] 2025-08-06 12:55:59.254881 - Configuration issue with this option : D3
+[DEBUG] 2025-08-06 12:55:59.254958 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.255021 - Use default:  
+[ERROR] 2025-08-06 12:55:59.255144 - Configuration issue with this option : D4
+[DEBUG] 2025-08-06 12:55:59.255217 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.255278 - Use default:  
+[ERROR] 2025-08-06 12:55:59.255389 - Configuration issue with this option : D5
+[DEBUG] 2025-08-06 12:55:59.255457 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.255516 - Use default:  
+[ERROR] 2025-08-06 12:55:59.255628 - Configuration issue with this option : D6
+[DEBUG] 2025-08-06 12:55:59.255694 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.255753 - Use default:  
+[ERROR] 2025-08-06 12:55:59.255851 - Configuration issue with this option : D7
+[DEBUG] 2025-08-06 12:55:59.256550 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.256694 - Use default:  
+[ERROR] 2025-08-06 12:55:59.256854 - Configuration issue with this option : D8
+[DEBUG] 2025-08-06 12:55:59.256942 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.257005 - Use default:  
+[ERROR] 2025-08-06 12:55:59.257127 - Configuration issue with this option : D9
+[DEBUG] 2025-08-06 12:55:59.257202 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.257263 - Use default:  
+[ERROR] 2025-08-06 12:55:59.257379 - Configuration issue with this option : D10
+[DEBUG] 2025-08-06 12:55:59.257451 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.257517 - Use default:  
+[ERROR] 2025-08-06 12:55:59.257629 - Configuration issue with this option : D11
+[DEBUG] 2025-08-06 12:55:59.257699 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.257760 - Use default:  
+[ERROR] 2025-08-06 12:55:59.257867 - Configuration issue with this option : D12
+[DEBUG] 2025-08-06 12:55:59.257940 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.258004 - Use default:  
+[ERROR] 2025-08-06 12:55:59.258123 - Configuration issue with this option : D13
+[DEBUG] 2025-08-06 12:55:59.258204 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.258270 - Use default:  
+[ERROR] 2025-08-06 12:55:59.258385 - Configuration issue with this option : D14
+[DEBUG] 2025-08-06 12:55:59.258454 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.258518 - Use default:  
+[ERROR] 2025-08-06 12:55:59.258645 - Configuration issue with this option : D15
+[DEBUG] 2025-08-06 12:55:59.258767 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.258828 - Use default:  
+[ERROR] 2025-08-06 12:55:59.258930 - Configuration issue with this option : D16
+[DEBUG] 2025-08-06 12:55:59.259284 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.259433 - Use default:  
+[ERROR] 2025-08-06 12:55:59.259568 - Configuration issue with this option : D17
+[DEBUG] 2025-08-06 12:55:59.259643 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.259703 - Use default:  
+[ERROR] 2025-08-06 12:55:59.259823 - Configuration issue with this option : D18
+[DEBUG] 2025-08-06 12:55:59.259893 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.259952 - Use default:  
+[ERROR] 2025-08-06 12:55:59.260050 - Configuration issue with this option : D19
+[DEBUG] 2025-08-06 12:55:59.260118 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.260176 - Use default:  
+[ERROR] 2025-08-06 12:55:59.260271 - Configuration issue with this option : D20
+[DEBUG] 2025-08-06 12:55:59.260335 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.260394 - Use default:  
+[ERROR] 2025-08-06 12:55:59.260488 - Configuration issue with this option : T1
+[DEBUG] 2025-08-06 12:55:59.260557 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.260618 - Use default:  
+[ERROR] 2025-08-06 12:55:59.260714 - Configuration issue with this option : T2
+[DEBUG] 2025-08-06 12:55:59.260783 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.260840 - Use default:  
+[ERROR] 2025-08-06 12:55:59.260936 - Configuration issue with this option : T3
+[DEBUG] 2025-08-06 12:55:59.261142 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.261289 - Use default:  
+[ERROR] 2025-08-06 12:55:59.261413 - Configuration issue with this option : T4
+[DEBUG] 2025-08-06 12:55:59.261488 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.261553 - Use default:  
+[ERROR] 2025-08-06 12:55:59.261659 - Configuration issue with this option : T5
+[DEBUG] 2025-08-06 12:55:59.261728 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.261787 - Use default:  
+[ERROR] 2025-08-06 12:55:59.261885 - Configuration issue with this option : T6
+[DEBUG] 2025-08-06 12:55:59.261949 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.262008 - Use default:  
+[ERROR] 2025-08-06 12:55:59.262106 - Configuration issue with this option : T7
+[DEBUG] 2025-08-06 12:55:59.262177 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.262238 - Use default:  
+[ERROR] 2025-08-06 12:55:59.262347 - Configuration issue with this option : T8
+[DEBUG] 2025-08-06 12:55:59.262428 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.262499 - Use default:  
+[ERROR] 2025-08-06 12:55:59.262632 - Configuration issue with this option : T9
+[DEBUG] 2025-08-06 12:55:59.262707 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.262773 - Use default:  
+[ERROR] 2025-08-06 12:55:59.262898 - Configuration issue with this option : T10
+[DEBUG] 2025-08-06 12:55:59.262966 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.263030 - Use default:  
+[ERROR] 2025-08-06 12:55:59.263164 - Configuration issue with this option : T11
+[DEBUG] 2025-08-06 12:55:59.263254 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.263317 - Use default:  
+[ERROR] 2025-08-06 12:55:59.263428 - Configuration issue with this option : T12
+[DEBUG] 2025-08-06 12:55:59.263500 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.263564 - Use default:  
+[ERROR] 2025-08-06 12:55:59.263683 - Configuration issue with this option : T13
+[DEBUG] 2025-08-06 12:55:59.263767 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.263832 - Use default:  
+[ERROR] 2025-08-06 12:55:59.263965 - Configuration issue with this option : T14
+[DEBUG] 2025-08-06 12:55:59.264057 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.264129 - Use default:  
+[ERROR] 2025-08-06 12:55:59.264264 - Configuration issue with this option : T15
+[DEBUG] 2025-08-06 12:55:59.264387 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.264456 - Use default:  
+[ERROR] 2025-08-06 12:55:59.264582 - Configuration issue with this option : T16
+[DEBUG] 2025-08-06 12:55:59.264664 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.264726 - Use default:  
+[ERROR] 2025-08-06 12:55:59.264833 - Configuration issue with this option : T17
+[DEBUG] 2025-08-06 12:55:59.264905 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.264967 - Use default:  
+[ERROR] 2025-08-06 12:55:59.265076 - Configuration issue with this option : T18
+[DEBUG] 2025-08-06 12:55:59.265150 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.265210 - Use default:  
+[ERROR] 2025-08-06 12:55:59.265311 - Configuration issue with this option : T19
+[DEBUG] 2025-08-06 12:55:59.265382 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.265440 - Use default:  
+[ERROR] 2025-08-06 12:55:59.265547 - Configuration issue with this option : T20
+[DEBUG] 2025-08-06 12:55:59.265679 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.265750 - Use default:  
+[ERROR] 2025-08-06 12:55:59.265861 - Configuration issue with this option : E1
+[DEBUG] 2025-08-06 12:55:59.265933 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.265997 - Use default:  
+[ERROR] 2025-08-06 12:55:59.266270 - Configuration issue with this option : E2
+[DEBUG] 2025-08-06 12:55:59.266378 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.266583 - Use default:  
+[ERROR] 2025-08-06 12:55:59.266738 - Configuration issue with this option : E3
+[DEBUG] 2025-08-06 12:55:59.266826 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.266892 - Use default:  
+[ERROR] 2025-08-06 12:55:59.267006 - Configuration issue with this option : E4
+[DEBUG] 2025-08-06 12:55:59.267079 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.267141 - Use default:  
+[ERROR] 2025-08-06 12:55:59.267245 - Configuration issue with this option : E5
+[DEBUG] 2025-08-06 12:55:59.267310 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.267371 - Use default:  
+[ERROR] 2025-08-06 12:55:59.267469 - Configuration issue with this option : E6
+[DEBUG] 2025-08-06 12:55:59.267543 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.267600 - Use default:  
+[ERROR] 2025-08-06 12:55:59.267700 - Configuration issue with this option : E7
+[DEBUG] 2025-08-06 12:55:59.267770 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.267828 - Use default:  
+[ERROR] 2025-08-06 12:55:59.267925 - Configuration issue with this option : E8
+[DEBUG] 2025-08-06 12:55:59.267992 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.268050 - Use default:  
+[ERROR] 2025-08-06 12:55:59.268150 - Configuration issue with this option : E9
+[DEBUG] 2025-08-06 12:55:59.268219 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.268281 - Use default:  
+[ERROR] 2025-08-06 12:55:59.268380 - Configuration issue with this option : E10
+[DEBUG] 2025-08-06 12:55:59.268450 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.268518 - Use default:  
+[ERROR] 2025-08-06 12:55:59.268623 - Configuration issue with this option : E11
+[DEBUG] 2025-08-06 12:55:59.268692 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.268752 - Use default:  
+[ERROR] 2025-08-06 12:55:59.268847 - Configuration issue with this option : E12
+[DEBUG] 2025-08-06 12:55:59.268914 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.269110 - Use default:  
+[ERROR] 2025-08-06 12:55:59.269387 - Configuration issue with this option : E13
+[DEBUG] 2025-08-06 12:55:59.269469 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.269534 - Use default:  
+[ERROR] 2025-08-06 12:55:59.269643 - Configuration issue with this option : E14
+[DEBUG] 2025-08-06 12:55:59.269716 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.269780 - Use default:  
+[ERROR] 2025-08-06 12:55:59.269884 - Configuration issue with this option : E15
+[DEBUG] 2025-08-06 12:55:59.269997 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.270060 - Use default:  
+[ERROR] 2025-08-06 12:55:59.270168 - Configuration issue with this option : E16
+[DEBUG] 2025-08-06 12:55:59.270244 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.270305 - Use default:  
+[ERROR] 2025-08-06 12:55:59.270405 - Configuration issue with this option : E17
+[DEBUG] 2025-08-06 12:55:59.270469 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.270533 - Use default:  
+[ERROR] 2025-08-06 12:55:59.270633 - Configuration issue with this option : E18
+[DEBUG] 2025-08-06 12:55:59.270697 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.270756 - Use default:  
+[ERROR] 2025-08-06 12:55:59.270850 - Configuration issue with this option : E19
+[DEBUG] 2025-08-06 12:55:59.270914 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.270971 - Use default:  
+[ERROR] 2025-08-06 12:55:59.271065 - Configuration issue with this option : E20
+[DEBUG] 2025-08-06 12:55:59.271132 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.271194 - Use default:  
+[ERROR] 2025-08-06 12:55:59.271295 - Configuration issue with this option : SB
+[DEBUG] 2025-08-06 12:55:59.271365 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.271424 - Use default:  
+[ERROR] 2025-08-06 12:55:59.271542 - Configuration issue with this option : DB
+[DEBUG] 2025-08-06 12:55:59.271626 - Error was:  No section: 'LEDTarget'
+[DEBUG] 2025-08-06 12:55:59.271692 - Use default:  
+[DEBUG] 2025-08-06 12:55:59.272019 - Config[LEDTarget]={'S1': '', 'S2': '', 'S3': '', 'S4': '', 'S5': '', 'S6': '', 'S7': '', 'S8': '', 'S9': '', 'S10': '', 'S11': '', 'S12': '', 'S13': '', 'S14': '', 'S15': '', 'S16': '', 'S17': '', 'S18': '', 'S19': '', 'S20': '', 'D1': '', 'D2': '', 'D3': '', 'D4': '', 'D5': '', 'D6': '', 'D7': '', 'D8': '', 'D9': '', 'D10': '', 'D11': '', 'D12': '', 'D13': '', 'D14': '', 'D15': '', 'D16': '', 'D17': '', 'D18': '', 'D19': '', 'D20': '', 'T1': '', 'T2': '', 'T3': '', 'T4': '', 'T5': '', 'T6': '', 'T7': '', 'T8': '', 'T9': '', 'T10': '', 'T11': '', 'T12': '', 'T13': '', 'T14': '', 'T15': '', 'T16': '', 'T17': '', 'T18': '', 'T19': '', 'T20': '', 'E1': '', 'E2': '', 'E3': '', 'E4': '', 'E5': '', 'E6': '', 'E7': '', 'E8': '', 'E9': '', 'E10': '', 'E11': '', 'E12': '', 'E13': '', 'E14': '', 'E15': '', 'E16': '', 'E17': '', 'E18': '', 'E19': '', 'E20': '', 'SB': '', 'DB': ''}
+[DEBUG] 2025-08-06 12:55:59.272855 - Working on section Favorites of your config file.
+[WARNING] 2025-08-06 12:55:59.273278 - Your config file does not contain a section named Favorites.
+[WARNING] 2025-08-06 12:55:59.273601 - Will use default section values
+[ERROR] 2025-08-06 12:55:59.273818 - Configuration issue with this option : servers
+[DEBUG] 2025-08-06 12:55:59.273920 - Error was:  No section: 'Favorites'
+[DEBUG] 2025-08-06 12:55:59.273989 - Use default:  raspydarts.synology.me:5005
+[ERROR] 2025-08-06 12:55:59.274105 - Configuration issue with this option : firstnames
+[DEBUG] 2025-08-06 12:55:59.274182 - Error was:  No section: 'Favorites'
+[DEBUG] 2025-08-06 12:55:59.274244 - Use default:  Joueur 1
+[ERROR] 2025-08-06 12:55:59.274351 - Configuration issue with this option : games
+[DEBUG] 2025-08-06 12:55:59.274428 - Error was:  No section: 'Favorites'
+[DEBUG] 2025-08-06 12:55:59.274497 - Use default:  
+[ERROR] 2025-08-06 12:55:59.274631 - Configuration issue with this option : players_color
+[DEBUG] 2025-08-06 12:55:59.274711 - Error was:  No section: 'Favorites'
+[DEBUG] 2025-08-06 12:55:59.274773 - Use default:  
+[DEBUG] 2025-08-06 12:55:59.274867 - Config[Favorites]={'servers': 'raspydarts.synology.me:5005', 'firstnames': 'Joueur 1', 'games': '', 'players_color': ''}
+[DEBUG] 2025-08-06 12:55:59.275987 - Working on section Events of your config file.
+[WARNING] 2025-08-06 12:55:59.276474 - Your config file does not contain a section named Events.
+[WARNING] 2025-08-06 12:55:59.276601 - Will use default section values
+[ERROR] 2025-08-06 12:55:59.276737 - Configuration issue with this option : launch
+[DEBUG] 2025-08-06 12:55:59.276877 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.276985 - Use default:  {'TARGET': ['FadeRGB,1,random,10', 'Snake,100,random,50', 'Sparkle,10,gold,20'], 'STRIP': ['Strobe,5,red,20', 'Strobe,3,blue,50']}
+[ERROR] 2025-08-06 12:55:59.277100 - Configuration issue with this option : off
+[DEBUG] 2025-08-06 12:55:59.277170 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.277262 - Use default:  {'TARGET': ['off,,,'], 'STRIP': ['off,,,'], 'DMD': ['off,,,'], 'MATRIX': ['off,,,']}
+[ERROR] 2025-08-06 12:55:59.277368 - Configuration issue with this option : menu
+[DEBUG] 2025-08-06 12:55:59.277438 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.277519 - Use default:  {'TARGET': ['Strobe,3,gold,50'], 'STRIP': ['Strobe,3,gold,50']}
+[ERROR] 2025-08-06 12:55:59.277622 - Configuration issue with this option : wait
+[DEBUG] 2025-08-06 12:55:59.277694 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.277772 - Use default:  {'TARGET': ['Alain2,10,red,20'], 'STRIP': ['Fireworks,1,random,1']}
+[ERROR] 2025-08-06 12:55:59.277873 - Configuration issue with this option : quit
+[DEBUG] 2025-08-06 12:55:59.277939 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.278015 - Use default:  {'TARGET': ['Rainbow2,50,random,50'], 'STRIP': ['Rainbow,50,random,50']}
+[ERROR] 2025-08-06 12:55:59.278119 - Configuration issue with this option : newgame
+[DEBUG] 2025-08-06 12:55:59.278198 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.278270 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.278385 - Configuration issue with this option : ready
+[DEBUG] 2025-08-06 12:55:59.278459 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.278535 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.278657 - Configuration issue with this option : release
+[DEBUG] 2025-08-06 12:55:59.278732 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.278803 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.278909 - Configuration issue with this option : nextplayer
+[DEBUG] 2025-08-06 12:55:59.279174 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.279416 - Use default:  {'TARGET': ['Ring,20,random,50'], 'STRIP': ['Cylon,2,red,1']}
+[ERROR] 2025-08-06 12:55:59.279587 - Configuration issue with this option : SB
+[DEBUG] 2025-08-06 12:55:59.279685 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.279762 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.279897 - Configuration issue with this option : DB
+[DEBUG] 2025-08-06 12:55:59.279980 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.280050 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.280171 - Configuration issue with this option : 180
+[DEBUG] 2025-08-06 12:55:59.280257 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.280344 - Use default:  {'LIGHT': ['LIGHT_CELEBRATION, 2500'], 'STROBE': ['LIGHT_FLASH, 10']}
+[ERROR] 2025-08-06 12:55:59.280461 - Configuration issue with this option : winner
+[DEBUG] 2025-08-06 12:55:59.280548 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.280627 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.280749 - Configuration issue with this option : miss
+[DEBUG] 2025-08-06 12:55:59.280826 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.280895 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.281005 - Configuration issue with this option : gameover
+[DEBUG] 2025-08-06 12:55:59.281078 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.281149 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.281260 - Configuration issue with this option : interrupt
+[DEBUG] 2025-08-06 12:55:59.281332 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.281400 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.281518 - Configuration issue with this option : simple
+[DEBUG] 2025-08-06 12:55:59.281589 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.281667 - Use default:  {'STROBE': ['TOY1, 1']}
+[ERROR] 2025-08-06 12:55:59.281773 - Configuration issue with this option : double
+[DEBUG] 2025-08-06 12:55:59.281883 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.281958 - Use default:  {'STROBE': ['TOY1, 2']}
+[ERROR] 2025-08-06 12:55:59.282063 - Configuration issue with this option : triple
+[DEBUG] 2025-08-06 12:55:59.282133 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.282205 - Use default:  {'STROBE': ['TOY1, 3']}
+[ERROR] 2025-08-06 12:55:59.282312 - Configuration issue with this option : setwinner
+[DEBUG] 2025-08-06 12:55:59.282385 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.282469 - Use default:  {'STRIP': ['Fireworks,1,gold,10'], 'TARGET': ['Wait,15,gold,100', 'Sparkle,10,gold,5']}
+[ERROR] 2025-08-06 12:55:59.282590 - Configuration issue with this option : pressure
+[DEBUG] 2025-08-06 12:55:59.282674 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.282758 - Use default:  {'TARGET': ['TheaterChase,10,blue,10'], 'STRIP': ['RunningLights,100,blue,10']}
+[ERROR] 2025-08-06 12:55:59.282875 - Configuration issue with this option : nopressure
+[DEBUG] 2025-08-06 12:55:59.282956 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.283033 - Use default:  {'TARGET': ['off,,,']}
+[ERROR] 2025-08-06 12:55:59.283146 - Configuration issue with this option : S1
+[DEBUG] 2025-08-06 12:55:59.283226 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.283295 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.283413 - Configuration issue with this option : S2
+[DEBUG] 2025-08-06 12:55:59.283497 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.283571 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.283691 - Configuration issue with this option : S3
+[DEBUG] 2025-08-06 12:55:59.283773 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.283844 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.283957 - Configuration issue with this option : S4
+[DEBUG] 2025-08-06 12:55:59.284040 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.284112 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.284225 - Configuration issue with this option : S5
+[DEBUG] 2025-08-06 12:55:59.284305 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.284375 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.284489 - Configuration issue with this option : S6
+[DEBUG] 2025-08-06 12:55:59.284567 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.284641 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.284753 - Configuration issue with this option : S7
+[DEBUG] 2025-08-06 12:55:59.284825 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.284893 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.285000 - Configuration issue with this option : S8
+[DEBUG] 2025-08-06 12:55:59.285067 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.285132 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.285232 - Configuration issue with this option : S9
+[DEBUG] 2025-08-06 12:55:59.285299 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.285362 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.285456 - Configuration issue with this option : S10
+[DEBUG] 2025-08-06 12:55:59.285530 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.285594 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.285715 - Configuration issue with this option : S11
+[DEBUG] 2025-08-06 12:55:59.285784 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.285847 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.286428 - Configuration issue with this option : S12
+[DEBUG] 2025-08-06 12:55:59.286593 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.286681 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.286813 - Configuration issue with this option : S13
+[DEBUG] 2025-08-06 12:55:59.286889 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.286957 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.287069 - Configuration issue with this option : S14
+[DEBUG] 2025-08-06 12:55:59.287135 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.287199 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.287301 - Configuration issue with this option : S15
+[DEBUG] 2025-08-06 12:55:59.287421 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.287489 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.287626 - Configuration issue with this option : S16
+[DEBUG] 2025-08-06 12:55:59.287708 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.287777 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.287884 - Configuration issue with this option : S17
+[DEBUG] 2025-08-06 12:55:59.287953 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.288019 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.288125 - Configuration issue with this option : S18
+[DEBUG] 2025-08-06 12:55:59.288191 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.288255 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.288361 - Configuration issue with this option : S19
+[DEBUG] 2025-08-06 12:55:59.288432 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.288500 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.288625 - Configuration issue with this option : S20
+[DEBUG] 2025-08-06 12:55:59.288698 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.288765 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.288875 - Configuration issue with this option : D1
+[DEBUG] 2025-08-06 12:55:59.289143 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.289491 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.289801 - Configuration issue with this option : D2
+[DEBUG] 2025-08-06 12:55:59.289920 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.290001 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.290156 - Configuration issue with this option : D3
+[DEBUG] 2025-08-06 12:55:59.290236 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.290302 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.290422 - Configuration issue with this option : D4
+[DEBUG] 2025-08-06 12:55:59.290494 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.290567 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.290678 - Configuration issue with this option : D5
+[DEBUG] 2025-08-06 12:55:59.290753 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.290823 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.290933 - Configuration issue with this option : D6
+[DEBUG] 2025-08-06 12:55:59.291007 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.291076 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.291200 - Configuration issue with this option : D7
+[DEBUG] 2025-08-06 12:55:59.291280 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.291345 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.291459 - Configuration issue with this option : D8
+[DEBUG] 2025-08-06 12:55:59.291543 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.291619 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.291740 - Configuration issue with this option : D9
+[DEBUG] 2025-08-06 12:55:59.291813 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.291879 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.291999 - Configuration issue with this option : D10
+[DEBUG] 2025-08-06 12:55:59.292261 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.292343 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.292466 - Configuration issue with this option : D11
+[DEBUG] 2025-08-06 12:55:59.292549 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.292616 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.292724 - Configuration issue with this option : D12
+[DEBUG] 2025-08-06 12:55:59.292793 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.292858 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.292962 - Configuration issue with this option : D13
+[DEBUG] 2025-08-06 12:55:59.293029 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.293093 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.293192 - Configuration issue with this option : D14
+[DEBUG] 2025-08-06 12:55:59.293260 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.293323 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.293423 - Configuration issue with this option : D15
+[DEBUG] 2025-08-06 12:55:59.293570 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.293661 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.293788 - Configuration issue with this option : D16
+[DEBUG] 2025-08-06 12:55:59.293864 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.293934 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.294050 - Configuration issue with this option : D17
+[DEBUG] 2025-08-06 12:55:59.294127 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.294191 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.294297 - Configuration issue with this option : D18
+[DEBUG] 2025-08-06 12:55:59.294365 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.294429 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.294534 - Configuration issue with this option : D19
+[DEBUG] 2025-08-06 12:55:59.294600 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.294665 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.294760 - Configuration issue with this option : D20
+[DEBUG] 2025-08-06 12:55:59.294823 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.294885 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.294978 - Configuration issue with this option : T1
+[DEBUG] 2025-08-06 12:55:59.295043 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.295104 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.295366 - Configuration issue with this option : T2
+[DEBUG] 2025-08-06 12:55:59.295440 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.295508 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.295622 - Configuration issue with this option : T3
+[DEBUG] 2025-08-06 12:55:59.295755 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.295829 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.295937 - Configuration issue with this option : T4
+[DEBUG] 2025-08-06 12:55:59.296004 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.296067 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.296163 - Configuration issue with this option : T5
+[DEBUG] 2025-08-06 12:55:59.296228 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.296292 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.296395 - Configuration issue with this option : T6
+[DEBUG] 2025-08-06 12:55:59.296476 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.296555 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.296670 - Configuration issue with this option : T7
+[DEBUG] 2025-08-06 12:55:59.296743 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.296809 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.296916 - Configuration issue with this option : T8
+[DEBUG] 2025-08-06 12:55:59.296989 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.297055 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.297367 - Configuration issue with this option : T9
+[DEBUG] 2025-08-06 12:55:59.297499 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.297579 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.297703 - Configuration issue with this option : T10
+[DEBUG] 2025-08-06 12:55:59.297771 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.297834 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.297936 - Configuration issue with this option : T11
+[DEBUG] 2025-08-06 12:55:59.298002 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.298065 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.298163 - Configuration issue with this option : T12
+[DEBUG] 2025-08-06 12:55:59.298230 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.298295 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.298395 - Configuration issue with this option : T13
+[DEBUG] 2025-08-06 12:55:59.298461 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.298529 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.298634 - Configuration issue with this option : T14
+[DEBUG] 2025-08-06 12:55:59.298699 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.298762 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.298857 - Configuration issue with this option : T15
+[DEBUG] 2025-08-06 12:55:59.298923 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.299338 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.299536 - Configuration issue with this option : T16
+[DEBUG] 2025-08-06 12:55:59.299620 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.299686 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.299791 - Configuration issue with this option : T17
+[DEBUG] 2025-08-06 12:55:59.299859 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.299922 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.300023 - Configuration issue with this option : T18
+[DEBUG] 2025-08-06 12:55:59.300089 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.300151 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.300246 - Configuration issue with this option : T19
+[DEBUG] 2025-08-06 12:55:59.300309 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.300371 - Use default:  {}
+[ERROR] 2025-08-06 12:55:59.300466 - Configuration issue with this option : T20
+[DEBUG] 2025-08-06 12:55:59.300544 - Error was:  No section: 'Events'
+[DEBUG] 2025-08-06 12:55:59.300610 - Use default:  {}
+[DEBUG] 2025-08-06 12:55:59.301045 - Config[Events]={'launch': {'TARGET': ['FadeRGB,1,random,10', 'Snake,100,random,50', 'Sparkle,10,gold,20'], 'STRIP': ['Strobe,5,red,20', 'Strobe,3,blue,50']}, 'off': {'TARGET': ['off,,,'], 'STRIP': ['off,,,'], 'DMD': ['off,,,'], 'MATRIX': ['off,,,']}, 'menu': {'TARGET': ['Strobe,3,gold,50'], 'STRIP': ['Strobe,3,gold,50']}, 'wait': {'TARGET': ['Alain2,10,red,20'], 'STRIP': ['Fireworks,1,random,1']}, 'quit': {'TARGET': ['Rainbow2,50,random,50'], 'STRIP': ['Rainbow,50,random,50']}, 'newgame': {}, 'ready': {}, 'release': {}, 'nextplayer': {'TARGET': ['Ring,20,random,50'], 'STRIP': ['Cylon,2,red,1']}, 'SB': {}, 'DB': {}, '180': {'LIGHT': ['LIGHT_CELEBRATION, 2500'], 'STROBE': ['LIGHT_FLASH, 10']}, 'winner': {}, 'miss': {}, 'gameover': {}, 'interrupt': {}, 'simple': {'STROBE': ['TOY1, 1']}, 'double': {'STROBE': ['TOY1, 2']}, 'triple': {'STROBE': ['TOY1, 3']}, 'setwinner': {'STRIP': ['Fireworks,1,gold,10'], 'TARGET': ['Wait,15,gold,100', 'Sparkle,10,gold,5']}, 'pressure': {'TARGET': ['TheaterChase,10,blue,10'], 'STRIP': ['RunningLights,100,blue,10']}, 'nopressure': {'TARGET': ['off,,,']}, 'S1': {}, 'S2': {}, 'S3': {}, 'S4': {}, 'S5': {}, 'S6': {}, 'S7': {}, 'S8': {}, 'S9': {}, 'S10': {}, 'S11': {}, 'S12': {}, 'S13': {}, 'S14': {}, 'S15': {}, 'S16': {}, 'S17': {}, 'S18': {}, 'S19': {}, 'S20': {}, 'D1': {}, 'D2': {}, 'D3': {}, 'D4': {}, 'D5': {}, 'D6': {}, 'D7': {}, 'D8': {}, 'D9': {}, 'D10': {}, 'D11': {}, 'D12': {}, 'D13': {}, 'D14': {}, 'D15': {}, 'D16': {}, 'D17': {}, 'D18': {}, 'D19': {}, 'D20': {}, 'T1': {}, 'T2': {}, 'T3': {}, 'T4': {}, 'T5': {}, 'T6': {}, 'T7': {}, 'T8': {}, 'T9': {}, 'T10': {}, 'T11': {}, 'T12': {}, 'T13': {}, 'T14': {}, 'T15': {}, 'T16': {}, 'T17': {}, 'T18': {}, 'T19': {}, 'T20': {}}
+[DEBUG] 2025-08-06 12:55:59.301829 - Working on section SectionGlobals of your config file.
+[WARNING] 2025-08-06 12:55:59.302132 - Your config file does not contain a section named SectionGlobals.
+[WARNING] 2025-08-06 12:55:59.302219 - Will use default section values
+[ERROR] 2025-08-06 12:55:59.302328 - Configuration issue with this option : locale
+[DEBUG] 2025-08-06 12:55:59.302398 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.302457 - Use default:  fr_FR
+[ERROR] 2025-08-06 12:55:59.302555 - Configuration issue with this option : colorset
+[DEBUG] 2025-08-06 12:55:59.302622 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.302680 - Use default:  clear
+[ERROR] 2025-08-06 12:55:59.302773 - Configuration issue with this option : font
+[DEBUG] 2025-08-06 12:55:59.302837 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.302896 - Use default:  Fabrik.ttf
+[ERROR] 2025-08-06 12:55:59.302989 - Configuration issue with this option : soundvolume
+[DEBUG] 2025-08-06 12:55:59.303052 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.303114 - Use default:  100
+[ERROR] 2025-08-06 12:55:59.303205 - Configuration issue with this option : videos
+[DEBUG] 2025-08-06 12:55:59.303310 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.303371 - Use default:  2
+[ERROR] 2025-08-06 12:55:59.303463 - Configuration issue with this option : blinktime
+[DEBUG] 2025-08-06 12:55:59.303530 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.303590 - Use default:  3000
+[ERROR] 2025-08-06 12:55:59.303687 - Configuration issue with this option : pnj_time
+[DEBUG] 2025-08-06 12:55:59.303752 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.303811 - Use default:  2000
+[ERROR] 2025-08-06 12:55:59.303903 - Configuration issue with this option : releasedartstime
+[DEBUG] 2025-08-06 12:55:59.303967 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.304027 - Use default:  1800
+[ERROR] 2025-08-06 12:55:59.304119 - Configuration issue with this option : nextplayer_sound_duration
+[DEBUG] 2025-08-06 12:55:59.304184 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.304244 - Use default:  7000
+[ERROR] 2025-08-06 12:55:59.304336 - Configuration issue with this option : waitevent_time
+[DEBUG] 2025-08-06 12:55:59.304401 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.304459 - Use default:  30000
+[ERROR] 2025-08-06 12:55:59.304554 - Configuration issue with this option : resx
+[DEBUG] 2025-08-06 12:55:59.304623 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.304682 - Use default:  1000
+[ERROR] 2025-08-06 12:55:59.304774 - Configuration issue with this option : resy
+[DEBUG] 2025-08-06 12:55:59.304837 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.304896 - Use default:  700
+[ERROR] 2025-08-06 12:55:59.304987 - Configuration issue with this option : fullscreen
+[DEBUG] 2025-08-06 12:55:59.305050 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.305112 - Use default:  True
+[ERROR] 2025-08-06 12:55:59.305202 - Configuration issue with this option : nbcol
+[DEBUG] 2025-08-06 12:55:59.305265 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.305680 - Use default:  6
+[ERROR] 2025-08-06 12:55:59.305794 - Configuration issue with this option : onscreenbuttons
+[DEBUG] 2025-08-06 12:55:59.305861 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.305922 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.306015 - Configuration issue with this option : startpercent
+[DEBUG] 2025-08-06 12:55:59.306078 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.306152 - Use default:  0.4
+[ERROR] 2025-08-06 12:55:59.306243 - Configuration issue with this option : endgamestats
+[DEBUG] 2025-08-06 12:55:59.306306 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.306365 - Use default:  1
+[ERROR] 2025-08-06 12:55:59.306455 - Configuration issue with this option : keeporder
+[DEBUG] 2025-08-06 12:55:59.306520 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.306579 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.306672 - Configuration issue with this option : play_firstname
+[DEBUG] 2025-08-06 12:55:59.306736 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.306796 - Use default:  True
+[ERROR] 2025-08-06 12:55:59.306888 - Configuration issue with this option : print_dartstroke
+[DEBUG] 2025-08-06 12:55:59.306952 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.307019 - Use default:  True
+[ERROR] 2025-08-06 12:55:59.307116 - Configuration issue with this option : light_target
+[DEBUG] 2025-08-06 12:55:59.307180 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.307240 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.307330 - Configuration issue with this option : light_strip
+[DEBUG] 2025-08-06 12:55:59.307393 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.307452 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.307546 - Configuration issue with this option : netgamecreator
+[DEBUG] 2025-08-06 12:55:59.307614 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.307711 - Use default:  Raspydarts
+[ERROR] 2025-08-06 12:55:59.307808 - Configuration issue with this option : debuglevel
+[DEBUG] 2025-08-06 12:55:59.307872 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.307932 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.308025 - Configuration issue with this option : exhibition_mode
+[DEBUG] 2025-08-06 12:55:59.308090 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.308151 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.308243 - Configuration issue with this option : competition_mode
+[DEBUG] 2025-08-06 12:55:59.308307 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.308367 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.308457 - Configuration issue with this option : videosound_multiplier
+[DEBUG] 2025-08-06 12:55:59.308525 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.308584 - Use default:  1
+[ERROR] 2025-08-06 12:55:59.308678 - Configuration issue with this option : sound_multiplier
+[DEBUG] 2025-08-06 12:55:59.308742 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.308801 - Use default:  100
+[ERROR] 2025-08-06 12:55:59.308893 - Configuration issue with this option : illumination_mode
+[DEBUG] 2025-08-06 12:55:59.309070 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.309263 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.309395 - Configuration issue with this option : illumination_color
+[DEBUG] 2025-08-06 12:55:59.309463 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.309524 - Use default:  white
+[ERROR] 2025-08-06 12:55:59.309620 - Configuration issue with this option : fast_games_mode
+[DEBUG] 2025-08-06 12:55:59.309684 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.309746 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.309840 - Configuration issue with this option : only_favorites_games_mode
+[DEBUG] 2025-08-06 12:55:59.309906 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.309965 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.310057 - Configuration issue with this option : check_for_updates
+[DEBUG] 2025-08-06 12:55:59.310121 - Error was:  No section: 'SectionGlobals'
+[DEBUG] 2025-08-06 12:55:59.310181 - Use default:  True
+[DEBUG] 2025-08-06 12:55:59.310361 - Config[SectionGlobals]={'locale': 'fr_FR', 'colorset': 'clear', 'font': 'Fabrik.ttf', 'soundvolume': 100, 'videos': 2, 'blinktime': 3000, 'pnj_time': 2000, 'releasedartstime': 1800, 'nextplayer_sound_duration': 7000, 'waitevent_time': 30000, 'resx': 1000, 'resy': 700, 'fullscreen': True, 'nbcol': 6, 'onscreenbuttons': False, 'startpercent': 0.4, 'endgamestats': 1, 'keeporder': False, 'play_firstname': True, 'print_dartstroke': True, 'light_target': False, 'light_strip': False, 'netgamecreator': 'Raspydarts', 'debuglevel': 0, 'exhibition_mode': False, 'competition_mode': False, 'videosound_multiplier': 1, 'sound_multiplier': 100, 'illumination_mode': False, 'illumination_color': 'white', 'fast_games_mode': False, 'only_favorites_games_mode': False, 'check_for_updates': True}
+[DEBUG] 2025-08-06 12:55:59.311105 - Working on section SectionAdvanced of your config file.
+[WARNING] 2025-08-06 12:55:59.311438 - Your config file does not contain a section named SectionAdvanced.
+[WARNING] 2025-08-06 12:55:59.311540 - Will use default section values
+[ERROR] 2025-08-06 12:55:59.311664 - Configuration issue with this option : bypass-stats
+[DEBUG] 2025-08-06 12:55:59.311742 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.311804 - Use default:  1
+[ERROR] 2025-08-06 12:55:59.311906 - Configuration issue with this option : directplay
+[DEBUG] 2025-08-06 12:55:59.311972 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.312031 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.312127 - Configuration issue with this option : selectedgame
+[DEBUG] 2025-08-06 12:55:59.312194 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.312380 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.312558 - Configuration issue with this option : gametype
+[DEBUG] 2025-08-06 12:55:59.312632 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.312693 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.312790 - Configuration issue with this option : netgamename
+[DEBUG] 2025-08-06 12:55:59.312854 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.312913 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.313007 - Configuration issue with this option : servername
+[DEBUG] 2025-08-06 12:55:59.313071 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.313129 - Use default:  raspydarts.synology.me
+[ERROR] 2025-08-06 12:55:59.313223 - Configuration issue with this option : serverport
+[DEBUG] 2025-08-06 12:55:59.313287 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.313348 - Use default:  5005
+[ERROR] 2025-08-06 12:55:59.313442 - Configuration issue with this option : masterserver
+[DEBUG] 2025-08-06 12:55:59.313510 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.313567 - Use default:  raspydarts.synology.me
+[ERROR] 2025-08-06 12:55:59.313661 - Configuration issue with this option : masterport
+[DEBUG] 2025-08-06 12:55:59.313724 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.313783 - Use default:  5006
+[ERROR] 2025-08-06 12:55:59.313875 - Configuration issue with this option : serveralias
+[DEBUG] 2025-08-06 12:55:59.313939 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.314000 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.314091 - Configuration issue with this option : listen
+[DEBUG] 2025-08-06 12:55:59.314155 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.314212 - Use default:  eth0
+[ERROR] 2025-08-06 12:55:59.314306 - Configuration issue with this option : clientpolltime
+[DEBUG] 2025-08-06 12:55:59.314370 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.314429 - Use default:  5
+[ERROR] 2025-08-06 12:55:59.314527 - Configuration issue with this option : masterclientpolltime
+[DEBUG] 2025-08-06 12:55:59.314591 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.314655 - Use default:  32
+[ERROR] 2025-08-06 12:55:59.314749 - Configuration issue with this option : animationduration
+[DEBUG] 2025-08-06 12:55:59.314812 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.314871 - Use default:  5
+[ERROR] 2025-08-06 12:55:59.314963 - Configuration issue with this option : clear-local-db
+[DEBUG] 2025-08-06 12:55:59.315026 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.315086 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.315180 - Configuration issue with this option : localplayers
+[DEBUG] 2025-08-06 12:55:59.315244 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.315302 - Use default:  
+[ERROR] 2025-08-06 12:55:59.315393 - Configuration issue with this option : stats-format
+[DEBUG] 2025-08-06 12:55:59.315456 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.315518 - Use default:  old
+[ERROR] 2025-08-06 12:55:59.315610 - Configuration issue with this option : use-matrix
+[DEBUG] 2025-08-06 12:55:59.315675 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.315738 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.315829 - Configuration issue with this option : use-dmd
+[DEBUG] 2025-08-06 12:55:59.316301 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.316387 - Use default:  True
+[ERROR] 2025-08-06 12:55:59.316522 - Configuration issue with this option : use-other
+[DEBUG] 2025-08-06 12:55:59.316590 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.316653 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.316752 - Configuration issue with this option : use-hue
+[DEBUG] 2025-08-06 12:55:59.316817 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.316878 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.316974 - Configuration issue with this option : mqtt-broker
+[DEBUG] 2025-08-06 12:55:59.317079 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.317139 - Use default:  localhost
+[ERROR] 2025-08-06 12:55:59.317236 - Configuration issue with this option : interior
+[DEBUG] 2025-08-06 12:55:59.317301 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.317362 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.317454 - Configuration issue with this option : target-bgcolor1
+[DEBUG] 2025-08-06 12:55:59.317524 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.317581 - Use default:  blue
+[ERROR] 2025-08-06 12:55:59.317676 - Configuration issue with this option : target-bgcolor2
+[DEBUG] 2025-08-06 12:55:59.317741 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.317798 - Use default:  red
+[ERROR] 2025-08-06 12:55:59.317890 - Configuration issue with this option : target-bgcolor3
+[DEBUG] 2025-08-06 12:55:59.317954 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.318011 - Use default:  white
+[ERROR] 2025-08-06 12:55:59.318103 - Configuration issue with this option : target-bgbrightness
+[DEBUG] 2025-08-06 12:55:59.318167 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.318227 - Use default:  10
+[ERROR] 2025-08-06 12:55:59.318319 - Configuration issue with this option : prefered_game
+[DEBUG] 2025-08-06 12:55:59.318383 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.318440 - Use default:  
+[ERROR] 2025-08-06 12:55:59.318536 - Configuration issue with this option : preferedclassicgame
+[DEBUG] 2025-08-06 12:55:59.318600 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.318659 - Use default:  
+[ERROR] 2025-08-06 12:55:59.318751 - Configuration issue with this option : preferedfungame
+[DEBUG] 2025-08-06 12:55:59.318814 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.318872 - Use default:  
+[ERROR] 2025-08-06 12:55:59.319102 - Configuration issue with this option : preferedsportgame
+[DEBUG] 2025-08-06 12:55:59.319330 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.319397 - Use default:  
+[ERROR] 2025-08-06 12:55:59.319505 - Configuration issue with this option : preferedcategory
+[DEBUG] 2025-08-06 12:55:59.319570 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.319632 - Use default:  classic
+[ERROR] 2025-08-06 12:55:59.319728 - Configuration issue with this option : nb_sets
+[DEBUG] 2025-08-06 12:55:59.319797 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.319865 - Use default:  1
+[ERROR] 2025-08-06 12:55:59.319978 - Configuration issue with this option : db-celebration-delay
+[DEBUG] 2025-08-06 12:55:59.320047 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.320108 - Use default:  2000
+[ERROR] 2025-08-06 12:55:59.320206 - Configuration issue with this option : set-celebration-delay
+[DEBUG] 2025-08-06 12:55:59.320272 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.320331 - Use default:  3000
+[ERROR] 2025-08-06 12:55:59.320428 - Configuration issue with this option : victory-celebration-delay
+[DEBUG] 2025-08-06 12:55:59.320495 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.320560 - Use default:  5000
+[ERROR] 2025-08-06 12:55:59.320661 - Configuration issue with this option : launch-game-celebration
+[DEBUG] 2025-08-06 12:55:59.320727 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.320791 - Use default:  False
+[ERROR] 2025-08-06 12:55:59.320885 - Configuration issue with this option : game-options-list
+[DEBUG] 2025-08-06 12:55:59.320948 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.321008 - Use default:  
+[ERROR] 2025-08-06 12:55:59.321106 - Configuration issue with this option : richard-mode
+[DEBUG] 2025-08-06 12:55:59.321175 - Error was:  No section: 'SectionAdvanced'
+[DEBUG] 2025-08-06 12:55:59.321239 - Use default:  False
+[DEBUG] 2025-08-06 12:55:59.321414 - Config[SectionAdvanced]={'bypass-stats': 1, 'directplay': 'False', 'selectedgame': False, 'gametype': False, 'netgamename': False, 'servername': 'raspydarts.synology.me', 'serverport': 5005, 'masterserver': 'raspydarts.synology.me', 'masterport': '5006', 'serveralias': False, 'listen': 'eth0', 'clientpolltime': 5, 'masterclientpolltime': 32, 'animationduration': 5, 'clear-local-db': False, 'localplayers': '', 'stats-format': 'old', 'use-matrix': False, 'use-dmd': True, 'use-other': False, 'use-hue': False, 'mqtt-broker': 'localhost', 'interior': False, 'target-bgcolor1': 'blue', 'target-bgcolor2': 'red', 'target-bgcolor3': 'white', 'target-bgbrightness': 10, 'prefered_game': '', 'preferedclassicgame': '', 'preferedfungame': '', 'preferedsportgame': '', 'preferedcategory': 'classic', 'nb_sets': 1, 'db-celebration-delay': 2000, 'set-celebration-delay': 3000, 'victory-celebration-delay': 5000, 'launch-game-celebration': False, 'game-options-list': '', 'richard-mode': False}
+[DEBUG] 2025-08-06 12:55:59.322284 - Working on section Raspberry_BoardPinsIns of your config file.
+[WARNING] 2025-08-06 12:55:59.322677 - Your config file does not contain a section named Raspberry_BoardPinsIns.
+[WARNING] 2025-08-06 12:55:59.322786 - Will use default section values
+[ERROR] 2025-08-06 12:55:59.322940 - Configuration issue with this option : PIN_1
+[DEBUG] 2025-08-06 12:55:59.323032 - Error was:  No section: 'Raspberry_BoardPinsIns'
+[DEBUG] 2025-08-06 12:55:59.323092 - Use default:  
+[ERROR] 2025-08-06 12:55:59.323202 - Configuration issue with this option : PIN_2
+[DEBUG] 2025-08-06 12:55:59.323269 - Error was:  No section: 'Raspberry_BoardPinsIns'
+[DEBUG] 2025-08-06 12:55:59.323327 - Use default:  
+[ERROR] 2025-08-06 12:55:59.323423 - Configuration issue with this option : PIN_3
+[DEBUG] 2025-08-06 12:55:59.323490 - Error was:  No section: 'Raspberry_BoardPinsIns'
+[DEBUG] 2025-08-06 12:55:59.323552 - Use default:  
+[ERROR] 2025-08-06 12:55:59.323651 - Configuration issue with this option : PIN_4
+[DEBUG] 2025-08-06 12:55:59.323715 - Error was:  No section: 'Raspberry_BoardPinsIns'
+[DEBUG] 2025-08-06 12:55:59.323773 - Use default:  
+[ERROR] 2025-08-06 12:55:59.323869 - Configuration issue with this option : PIN_5
+[DEBUG] 2025-08-06 12:55:59.323932 - Error was:  No section: 'Raspberry_BoardPinsIns'
+[DEBUG] 2025-08-06 12:55:59.323990 - Use default:  
+[ERROR] 2025-08-06 12:55:59.324086 - Configuration issue with this option : PIN_6
+[DEBUG] 2025-08-06 12:55:59.324153 - Error was:  No section: 'Raspberry_BoardPinsIns'
+[DEBUG] 2025-08-06 12:55:59.324211 - Use default:  
+[ERROR] 2025-08-06 12:55:59.324307 - Configuration issue with this option : PIN_7
+[DEBUG] 2025-08-06 12:55:59.324371 - Error was:  No section: 'Raspberry_BoardPinsIns'
+[DEBUG] 2025-08-06 12:55:59.324429 - Use default:  
+[ERROR] 2025-08-06 12:55:59.324536 - Configuration issue with this option : PIN_8
+[DEBUG] 2025-08-06 12:55:59.324611 - Error was:  No section: 'Raspberry_BoardPinsIns'
+[DEBUG] 2025-08-06 12:55:59.324680 - Use default:  
+[ERROR] 2025-08-06 12:55:59.324782 - Configuration issue with this option : PIN_9
+[DEBUG] 2025-08-06 12:55:59.324846 - Error was:  No section: 'Raspberry_BoardPinsIns'
+[DEBUG] 2025-08-06 12:55:59.324906 - Use default:  
+[ERROR] 2025-08-06 12:55:59.325002 - Configuration issue with this option : PIN_10
+[DEBUG] 2025-08-06 12:55:59.325068 - Error was:  No section: 'Raspberry_BoardPinsIns'
+[DEBUG] 2025-08-06 12:55:59.325135 - Use default:  
+[ERROR] 2025-08-06 12:55:59.325235 - Configuration issue with this option : PIN_11
+[DEBUG] 2025-08-06 12:55:59.325300 - Error was:  No section: 'Raspberry_BoardPinsIns'
+[DEBUG] 2025-08-06 12:55:59.325359 - Use default:  
+[ERROR] 2025-08-06 12:55:59.325454 - Configuration issue with this option : PIN_12
+[DEBUG] 2025-08-06 12:55:59.325525 - Error was:  No section: 'Raspberry_BoardPinsIns'
+[DEBUG] 2025-08-06 12:55:59.325583 - Use default:  
+[ERROR] 2025-08-06 12:55:59.325743 - Configuration issue with this option : PIN_13
+[DEBUG] 2025-08-06 12:55:59.325811 - Error was:  No section: 'Raspberry_BoardPinsIns'
+[DEBUG] 2025-08-06 12:55:59.325871 - Use default:  
+[ERROR] 2025-08-06 12:55:59.326022 - Configuration issue with this option : PIN_14
+[DEBUG] 2025-08-06 12:55:59.326088 - Error was:  No section: 'Raspberry_BoardPinsIns'
+[DEBUG] 2025-08-06 12:55:59.326146 - Use default:  
+[ERROR] 2025-08-06 12:55:59.326240 - Configuration issue with this option : PIN_15
+[DEBUG] 2025-08-06 12:55:59.326304 - Error was:  No section: 'Raspberry_BoardPinsIns'
+[DEBUG] 2025-08-06 12:55:59.326363 - Use default:  
+[ERROR] 2025-08-06 12:55:59.326457 - Configuration issue with this option : PIN_16
+[DEBUG] 2025-08-06 12:55:59.326527 - Error was:  No section: 'Raspberry_BoardPinsIns'
+[DEBUG] 2025-08-06 12:55:59.326585 - Use default:  
+[DEBUG] 2025-08-06 12:55:59.326701 - Config[Raspberry_BoardPinsIns]={'PIN_1': '', 'PIN_2': '', 'PIN_3': '', 'PIN_4': '', 'PIN_5': '', 'PIN_6': '', 'PIN_7': '', 'PIN_8': '', 'PIN_9': '', 'PIN_10': '', 'PIN_11': '', 'PIN_12': '', 'PIN_13': '', 'PIN_14': '', 'PIN_15': '', 'PIN_16': ''}
+[DEBUG] 2025-08-06 12:55:59.327457 - Working on section Raspberry_BoardPinsOuts of your config file.
+[WARNING] 2025-08-06 12:55:59.328075 - Your config file does not contain a section named Raspberry_BoardPinsOuts.
+[WARNING] 2025-08-06 12:55:59.328228 - Will use default section values
+[ERROR] 2025-08-06 12:55:59.328362 - Configuration issue with this option : PIN_1
+[DEBUG] 2025-08-06 12:55:59.328438 - Error was:  No section: 'Raspberry_BoardPinsOuts'
+[DEBUG] 2025-08-06 12:55:59.328499 - Use default:  
+[ERROR] 2025-08-06 12:55:59.328600 - Configuration issue with this option : PIN_2
+[DEBUG] 2025-08-06 12:55:59.328668 - Error was:  No section: 'Raspberry_BoardPinsOuts'
+[DEBUG] 2025-08-06 12:55:59.328726 - Use default:  
+[ERROR] 2025-08-06 12:55:59.328824 - Configuration issue with this option : PIN_3
+[DEBUG] 2025-08-06 12:55:59.328889 - Error was:  No section: 'Raspberry_BoardPinsOuts'
+[DEBUG] 2025-08-06 12:55:59.328948 - Use default:  
+[ERROR] 2025-08-06 12:55:59.329392 - Configuration issue with this option : PIN_4
+[DEBUG] 2025-08-06 12:55:59.329469 - Error was:  No section: 'Raspberry_BoardPinsOuts'
+[DEBUG] 2025-08-06 12:55:59.329532 - Use default:  
+[ERROR] 2025-08-06 12:55:59.329636 - Configuration issue with this option : PIN_5
+[DEBUG] 2025-08-06 12:55:59.329700 - Error was:  No section: 'Raspberry_BoardPinsOuts'
+[DEBUG] 2025-08-06 12:55:59.329759 - Use default:  
+[ERROR] 2025-08-06 12:55:59.329852 - Configuration issue with this option : PIN_6
+[DEBUG] 2025-08-06 12:55:59.329916 - Error was:  No section: 'Raspberry_BoardPinsOuts'
+[DEBUG] 2025-08-06 12:55:59.329973 - Use default:  
+[ERROR] 2025-08-06 12:55:59.330064 - Configuration issue with this option : PIN_7
+[DEBUG] 2025-08-06 12:55:59.330129 - Error was:  No section: 'Raspberry_BoardPinsOuts'
+[DEBUG] 2025-08-06 12:55:59.330186 - Use default:  
+[ERROR] 2025-08-06 12:55:59.330278 - Configuration issue with this option : PIN_8
+[DEBUG] 2025-08-06 12:55:59.330341 - Error was:  No section: 'Raspberry_BoardPinsOuts'
+[DEBUG] 2025-08-06 12:55:59.330399 - Use default:  
+[ERROR] 2025-08-06 12:55:59.330491 - Configuration issue with this option : PIN_9
+[DEBUG] 2025-08-06 12:55:59.330559 - Error was:  No section: 'Raspberry_BoardPinsOuts'
+[DEBUG] 2025-08-06 12:55:59.330619 - Use default:  
+[ERROR] 2025-08-06 12:55:59.330711 - Configuration issue with this option : PIN_10
+[DEBUG] 2025-08-06 12:55:59.330776 - Error was:  No section: 'Raspberry_BoardPinsOuts'
+[DEBUG] 2025-08-06 12:55:59.330833 - Use default:  
+[DEBUG] 2025-08-06 12:55:59.330927 - Config[Raspberry_BoardPinsOuts]={'PIN_1': '', 'PIN_2': '', 'PIN_3': '', 'PIN_4': '', 'PIN_5': '', 'PIN_6': '', 'PIN_7': '', 'PIN_8': '', 'PIN_9': '', 'PIN_10': ''}
+[DEBUG] 2025-08-06 12:55:59.331660 - Working on section Camera of your config file.
+[WARNING] 2025-08-06 12:55:59.331952 - Your config file does not contain a section named Camera.
+[WARNING] 2025-08-06 12:55:59.332025 - Will use default section values
+[ERROR] 2025-08-06 12:55:59.332131 - Configuration issue with this option : camera_id
+[DEBUG] 2025-08-06 12:55:59.332200 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:55:59.332304 - Use default:  -1
+[ERROR] 2025-08-06 12:55:59.332532 - Configuration issue with this option : picture_path
+[DEBUG] 2025-08-06 12:55:59.332603 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:55:59.332665 - Use default:  /home/pi/Pictures
+[ERROR] 2025-08-06 12:55:59.332761 - Configuration issue with this option : video_path
+[DEBUG] 2025-08-06 12:55:59.332826 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:55:59.332884 - Use default:  /home/pi/Videos
+[ERROR] 2025-08-06 12:55:59.332975 - Configuration issue with this option : directory_order
+[DEBUG] 2025-08-06 12:55:59.333039 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:55:59.333096 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.333188 - Configuration issue with this option : choice_of_memories
+[DEBUG] 2025-08-06 12:55:59.333252 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:55:59.333309 - Use default:  1
+[ERROR] 2025-08-06 12:55:59.333401 - Configuration issue with this option : video_res_width
+[DEBUG] 2025-08-06 12:55:59.333463 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:55:59.333523 - Use default:  1280
+[ERROR] 2025-08-06 12:55:59.333617 - Configuration issue with this option : video_res_height
+[DEBUG] 2025-08-06 12:55:59.333680 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:55:59.333738 - Use default:  720
+[ERROR] 2025-08-06 12:55:59.333828 - Configuration issue with this option : picture_res_width
+[DEBUG] 2025-08-06 12:55:59.333893 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:55:59.333951 - Use default:  1280
+[ERROR] 2025-08-06 12:55:59.334044 - Configuration issue with this option : picture_res_height
+[DEBUG] 2025-08-06 12:55:59.334107 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:55:59.334165 - Use default:  720
+[ERROR] 2025-08-06 12:55:59.334257 - Configuration issue with this option : flip_horizontal
+[DEBUG] 2025-08-06 12:55:59.334321 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:55:59.334379 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.334469 - Configuration issue with this option : flip_vertical
+[DEBUG] 2025-08-06 12:55:59.334536 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:55:59.334594 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.334691 - Configuration issue with this option : resolutions_available
+[DEBUG] 2025-08-06 12:55:59.334755 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:55:59.334812 - Use default:  
+[ERROR] 2025-08-06 12:55:59.334903 - Configuration issue with this option : nb_picture
+[DEBUG] 2025-08-06 12:55:59.334966 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:55:59.335024 - Use default:  1
+[ERROR] 2025-08-06 12:55:59.335114 - Configuration issue with this option : video_duration
+[DEBUG] 2025-08-06 12:55:59.335178 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:55:59.335237 - Use default:  5
+[ERROR] 2025-08-06 12:55:59.335737 - Configuration issue with this option : fps
+[DEBUG] 2025-08-06 12:55:59.335878 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:55:59.335950 - Use default:  30
+[ERROR] 2025-08-06 12:55:59.336071 - Configuration issue with this option : events
+[DEBUG] 2025-08-06 12:55:59.336155 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:55:59.336222 - Use default:  DB,SB,T20
+[ERROR] 2025-08-06 12:55:59.336329 - Configuration issue with this option : upload_cloud
+[DEBUG] 2025-08-06 12:55:59.336399 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:55:59.336458 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.336571 - Configuration issue with this option : path_google_drive
+[DEBUG] 2025-08-06 12:55:59.336643 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:55:59.336701 - Use default:  
+[ERROR] 2025-08-06 12:55:59.336802 - Configuration issue with this option : fullscreen_pop
+[DEBUG] 2025-08-06 12:55:59.336868 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:55:59.336927 - Use default:  0
+[ERROR] 2025-08-06 12:55:59.337025 - Configuration issue with this option : duree_ms
+[DEBUG] 2025-08-06 12:55:59.337090 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:55:59.337190 - Use default:  5000
+[DEBUG] 2025-08-06 12:55:59.337344 - Config[Camera]={'camera_id': '-1', 'picture_path': '/home/pi/Pictures', 'video_path': '/home/pi/Videos', 'directory_order': '0', 'choice_of_memories': '1', 'video_res_width': '1280', 'video_res_height': '720', 'picture_res_width': '1280', 'picture_res_height': '720', 'flip_horizontal': '0', 'flip_vertical': '0', 'resolutions_available': '', 'nb_picture': '1', 'video_duration': '5', 'fps': '30', 'events': 'DB,SB,T20', 'upload_cloud': '0', 'path_google_drive': '', 'fullscreen_pop': '0', 'duree_ms': '5000'}
+[INFO] 2025-08-06 12:55:59.337468 - Theme dir is /home/pi/.pydarts/themes/clear
+[INFO] 2025-08-06 12:55:59.337542 - Personnal dir is /home/pi/.pydarts
+[INFO] 2025-08-06 12:55:59.337601 - Root dir is /pydarts
+[DEBUG] 2025-08-06 12:55:59.339432 - Working on Colorset's section of /home/pi/.pydarts/themes/clear/other/Colorset.cfg
+[DEBUG] 2025-08-06 12:55:59.404102 - Working on section game- of your config file.
+[WARNING] 2025-08-06 12:55:59.404436 - No default game- section. Use config only
+[DEBUG] 2025-08-06 12:55:59.404577 - Don't forget that you may create section named game- to customize pyDarts
+[DEBUG] 2025-08-06 12:55:59.404754 - use-dmd option is set to : True
+[DEBUG] 2025-08-06 12:55:59.404825 - use-matrix option is set to : False
+[DEBUG] 2025-08-06 12:55:59.404892 - use-other option is set to : False
+[DEBUG] 2025-08-06 12:55:59.404958 - mqtt-broker option is set to : localhost
+[DEBUG] 2025-08-06 12:55:59.405545 - self.dispatcher={'launch': {'TARGET': ['FadeRGB,1,random,10', 'Snake,100,random,50', 'Sparkle,10,gold,20'], 'STRIP': ['Strobe,5,red,20', 'Strobe,3,blue,50']}, 'off': {'TARGET': ['off,,,'], 'STRIP': ['off,,,'], 'DMD': ['off,,,'], 'MATRIX': ['off,,,']}, 'menu': {'TARGET': ['Strobe,3,gold,50'], 'STRIP': ['Strobe,3,gold,50']}, 'wait': {'TARGET': ['Alain2,10,red,20'], 'STRIP': ['Fireworks,1,random,1']}, 'quit': {'TARGET': ['Rainbow2,50,random,50'], 'STRIP': ['Rainbow,50,random,50']}, 'newgame': {}, 'ready': {}, 'release': {}, 'nextplayer': {'TARGET': ['Ring,20,random,50'], 'STRIP': ['Cylon,2,red,1']}, 'SB': {}, 'DB': {}, '180': {'LIGHT': ['LIGHT_CELEBRATION, 2500'], 'STROBE': ['LIGHT_FLASH, 10']}, 'winner': {}, 'miss': {}, 'gameover': {}, 'interrupt': {}, 'simple': {'STROBE': ['TOY1, 1']}, 'double': {'STROBE': ['TOY1, 2']}, 'triple': {'STROBE': ['TOY1, 3']}, 'setwinner': {'STRIP': ['Fireworks,1,gold,10'], 'TARGET': ['Wait,15,gold,100', 'Sparkle,10,gold,5']}, 'pressure': {'TARGET': ['TheaterChase,10,blue,10'], 'STRIP': ['RunningLights,100,blue,10']}, 'nopressure': {'TARGET': ['off,,,']}, 'S1': {}, 'S2': {}, 'S3': {}, 'S4': {}, 'S5': {}, 'S6': {}, 'S7': {}, 'S8': {}, 'S9': {}, 'S10': {}, 'S11': {}, 'S12': {}, 'S13': {}, 'S14': {}, 'S15': {}, 'S16': {}, 'S17': {}, 'S18': {}, 'S19': {}, 'S20': {}, 'D1': {}, 'D2': {}, 'D3': {}, 'D4': {}, 'D5': {}, 'D6': {}, 'D7': {}, 'D8': {}, 'D9': {}, 'D10': {}, 'D11': {}, 'D12': {}, 'D13': {}, 'D14': {}, 'D15': {}, 'D16': {}, 'D17': {}, 'D18': {}, 'D19': {}, 'D20': {}, 'T1': {}, 'T2': {}, 'T3': {}, 'T4': {}, 'T5': {}, 'T6': {}, 'T7': {}, 'T8': {}, 'T9': {}, 'T10': {}, 'T11': {}, 'T12': {}, 'T13': {}, 'T14': {}, 'T15': {}, 'T16': {}, 'T17': {}, 'T18': {}, 'T19': {}, 'T20': {}}
+[DEBUG] 2025-08-06 12:55:59.405675 - broker=localhost
+[DEBUG] 2025-08-06 12:55:59.435438 - target segment colors option is set to : 0,0,255_255,255,255_255,255,255_255,0,0_255,255,255_255,0,0_255,0,0_0,0,255
+[DEBUG] 2025-08-06 12:55:59.435703 - target-bgbrightness option is set to : 10
+[DEBUG] 2025-08-06 12:55:59.435818 - dispatcher.strip_leds is set to False
+[DEBUG] 2025-08-06 12:55:59.435897 - dispatcher.target_leds is set to False
+[DEBUG] 2025-08-06 12:55:59.435968 - subsribers is set to ['Dmd']
 ############### Welcome to RaspyDarts ########################
 #      A Free, Open-Source and Open-Hardware Darts Game      #
 #             Please check the website to know more          #
@@ -54,407 +1564,168 @@
 ##############################################################
 pygame 2.0.0 (SDL 2.0.9, python 3.7.3)
 Hello from the pygame community. https://www.pygame.org/contribute.html
-[DEBUG] 2024-09-30 09:13:16.273019 - You requested to load following locale fr_FR
-[DEBUG] 2024-09-30 09:13:16.273241 - Your locale is mapped on locale : "fr_FR.UTF-8".
-[ERROR] No I2C device at address: 0x20
-[DEBUG] 2024-09-30 09:13:16.311337 - self.buttons={'EXTENDED_GPIO': 0, 'PIN_UP': 'A0', 'PIN_DOWN': 'A1', 'PIN_LEFT': 'A2', 'PIN_RIGHT': 'A3', 'PIN_MINUS': 'A5', 'PIN_PLUS': 'A4', 'PIN_VALIDATE': 'A6', 'PIN_CANCEL': 'B4', 'PIN_NEXTPLAYER': 'B0', 'PIN_BACK': 'A7', 'PIN_GAMEBUTTON': '', 'PIN_VOLUME_UP': '', 'PIN_VOLUME_DOWN': '', 'PIN_VOLUME_MUTE': '', 'PIN_CPTPLAYER': '', 'PIN_MISSDART': '', 'LIGHT_NEXTPLAYER': 'B1', 'LIGHT_NAVIGATE': 'B2', 'LIGHT_VALIDATE': '', 'LIGHT_BACK': '', 'LIGHT_PLAYERS': '', 'LIGHT_LASER': '', 'LIGHT_FLASH': '', 'LIGHT_CELEBRATION': 'B3', 'LIGHT_CELEBRATION2': '', 'LIGHT_LIGHT': ''}
-[INFO] 2024-09-30 09:13:16.311824 - Theme dir is /home/pi/.pydarts/themes/remi
-[INFO] 2024-09-30 09:13:16.311891 - Personnal dir is /home/pi/.pydarts
-[INFO] 2024-09-30 09:13:16.311943 - Root dir is /pydarts
-[DEBUG] 2024-09-30 09:13:16.314022 - Return None
-[INFO] 2024-09-30 09:13:16.314177 - Video sound multiplier is set to 1
-[INFO] 2024-09-30 09:13:16.314281 - Sound multiplier is set to 100.0
-[DEBUG] 2024-09-30 09:13:16.314391 - Set volume to -962
-[DEBUG] 2024-09-30 09:13:16.728965 - Ho yeah, going fullscreen : 1920x1080
-[INFO] 2024-09-30 09:13:17.786530 - Use /home/pi/.pydarts/themes/remi/other/Colorset.cfg for color's customization
-[DEBUG] 2024-09-30 09:13:17.788014 - Working on Colorset's section of /home/pi/.pydarts/themes/remi/other/Colorset.cfg
-[INFO] 2024-09-30 09:13:17.808943 - Customization : border-radius is customized to 10
-[INFO] 2024-09-30 09:13:17.809136 - Customization : button-radius is customized to max
-[INFO] 2024-09-30 09:13:17.809200 - Customization : border-size is customized to 3
-[INFO] 2024-09-30 09:13:17.809255 - Customization : padding is customized to 2
-[INFO] 2024-09-30 09:13:17.809321 - Customization : color-black is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:17.809382 - Customization : bg-global is customized to False
-[INFO] 2024-09-30 09:13:17.809442 - Customization : bg-round-nb is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:17.809557 - Customization : bg-round-nb-header is customized to (107, 134, 176)
-[INFO] 2024-09-30 09:13:17.809621 - Customization : bg-LOGO is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:17.809678 - Customization : bg-darts-nb is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:17.809736 - Customization : bg-darts-nb-header is customized to (107, 134, 176)
-[INFO] 2024-09-30 09:13:17.809793 - Customization : bg-optionslist-header is customized to (107, 134, 176)
-[INFO] 2024-09-30 09:13:17.809851 - Customization : bg-optionslist is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:17.809908 - Customization : player1 is customized to (0, 255, 0)
-[INFO] 2024-09-30 09:13:17.809964 - Customization : player2 is customized to (0, 0, 255)
-[INFO] 2024-09-30 09:13:17.810021 - Customization : player3 is customized to (255, 0, 0)
-[INFO] 2024-09-30 09:13:17.810077 - Customization : player4 is customized to (255, 255, 0)
-[INFO] 2024-09-30 09:13:17.810134 - Customization : player5 is customized to (255, 0, 255)
-[INFO] 2024-09-30 09:13:17.810190 - Customization : player6 is customized to (0, 255, 255)
-[INFO] 2024-09-30 09:13:17.810247 - Customization : player7 is customized to (255, 0, 128)
-[INFO] 2024-09-30 09:13:17.810303 - Customization : player8 is customized to (0, 255, 128)
-[INFO] 2024-09-30 09:13:17.810361 - Customization : player9 is customized to (0, 128, 255)
-[INFO] 2024-09-30 09:13:17.810417 - Customization : player10 is customized to (255, 128, 0)
-[INFO] 2024-09-30 09:13:17.810475 - Customization : player11 is customized to (128, 255, 0)
-[INFO] 2024-09-30 09:13:17.810532 - Customization : player12 is customized to (128, 0, 255)
-[INFO] 2024-09-30 09:13:17.810589 - Customization : menu-header is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:17.810645 - Customization : menu-text is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:17.810705 - Customization : menu-selected is customized to (112, 156, 118)
-[INFO] 2024-09-30 09:13:17.810764 - Customization : menu-shortcut is customized to (224, 196, 119)
-[INFO] 2024-09-30 09:13:17.810871 - Customization : menu-alternate is customized to (107, 134, 176)
-[INFO] 2024-09-30 09:13:17.810934 - Customization : menu-ok is customized to (112, 156, 118)
-[INFO] 2024-09-30 09:13:17.810991 - Customization : menu-warning is customized to (205, 144, 110)
-[INFO] 2024-09-30 09:13:17.811049 - Customization : menu-ko is customized to (189, 108, 109)
-[INFO] 2024-09-30 09:13:17.811106 - Customization : menu-item-white is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:17.811162 - Customization : menu-item-black is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:17.811218 - Customization : menu-text-black is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:17.811275 - Customization : menu-text-white is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:17.811331 - Customization : menu-buttons is customized to (232, 232, 232)
-[INFO] 2024-09-30 09:13:17.811390 - Customization : menu-favorite is customized to (255, 215, 0)
-[INFO] 2024-09-30 09:13:17.811446 - Customization : menu-border is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:17.811504 - Customization : menu-inactive is customized to (128, 128, 128)
-[INFO] 2024-09-30 09:13:17.811564 - Customization : description-bg is customized to (213, 206, 186)
-[INFO] 2024-09-30 09:13:17.811622 - Customization : description-text is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:17.811677 - Customization : description-game is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:17.811733 - Customization : game-bg is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:17.811790 - Customization : game-score is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:17.811847 - Customization : game-headers is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:17.811906 - Customization : game-player is customized to (119, 119, 118)
-[INFO] 2024-09-30 09:13:17.811966 - Customization : game-player-name is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:17.812024 - Customization : game-alt-headers is customized to (48, 48, 48)
-[INFO] 2024-09-30 09:13:17.812103 - Customization : game-round is customized to (107, 134, 176)
-[INFO] 2024-09-30 09:13:17.812160 - Customization : game-title1 is customized to (48, 48, 48)
-[INFO] 2024-09-30 09:13:17.812218 - Customization : game-title2 is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:17.812274 - Customization : game-type is customized to (255, 0, 0)
-[INFO] 2024-09-30 09:13:17.812332 - Customization : game-table is customized to (160, 160, 160)
-[INFO] 2024-09-30 09:13:17.812389 - Customization : game-text is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:17.812445 - Customization : game-option is customized to (255, 215, 0)
-[INFO] 2024-09-30 09:13:17.812502 - Customization : game-darts is customized to (160, 160, 160)
-[INFO] 2024-09-30 09:13:17.812559 - Customization : game-inactive is customized to (119, 119, 118)
-[INFO] 2024-09-30 09:13:17.812617 - Customization : game-dead is customized to (48, 48, 48)
-[INFO] 2024-09-30 09:13:17.812681 - Customization : game-grey is customized to (213, 206, 186)
-[INFO] 2024-09-30 09:13:17.812738 - Customization : game-grey2 is customized to (74, 74, 74)
-[INFO] 2024-09-30 09:13:17.812797 - Customization : game-purple is customized to (140, 108, 161)
-[INFO] 2024-09-30 09:13:17.812854 - Customization : game-red is customized to (255, 0, 0)
-[INFO] 2024-09-30 09:13:17.812911 - Customization : game-green is customized to (0, 255, 0)
-[INFO] 2024-09-30 09:13:17.812967 - Customization : game-blue is customized to (0, 0, 255)
-[INFO] 2024-09-30 09:13:17.813024 - Customization : game-gold is customized to (255, 215, 0)
-[INFO] 2024-09-30 09:13:17.813081 - Customization : game-silver is customized to (192, 192, 192)
-[INFO] 2024-09-30 09:13:17.813138 - Customization : game-bronze is customized to (205, 127, 50)
-[INFO] 2024-09-30 09:13:17.813196 - Customization : message-bg is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:17.813255 - Customization : message-text is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:17.813311 - Customization : target-sb is customized to (189, 108, 109)
-[INFO] 2024-09-30 09:13:17.813368 - Customization : target-db is customized to (107, 134, 176)
-[INFO] 2024-09-30 09:13:17.813425 - Customization : target-double1 is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:17.813481 - Customization : target-double2 is customized to (255, 0, 0)
-[INFO] 2024-09-30 09:13:17.813538 - Customization : target-triple1 is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:17.813596 - Customization : target-triple2 is customized to (255, 0, 0)
-[INFO] 2024-09-30 09:13:17.813652 - Customization : target-simple1 is customized to (0, 0, 255)
-[INFO] 2024-09-30 09:13:17.813709 - Customization : target-simple2 is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:17.813765 - Customization : bob27-bg is customized to (45, 78, 99)
-[INFO] 2024-09-30 09:13:17.813821 - Customization : bob27-blue is customized to (46, 64, 76)
-[INFO] 2024-09-30 09:13:17.813879 - Customization : bob27-green is customized to (45, 108, 85)
-[INFO] 2024-09-30 09:13:17.813938 - Customization : bob27-red is customized to (124, 84, 87)
-[INFO] 2024-09-30 09:13:17.813998 - Customization : bob27-hit is customized to (57, 209, 129)
-[INFO] 2024-09-30 09:13:17.814057 - Customization : bob27-miss is customized to (232, 21, 37)
-[INFO] 2024-09-30 09:13:17.814113 - Customization : bob27-text is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:17.814171 - Customization : fighters-medic is customized to (0, 240, 0)
-[INFO] 2024-09-30 09:13:17.814228 - Customization : fighters-actual-player is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:17.814285 - Customization : fighters-alive-player is customized to (150, 0, 0)
-[INFO] 2024-09-30 09:13:17.814342 - Customization : fighters-dead-player is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:17.814399 - Customization : fighters-targets is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:17.814456 - Customization : fighters-scores is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:17.814513 - Customization : fighters-round is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:17.814585 - Customization : fighters-darts is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:17.814647 - Customization : suggestion-color-allplayer is customized to None
-[INFO] 2024-09-30 09:13:17.814697 - Customization : main-sub-menu-shortcuts is customized to 
-[INFO] 2024-09-30 09:13:17.814749 - Customization : main-sub-menu-text-align is customized to Left
-[INFO] 2024-09-30 09:13:17.814800 - Customization : parametrage-menu-shortcuts is customized to 
-[INFO] 2024-09-30 09:13:17.814852 - Customization : parametrage-menu-text-align is customized to Left
-[INFO] 2024-09-30 09:13:17.814902 - Customization : players-menu-shortcuts is customized to 
-[INFO] 2024-09-30 09:13:17.814952 - Customization : players-menu-text-align is customized to Left
-[INFO] 2024-09-30 09:13:17.815003 - Customization : game-options-menu-shortcuts is customized to 
-[INFO] 2024-09-30 09:13:17.815053 - Customization : game-options-menu-text-align is customized to Left
-[DEBUG] 2024-09-30 09:13:17.815722 - Return None
-[DEBUG] 2024-09-30 09:13:17.817427 - Return /home/pi/.pydarts/themes/remi/images/background/background.png from stack
-[DEBUG] 2024-09-30 09:13:17.817537 - Cleaning image cache
-[DEBUG] 2024-09-30 09:13:17.817603 - Background is now /home/pi/.pydarts/themes/remi/images/background/background.png
-[INFO] 2024-09-30 09:13:17.818820 - Font defined in your colorset : /home/pi/.pydarts/themes/remi/font/CompactaBT.ttf
-[DEBUG] 2024-09-30 09:13:17.819412 - sound_multiplier is set to 1.0
-[DEBUG] 2024-09-30 09:13:17.819545 - Inserting image into cache /home/pi/.pydarts/themes/remi/images/background/background.png (/home/pi/.pydarts/themes/remi/images/background/background.png-True-1920-1080)
-[DEBUG] 2024-09-30 09:13:17.898402 - 1 elements in cache
-[DEBUG] 2024-09-30 09:13:19.473523 - Input debug (pyGame) : escape
-[INFO] 2024-09-30 09:13:19.476122 - Use /home/pi/.pydarts/themes/remi/other/Colorset.cfg for color's customization
-[DEBUG] 2024-09-30 09:13:19.477012 - Working on Colorset's section of /home/pi/.pydarts/themes/remi/other/Colorset.cfg
-[INFO] 2024-09-30 09:13:19.496478 - Customization : border-radius is customized to 10
-[INFO] 2024-09-30 09:13:19.496668 - Customization : button-radius is customized to max
-[INFO] 2024-09-30 09:13:19.496735 - Customization : border-size is customized to 3
-[INFO] 2024-09-30 09:13:19.496789 - Customization : padding is customized to 2
-[INFO] 2024-09-30 09:13:19.496851 - Customization : color-black is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:19.496911 - Customization : bg-global is customized to False
-[INFO] 2024-09-30 09:13:19.497038 - Customization : bg-round-nb is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:19.497100 - Customization : bg-round-nb-header is customized to (107, 134, 176)
-[INFO] 2024-09-30 09:13:19.497163 - Customization : bg-LOGO is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:19.497221 - Customization : bg-darts-nb is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:19.497311 - Customization : bg-darts-nb-header is customized to (107, 134, 176)
-[INFO] 2024-09-30 09:13:19.497372 - Customization : bg-optionslist-header is customized to (107, 134, 176)
-[INFO] 2024-09-30 09:13:19.497435 - Customization : bg-optionslist is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:19.497492 - Customization : player1 is customized to (0, 255, 0)
-[INFO] 2024-09-30 09:13:19.497550 - Customization : player2 is customized to (0, 0, 255)
-[INFO] 2024-09-30 09:13:19.497609 - Customization : player3 is customized to (255, 0, 0)
-[INFO] 2024-09-30 09:13:19.497668 - Customization : player4 is customized to (255, 255, 0)
-[INFO] 2024-09-30 09:13:19.497728 - Customization : player5 is customized to (255, 0, 255)
-[INFO] 2024-09-30 09:13:19.497787 - Customization : player6 is customized to (0, 255, 255)
-[INFO] 2024-09-30 09:13:19.497844 - Customization : player7 is customized to (255, 0, 128)
-[INFO] 2024-09-30 09:13:19.497900 - Customization : player8 is customized to (0, 255, 128)
-[INFO] 2024-09-30 09:13:19.497956 - Customization : player9 is customized to (0, 128, 255)
-[INFO] 2024-09-30 09:13:19.498059 - Customization : player10 is customized to (255, 128, 0)
-[INFO] 2024-09-30 09:13:19.498117 - Customization : player11 is customized to (128, 255, 0)
-[INFO] 2024-09-30 09:13:19.498173 - Customization : player12 is customized to (128, 0, 255)
-[INFO] 2024-09-30 09:13:19.498231 - Customization : menu-header is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:19.498286 - Customization : menu-text is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:19.498343 - Customization : menu-selected is customized to (112, 156, 118)
-[INFO] 2024-09-30 09:13:19.498401 - Customization : menu-shortcut is customized to (224, 196, 119)
-[INFO] 2024-09-30 09:13:19.498459 - Customization : menu-alternate is customized to (107, 134, 176)
-[INFO] 2024-09-30 09:13:19.498518 - Customization : menu-ok is customized to (112, 156, 118)
-[INFO] 2024-09-30 09:13:19.498575 - Customization : menu-warning is customized to (205, 144, 110)
-[INFO] 2024-09-30 09:13:19.498634 - Customization : menu-ko is customized to (189, 108, 109)
-[INFO] 2024-09-30 09:13:19.498691 - Customization : menu-item-white is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:19.498747 - Customization : menu-item-black is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:19.498802 - Customization : menu-text-black is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:19.498860 - Customization : menu-text-white is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:19.498916 - Customization : menu-buttons is customized to (232, 232, 232)
-[INFO] 2024-09-30 09:13:19.498973 - Customization : menu-favorite is customized to (255, 215, 0)
-[INFO] 2024-09-30 09:13:19.499028 - Customization : menu-border is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:19.499085 - Customization : menu-inactive is customized to (128, 128, 128)
-[INFO] 2024-09-30 09:13:19.499143 - Customization : description-bg is customized to (213, 206, 186)
-[INFO] 2024-09-30 09:13:19.499200 - Customization : description-text is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:19.499255 - Customization : description-game is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:19.499310 - Customization : game-bg is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:19.499366 - Customization : game-score is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:19.499425 - Customization : game-headers is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:19.499483 - Customization : game-player is customized to (119, 119, 118)
-[INFO] 2024-09-30 09:13:19.499539 - Customization : game-player-name is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:19.499598 - Customization : game-alt-headers is customized to (48, 48, 48)
-[INFO] 2024-09-30 09:13:19.499654 - Customization : game-round is customized to (107, 134, 176)
-[INFO] 2024-09-30 09:13:19.499710 - Customization : game-title1 is customized to (48, 48, 48)
-[INFO] 2024-09-30 09:13:19.499767 - Customization : game-title2 is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:19.499824 - Customization : game-type is customized to (255, 0, 0)
-[INFO] 2024-09-30 09:13:19.499881 - Customization : game-table is customized to (160, 160, 160)
-[INFO] 2024-09-30 09:13:19.499937 - Customization : game-text is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:19.499993 - Customization : game-option is customized to (255, 215, 0)
-[INFO] 2024-09-30 09:13:19.500050 - Customization : game-darts is customized to (160, 160, 160)
-[INFO] 2024-09-30 09:13:19.500108 - Customization : game-inactive is customized to (119, 119, 118)
-[INFO] 2024-09-30 09:13:19.500166 - Customization : game-dead is customized to (48, 48, 48)
-[INFO] 2024-09-30 09:13:19.500225 - Customization : game-grey is customized to (213, 206, 186)
-[INFO] 2024-09-30 09:13:19.500281 - Customization : game-grey2 is customized to (74, 74, 74)
-[INFO] 2024-09-30 09:13:19.500340 - Customization : game-purple is customized to (140, 108, 161)
-[INFO] 2024-09-30 09:13:19.500397 - Customization : game-red is customized to (255, 0, 0)
-[INFO] 2024-09-30 09:13:19.500453 - Customization : game-green is customized to (0, 255, 0)
-[INFO] 2024-09-30 09:13:19.500526 - Customization : game-blue is customized to (0, 0, 255)
-[INFO] 2024-09-30 09:13:19.500582 - Customization : game-gold is customized to (255, 215, 0)
-[INFO] 2024-09-30 09:13:19.500642 - Customization : game-silver is customized to (192, 192, 192)
-[INFO] 2024-09-30 09:13:19.500700 - Customization : game-bronze is customized to (205, 127, 50)
-[INFO] 2024-09-30 09:13:19.500756 - Customization : message-bg is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:19.500859 - Customization : message-text is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:19.500924 - Customization : target-sb is customized to (189, 108, 109)
-[INFO] 2024-09-30 09:13:19.500984 - Customization : target-db is customized to (107, 134, 176)
-[INFO] 2024-09-30 09:13:19.501043 - Customization : target-double1 is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:19.501100 - Customization : target-double2 is customized to (255, 0, 0)
-[INFO] 2024-09-30 09:13:19.501157 - Customization : target-triple1 is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:19.501212 - Customization : target-triple2 is customized to (255, 0, 0)
-[INFO] 2024-09-30 09:13:19.501268 - Customization : target-simple1 is customized to (0, 0, 255)
-[INFO] 2024-09-30 09:13:19.501325 - Customization : target-simple2 is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:19.501382 - Customization : bob27-bg is customized to (45, 78, 99)
-[INFO] 2024-09-30 09:13:19.501441 - Customization : bob27-blue is customized to (46, 64, 76)
-[INFO] 2024-09-30 09:13:19.501498 - Customization : bob27-green is customized to (45, 108, 85)
-[INFO] 2024-09-30 09:13:19.501554 - Customization : bob27-red is customized to (124, 84, 87)
-[INFO] 2024-09-30 09:13:19.501610 - Customization : bob27-hit is customized to (57, 209, 129)
-[INFO] 2024-09-30 09:13:19.501666 - Customization : bob27-miss is customized to (232, 21, 37)
-[INFO] 2024-09-30 09:13:19.501722 - Customization : bob27-text is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:19.501778 - Customization : fighters-medic is customized to (0, 240, 0)
-[INFO] 2024-09-30 09:13:19.501835 - Customization : fighters-actual-player is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:19.501891 - Customization : fighters-alive-player is customized to (150, 0, 0)
-[INFO] 2024-09-30 09:13:19.501948 - Customization : fighters-dead-player is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:19.502006 - Customization : fighters-targets is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:19.502062 - Customization : fighters-scores is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:19.502118 - Customization : fighters-round is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:19.502175 - Customization : fighters-darts is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:19.502230 - Customization : suggestion-color-allplayer is customized to None
-[INFO] 2024-09-30 09:13:19.502281 - Customization : main-sub-menu-shortcuts is customized to 
-[INFO] 2024-09-30 09:13:19.502332 - Customization : main-sub-menu-text-align is customized to Left
-[INFO] 2024-09-30 09:13:19.502382 - Customization : parametrage-menu-shortcuts is customized to 
-[INFO] 2024-09-30 09:13:19.502431 - Customization : parametrage-menu-text-align is customized to Left
-[INFO] 2024-09-30 09:13:19.502481 - Customization : players-menu-shortcuts is customized to 
-[INFO] 2024-09-30 09:13:19.502531 - Customization : players-menu-text-align is customized to Left
-[INFO] 2024-09-30 09:13:19.502582 - Customization : game-options-menu-shortcuts is customized to 
-[INFO] 2024-09-30 09:13:19.502631 - Customization : game-options-menu-text-align is customized to Left
-[DEBUG] 2024-09-30 09:13:19.503137 - Return None
-[DEBUG] 2024-09-30 09:13:19.503551 - Return /home/pi/.pydarts/themes/remi/images/background/background.png from stack
-[DEBUG] 2024-09-30 09:13:19.503617 - Cleaning image cache
-[DEBUG] 2024-09-30 09:13:19.503671 - Background is now /home/pi/.pydarts/themes/remi/images/background/background.png
-[INFO] 2024-09-30 09:13:19.504187 - Font defined in your colorset : /home/pi/.pydarts/themes/remi/font/CompactaBT.ttf
-[INFO] 2024-09-30 09:13:19.504510 - Version of raspydarts is V4.4.2_202409280858
-[DEBUG] 2024-09-30 09:13:20.107250 - Get updates list : {
-    "response": []
-}
-
-[DEBUG] 2024-09-30 09:13:20.107749 - NO availables update or error
-[DEBUG] 2024-09-30 09:13:20.119673 - Publish on raspydarts/targetLeds : off,,,
-[DEBUG] 2024-09-30 09:13:20.120608 - Publish on raspydarts/stripLeds : off,,,
-[DEBUG] 2024-09-30 09:13:20.122047 - Publish on raspydarts/targetLeds : FadeRGB,1,random,10
-[DEBUG] 2024-09-30 09:13:20.122760 - Publish on raspydarts/targetLeds : Snake,100,random,50
-[DEBUG] 2024-09-30 09:13:20.123505 - Publish on raspydarts/targetLeds : Sparkle,10,gold,20
-[DEBUG] 2024-09-30 09:13:20.123983 - Publish on raspydarts/stripLeds : Strobe,5,red,20
-[DEBUG] 2024-09-30 09:13:20.128229 - Publish on raspydarts/stripLeds : Strobe,3,blue,50
-[DEBUG] 2024-09-30 09:13:20.129414 - play_firstname option is set to : True
-[DEBUG] 2024-09-30 09:13:20.129548 - print_dartstroke option is set to : True
-[DEBUG] 2024-09-30 09:13:20.129604 - light_target option is set to : False
-[DEBUG] 2024-09-30 09:13:20.129655 - light_strip option is set to : False
-[DEBUG] 2024-09-30 09:13:20.129706 - illumination_mode option is set to : False
-[DEBUG] 2024-09-30 09:13:20.129766 - illumination color option is set to : white
-[DEBUG] 2024-09-30 09:13:20.129829 - pnj_time option is set to : 2000ms
-[DEBUG] 2024-09-30 09:13:20.129882 - nextplayer_sound_duration option is set to : 10000ms
-[DEBUG] 2024-09-30 09:13:20.129936 - wait_event_time option is set to : 15000ms
-[DEBUG] 2024-09-30 09:13:20.130125 - localplayers option is set to : ['Maité', 'Rémi', 'Murielle', 'JeanMarie', 'Jervé', 'Myriam', 'Yves', 'Anna', 'AnneLise']
-[DEBUG] 2024-09-30 09:13:20.130193 - local_players option is set to : ['Maité', 'Rémi']
-[DEBUG] 2024-09-30 09:13:20.130243 - pref_fun_game option is set to : 
-[DEBUG] 2024-09-30 09:13:20.130291 - pref_sport_game option is set to : 
-[DEBUG] 2024-09-30 09:13:20.130341 - pref_classic_game option is set to : 
-[DEBUG] 2024-09-30 09:13:20.130389 - pref_category option is set to : classic
-[DEBUG] 2024-09-30 09:13:20.146256 - light_buttons : True : ['LIGHT_NAVIGATE', 'LIGHT_VALIDATE']
-[DEBUG] 2024-09-30 09:13:20.146452 - light_buttons : False : ['LIGHT_BACK']
-[DEBUG] 2024-09-30 09:13:20.146561 - Publish on raspydarts/targetLeds : Strobe,3,gold,50
-[DEBUG] 2024-09-30 09:13:20.147966 - Publish on raspydarts/stripLeds : Strobe,3,gold,50
-[DEBUG] 2024-09-30 09:13:20.148689 - Publish on raspydarts/dmd : msg|Raspydarts
-[DEBUG] 2024-09-30 09:13:20.275708 - Event wait initialized every 15000ms
-[DEBUG] 2024-09-30 09:13:23.737907 - Input debug (pyGame) : (1093, 475)
-[DEBUG] 2024-09-30 09:13:23.739211 - light_buttons : True : ['LIGHT_BACK']
-[DEBUG] 2024-09-30 09:13:23.739435 - Publish on raspydarts/targetLeds : Strobe,3,gold,50
-[DEBUG] 2024-09-30 09:13:23.740131 - Publish on raspydarts/stripLeds : Strobe,3,gold,50
-[DEBUG] 2024-09-30 09:13:23.740779 - Publish on raspydarts/dmd : msg|Paramètres
-[DEBUG] 2024-09-30 09:13:29.174731 - Input debug (pyGame) : (376, 1018)
-[DEBUG] 2024-09-30 09:13:29.175182 - light_buttons : True : ['LIGHT_NAVIGATE', 'LIGHT_VALIDATE']
-[DEBUG] 2024-09-30 09:13:29.175339 - light_buttons : False : ['LIGHT_BACK']
-[DEBUG] 2024-09-30 09:13:29.175462 - Publish on raspydarts/targetLeds : Strobe,3,gold,50
-[DEBUG] 2024-09-30 09:13:29.176278 - Publish on raspydarts/stripLeds : Strobe,3,gold,50
-[DEBUG] 2024-09-30 09:13:29.177020 - Publish on raspydarts/dmd : msg|Raspydarts
-[DEBUG] 2024-09-30 09:13:29.287700 - Event wait initialized every 15000ms
-[DEBUG] 2024-09-30 09:13:30.720063 - Input debug (pyGame) : (830, 695)
-[DEBUG] 2024-09-30 09:13:30.720477 - light_buttons : False : ['LIGHT_VALIDATE']
-[INFO] 2024-09-30 09:13:30.725826 - Use /home/pi/.pydarts/themes/remi/other/Colorset.cfg for color's customization
-[DEBUG] 2024-09-30 09:13:30.726557 - Working on Colorset's section of /home/pi/.pydarts/themes/remi/other/Colorset.cfg
-[INFO] 2024-09-30 09:13:30.746994 - Customization : border-radius is customized to 10
-[INFO] 2024-09-30 09:13:30.747189 - Customization : button-radius is customized to max
-[INFO] 2024-09-30 09:13:30.747254 - Customization : border-size is customized to 3
-[INFO] 2024-09-30 09:13:30.747308 - Customization : padding is customized to 2
-[INFO] 2024-09-30 09:13:30.747373 - Customization : color-black is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:30.747428 - Customization : bg-global is customized to False
-[INFO] 2024-09-30 09:13:30.747487 - Customization : bg-round-nb is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:30.747550 - Customization : bg-round-nb-header is customized to (107, 134, 176)
-[INFO] 2024-09-30 09:13:30.747610 - Customization : bg-LOGO is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:30.747670 - Customization : bg-darts-nb is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:30.747726 - Customization : bg-darts-nb-header is customized to (107, 134, 176)
-[INFO] 2024-09-30 09:13:30.747783 - Customization : bg-optionslist-header is customized to (107, 134, 176)
-[INFO] 2024-09-30 09:13:30.747842 - Customization : bg-optionslist is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:30.747899 - Customization : player1 is customized to (0, 255, 0)
-[INFO] 2024-09-30 09:13:30.747957 - Customization : player2 is customized to (0, 0, 255)
-[INFO] 2024-09-30 09:13:30.748013 - Customization : player3 is customized to (255, 0, 0)
-[INFO] 2024-09-30 09:13:30.748069 - Customization : player4 is customized to (255, 255, 0)
-[INFO] 2024-09-30 09:13:30.748126 - Customization : player5 is customized to (255, 0, 255)
-[INFO] 2024-09-30 09:13:30.748183 - Customization : player6 is customized to (0, 255, 255)
-[INFO] 2024-09-30 09:13:30.748239 - Customization : player7 is customized to (255, 0, 128)
-[INFO] 2024-09-30 09:13:30.748296 - Customization : player8 is customized to (0, 255, 128)
-[INFO] 2024-09-30 09:13:30.748352 - Customization : player9 is customized to (0, 128, 255)
-[INFO] 2024-09-30 09:13:30.748411 - Customization : player10 is customized to (255, 128, 0)
-[INFO] 2024-09-30 09:13:30.748517 - Customization : player11 is customized to (128, 255, 0)
-[INFO] 2024-09-30 09:13:30.748574 - Customization : player12 is customized to (128, 0, 255)
-[INFO] 2024-09-30 09:13:30.748634 - Customization : menu-header is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:30.748690 - Customization : menu-text is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:30.748750 - Customization : menu-selected is customized to (112, 156, 118)
-[INFO] 2024-09-30 09:13:30.748807 - Customization : menu-shortcut is customized to (224, 196, 119)
-[INFO] 2024-09-30 09:13:30.748864 - Customization : menu-alternate is customized to (107, 134, 176)
-[INFO] 2024-09-30 09:13:30.748921 - Customization : menu-ok is customized to (112, 156, 118)
-[INFO] 2024-09-30 09:13:30.748978 - Customization : menu-warning is customized to (205, 144, 110)
-[INFO] 2024-09-30 09:13:30.749035 - Customization : menu-ko is customized to (189, 108, 109)
-[INFO] 2024-09-30 09:13:30.749092 - Customization : menu-item-white is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:30.749147 - Customization : menu-item-black is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:30.749203 - Customization : menu-text-black is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:30.749259 - Customization : menu-text-white is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:30.749316 - Customization : menu-buttons is customized to (232, 232, 232)
-[INFO] 2024-09-30 09:13:30.749372 - Customization : menu-favorite is customized to (255, 215, 0)
-[INFO] 2024-09-30 09:13:30.749427 - Customization : menu-border is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:30.749484 - Customization : menu-inactive is customized to (128, 128, 128)
-[INFO] 2024-09-30 09:13:30.749541 - Customization : description-bg is customized to (213, 206, 186)
-[INFO] 2024-09-30 09:13:30.749596 - Customization : description-text is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:30.749652 - Customization : description-game is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:30.749755 - Customization : game-bg is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:30.749813 - Customization : game-score is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:30.749869 - Customization : game-headers is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:30.749927 - Customization : game-player is customized to (119, 119, 118)
-[INFO] 2024-09-30 09:13:30.749985 - Customization : game-player-name is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:30.750042 - Customization : game-alt-headers is customized to (48, 48, 48)
-[INFO] 2024-09-30 09:13:30.750099 - Customization : game-round is customized to (107, 134, 176)
-[INFO] 2024-09-30 09:13:30.750156 - Customization : game-title1 is customized to (48, 48, 48)
-[INFO] 2024-09-30 09:13:30.750213 - Customization : game-title2 is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:30.750269 - Customization : game-type is customized to (255, 0, 0)
-[INFO] 2024-09-30 09:13:30.750326 - Customization : game-table is customized to (160, 160, 160)
-[INFO] 2024-09-30 09:13:30.750384 - Customization : game-text is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:30.750440 - Customization : game-option is customized to (255, 215, 0)
-[INFO] 2024-09-30 09:13:30.750497 - Customization : game-darts is customized to (160, 160, 160)
-[INFO] 2024-09-30 09:13:30.750553 - Customization : game-inactive is customized to (119, 119, 118)
-[INFO] 2024-09-30 09:13:30.750609 - Customization : game-dead is customized to (48, 48, 48)
-[INFO] 2024-09-30 09:13:30.750667 - Customization : game-grey is customized to (213, 206, 186)
-[INFO] 2024-09-30 09:13:30.750723 - Customization : game-grey2 is customized to (74, 74, 74)
-[INFO] 2024-09-30 09:13:30.750781 - Customization : game-purple is customized to (140, 108, 161)
-[INFO] 2024-09-30 09:13:30.750886 - Customization : game-red is customized to (255, 0, 0)
-[INFO] 2024-09-30 09:13:30.750949 - Customization : game-green is customized to (0, 255, 0)
-[INFO] 2024-09-30 09:13:30.751009 - Customization : game-blue is customized to (0, 0, 255)
-[INFO] 2024-09-30 09:13:30.751065 - Customization : game-gold is customized to (255, 215, 0)
-[INFO] 2024-09-30 09:13:30.751122 - Customization : game-silver is customized to (192, 192, 192)
-[INFO] 2024-09-30 09:13:30.751181 - Customization : game-bronze is customized to (205, 127, 50)
-[INFO] 2024-09-30 09:13:30.751238 - Customization : message-bg is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:30.751293 - Customization : message-text is customized to (0, 0, 0)
-[INFO] 2024-09-30 09:13:30.751349 - Customization : target-sb is customized to (189, 108, 109)
-[INFO] 2024-09-30 09:13:30.751406 - Customization : target-db is customized to (107, 134, 176)
-[INFO] 2024-09-30 09:13:30.751462 - Customization : target-double1 is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:30.751518 - Customization : target-double2 is customized to (255, 0, 0)
-[INFO] 2024-09-30 09:13:30.751575 - Customization : target-triple1 is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:30.751632 - Customization : target-triple2 is customized to (255, 0, 0)
-[INFO] 2024-09-30 09:13:30.751689 - Customization : target-simple1 is customized to (0, 0, 255)
-[INFO] 2024-09-30 09:13:30.751746 - Customization : target-simple2 is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:30.751803 - Customization : bob27-bg is customized to (45, 78, 99)
-[INFO] 2024-09-30 09:13:30.751859 - Customization : bob27-blue is customized to (46, 64, 76)
-[INFO] 2024-09-30 09:13:30.751915 - Customization : bob27-green is customized to (45, 108, 85)
-[INFO] 2024-09-30 09:13:30.751973 - Customization : bob27-red is customized to (124, 84, 87)
-[INFO] 2024-09-30 09:13:30.752032 - Customization : bob27-hit is customized to (57, 209, 129)
-[INFO] 2024-09-30 09:13:30.752091 - Customization : bob27-miss is customized to (232, 21, 37)
-[INFO] 2024-09-30 09:13:30.752146 - Customization : bob27-text is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:30.752203 - Customization : fighters-medic is customized to (0, 240, 0)
-[INFO] 2024-09-30 09:13:30.752284 - Customization : fighters-actual-player is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:30.752343 - Customization : fighters-alive-player is customized to (150, 0, 0)
-[INFO] 2024-09-30 09:13:30.752403 - Customization : fighters-dead-player is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:30.752462 - Customization : fighters-targets is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:30.752518 - Customization : fighters-scores is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:30.752575 - Customization : fighters-round is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:30.752632 - Customization : fighters-darts is customized to (255, 255, 255)
-[INFO] 2024-09-30 09:13:30.752686 - Customization : suggestion-color-allplayer is customized to None
-[INFO] 2024-09-30 09:13:30.752737 - Customization : main-sub-menu-shortcuts is customized to 
-[INFO] 2024-09-30 09:13:30.752787 - Customization : main-sub-menu-text-align is customized to Left
-[INFO] 2024-09-30 09:13:30.752837 - Customization : parametrage-menu-shortcuts is customized to 
-[INFO] 2024-09-30 09:13:30.752887 - Customization : parametrage-menu-text-align is customized to Left
-[INFO] 2024-09-30 09:13:30.752937 - Customization : players-menu-shortcuts is customized to 
-[INFO] 2024-09-30 09:13:30.752986 - Customization : players-menu-text-align is customized to Left
-[INFO] 2024-09-30 09:13:30.753036 - Customization : game-options-menu-shortcuts is customized to 
-[INFO] 2024-09-30 09:13:30.753086 - Customization : game-options-menu-text-align is customized to Left
-[DEBUG] 2024-09-30 09:13:30.753567 - Return None
-[DEBUG] 2024-09-30 09:13:30.753972 - Return /home/pi/.pydarts/themes/remi/images/background/background.png from stack
-[DEBUG] 2024-09-30 09:13:30.754032 - Cleaning image cache
-[DEBUG] 2024-09-30 09:13:30.754089 - Background is now /home/pi/.pydarts/themes/remi/images/background/background.png
-[INFO] 2024-09-30 09:13:30.754550 - Font defined in your colorset : /home/pi/.pydarts/themes/remi/font/CompactaBT.ttf
-[DEBUG] 2024-09-30 09:13:30.754709 - light_buttons : False : ['LIGHT_NEXTPLAYER', 'LIGHT_BACK', 'LIGHT_CELEBRATION', 'LIGHT_NAVIGATE']
-[DEBUG] 2024-09-30 09:13:30.816819 - Sending quit signal to external servers
-[DEBUG] 2024-09-30 09:13:30.817476 - Publish on raspydarts/targetLeds : ack:Rainbow2,50,random,50
-[DEBUG] 2024-09-30 09:13:31.321545 - Publish on raspydarts/stripLeds : ack:Rainbow,50,random,50
-[DEBUG] 2024-09-30 09:13:31.824596 - Wait for ack on ['raspydarts/targetLeds-ack', 'raspydarts/stripLeds-ack']
-[DEBUG] 2024-09-30 09:13:35.332611 - Wait for ack on ['raspydarts/stripLeds-ack']
-[DEBUG] 2024-09-30 09:13:35.834031 - Wait for ack on []
-[DEBUG] 2024-09-30 09:13:36.335012 - Ack received
-[DEBUG] 2024-09-30 09:13:37.337501 - Stop TARGETLEDS and STRIPLEDS when EXIT
-[DEBUG] 2024-09-30 09:13:37.337861 - Exit
+[DEBUG] 2025-08-06 12:56:02.010948 - You requested to load following locale fr_FR
+[DEBUG] 2025-08-06 12:56:02.011215 - Your locale is mapped on locale : "fr_FR.UTF-8".
+[INFO] 2025-08-06 12:56:02.060126 - MCP found at 0x20
+[INFO] 2025-08-06 12:56:02.060795 - No MCP at 0x21
+[DEBUG] 2025-08-06 12:56:02.101764 - Return None
+[INFO] 2025-08-06 12:56:02.101984 - Video sound multiplier is set to 1
+[INFO] 2025-08-06 12:56:02.102092 - Sound multiplier is set to 100.0
+[DEBUG] 2025-08-06 12:56:02.102205 - Set volume to -962
+[DEBUG] 2025-08-06 12:56:02.642258 - Ho yeah, going fullscreen : 1920x1080
+[DEBUG] 2025-08-06 12:56:04.233693 - Cleaning image cache
+[DEBUG] 2025-08-06 12:56:04.233921 - Background is now /pydarts/images/background.png
+[INFO] 2025-08-06 12:56:04.254048 - No font defined in your colorset
+[DEBUG] 2025-08-06 12:56:04.273708 - Working on section Camera of your config file.
+[WARNING] 2025-08-06 12:56:04.274065 - Your config file does not contain a section named Camera.
+[WARNING] 2025-08-06 12:56:04.274135 - Will use default section values
+[ERROR] 2025-08-06 12:56:04.274247 - Configuration issue with this option : camera_id
+[DEBUG] 2025-08-06 12:56:04.274319 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.274378 - Use default:  -1
+[ERROR] 2025-08-06 12:56:04.274471 - Configuration issue with this option : picture_path
+[DEBUG] 2025-08-06 12:56:04.274535 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.274593 - Use default:  /home/pi/Pictures
+[ERROR] 2025-08-06 12:56:04.274684 - Configuration issue with this option : video_path
+[DEBUG] 2025-08-06 12:56:04.274747 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.274805 - Use default:  /home/pi/Videos
+[ERROR] 2025-08-06 12:56:04.274895 - Configuration issue with this option : directory_order
+[DEBUG] 2025-08-06 12:56:04.274959 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.275016 - Use default:  0
+[ERROR] 2025-08-06 12:56:04.275107 - Configuration issue with this option : choice_of_memories
+[DEBUG] 2025-08-06 12:56:04.275170 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.275228 - Use default:  1
+[ERROR] 2025-08-06 12:56:04.275319 - Configuration issue with this option : video_res_width
+[DEBUG] 2025-08-06 12:56:04.275383 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.275440 - Use default:  1280
+[ERROR] 2025-08-06 12:56:04.275531 - Configuration issue with this option : video_res_height
+[DEBUG] 2025-08-06 12:56:04.275595 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.275652 - Use default:  720
+[ERROR] 2025-08-06 12:56:04.275744 - Configuration issue with this option : picture_res_width
+[DEBUG] 2025-08-06 12:56:04.275808 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.275865 - Use default:  1280
+[ERROR] 2025-08-06 12:56:04.275955 - Configuration issue with this option : picture_res_height
+[DEBUG] 2025-08-06 12:56:04.276019 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.276076 - Use default:  720
+[ERROR] 2025-08-06 12:56:04.276167 - Configuration issue with this option : flip_horizontal
+[DEBUG] 2025-08-06 12:56:04.276230 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.276288 - Use default:  0
+[ERROR] 2025-08-06 12:56:04.276379 - Configuration issue with this option : flip_vertical
+[DEBUG] 2025-08-06 12:56:04.276442 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.276499 - Use default:  0
+[ERROR] 2025-08-06 12:56:04.276590 - Configuration issue with this option : resolutions_available
+[DEBUG] 2025-08-06 12:56:04.276654 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.276712 - Use default:  
+[ERROR] 2025-08-06 12:56:04.276803 - Configuration issue with this option : nb_picture
+[DEBUG] 2025-08-06 12:56:04.276867 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.276967 - Use default:  1
+[ERROR] 2025-08-06 12:56:04.277058 - Configuration issue with this option : video_duration
+[DEBUG] 2025-08-06 12:56:04.277122 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.277179 - Use default:  5
+[ERROR] 2025-08-06 12:56:04.277270 - Configuration issue with this option : fps
+[DEBUG] 2025-08-06 12:56:04.277334 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.277391 - Use default:  30
+[ERROR] 2025-08-06 12:56:04.277482 - Configuration issue with this option : events
+[DEBUG] 2025-08-06 12:56:04.277546 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.277603 - Use default:  DB,SB,T20
+[ERROR] 2025-08-06 12:56:04.277694 - Configuration issue with this option : upload_cloud
+[DEBUG] 2025-08-06 12:56:04.277757 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.277815 - Use default:  0
+[ERROR] 2025-08-06 12:56:04.277905 - Configuration issue with this option : path_google_drive
+[DEBUG] 2025-08-06 12:56:04.277969 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.278026 - Use default:  
+[ERROR] 2025-08-06 12:56:04.278116 - Configuration issue with this option : fullscreen_pop
+[DEBUG] 2025-08-06 12:56:04.278179 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.278236 - Use default:  0
+[ERROR] 2025-08-06 12:56:04.278327 - Configuration issue with this option : duree_ms
+[DEBUG] 2025-08-06 12:56:04.278390 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.278448 - Use default:  5000
+[DEBUG] 2025-08-06 12:56:04.278581 - Config[Camera]={'camera_id': '-1', 'picture_path': '/home/pi/Pictures', 'video_path': '/home/pi/Videos', 'directory_order': '0', 'choice_of_memories': '1', 'video_res_width': '1280', 'video_res_height': '720', 'picture_res_width': '1280', 'picture_res_height': '720', 'flip_horizontal': '0', 'flip_vertical': '0', 'resolutions_available': '', 'nb_picture': '1', 'video_duration': '5', 'fps': '30', 'events': 'DB,SB,T20', 'upload_cloud': '0', 'path_google_drive': '', 'fullscreen_pop': '0', 'duree_ms': '5000'}
+[DEBUG] 2025-08-06 12:56:04.278809 - No credentials found to upload via Google Drive
+[DEBUG] 2025-08-06 12:56:04.278913 - sound_multiplier is set to 1.0
+[DEBUG] 2025-08-06 12:56:04.279816 - Working on section Camera of your config file.
+[WARNING] 2025-08-06 12:56:04.280029 - Your config file does not contain a section named Camera.
+[WARNING] 2025-08-06 12:56:04.280095 - Will use default section values
+[ERROR] 2025-08-06 12:56:04.280200 - Configuration issue with this option : camera_id
+[DEBUG] 2025-08-06 12:56:04.280270 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.280329 - Use default:  -1
+[ERROR] 2025-08-06 12:56:04.280422 - Configuration issue with this option : picture_path
+[DEBUG] 2025-08-06 12:56:04.280486 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.280544 - Use default:  /home/pi/Pictures
+[ERROR] 2025-08-06 12:56:04.280635 - Configuration issue with this option : video_path
+[DEBUG] 2025-08-06 12:56:04.280698 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.280756 - Use default:  /home/pi/Videos
+[ERROR] 2025-08-06 12:56:04.280847 - Configuration issue with this option : directory_order
+[DEBUG] 2025-08-06 12:56:04.280910 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.280968 - Use default:  0
+[ERROR] 2025-08-06 12:56:04.281059 - Configuration issue with this option : choice_of_memories
+[DEBUG] 2025-08-06 12:56:04.281122 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.281180 - Use default:  1
+[ERROR] 2025-08-06 12:56:04.281270 - Configuration issue with this option : video_res_width
+[DEBUG] 2025-08-06 12:56:04.281333 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.281391 - Use default:  1280
+[ERROR] 2025-08-06 12:56:04.281481 - Configuration issue with this option : video_res_height
+[DEBUG] 2025-08-06 12:56:04.281544 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.281602 - Use default:  720
+[ERROR] 2025-08-06 12:56:04.281692 - Configuration issue with this option : picture_res_width
+[DEBUG] 2025-08-06 12:56:04.281793 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.281851 - Use default:  1280
+[ERROR] 2025-08-06 12:56:04.281941 - Configuration issue with this option : picture_res_height
+[DEBUG] 2025-08-06 12:56:04.282005 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.282062 - Use default:  720
+[ERROR] 2025-08-06 12:56:04.282153 - Configuration issue with this option : flip_horizontal
+[DEBUG] 2025-08-06 12:56:04.282216 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.282274 - Use default:  0
+[ERROR] 2025-08-06 12:56:04.282364 - Configuration issue with this option : flip_vertical
+[DEBUG] 2025-08-06 12:56:04.282428 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.282485 - Use default:  0
+[ERROR] 2025-08-06 12:56:04.282576 - Configuration issue with this option : resolutions_available
+[DEBUG] 2025-08-06 12:56:04.282640 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.282697 - Use default:  
+[ERROR] 2025-08-06 12:56:04.282788 - Configuration issue with this option : nb_picture
+[DEBUG] 2025-08-06 12:56:04.282851 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.282908 - Use default:  1
+[ERROR] 2025-08-06 12:56:04.282998 - Configuration issue with this option : video_duration
+[DEBUG] 2025-08-06 12:56:04.283062 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.283119 - Use default:  5
+[ERROR] 2025-08-06 12:56:04.283211 - Configuration issue with this option : fps
+[DEBUG] 2025-08-06 12:56:04.283274 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.283331 - Use default:  30
+[ERROR] 2025-08-06 12:56:04.283422 - Configuration issue with this option : events
+[DEBUG] 2025-08-06 12:56:04.283486 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.283543 - Use default:  DB,SB,T20
+[ERROR] 2025-08-06 12:56:04.283634 - Configuration issue with this option : upload_cloud
+[DEBUG] 2025-08-06 12:56:04.283698 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.283755 - Use default:  0
+[ERROR] 2025-08-06 12:56:04.283845 - Configuration issue with this option : path_google_drive
+[DEBUG] 2025-08-06 12:56:04.283909 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.283966 - Use default:  
+[ERROR] 2025-08-06 12:56:04.284056 - Configuration issue with this option : fullscreen_pop
+[DEBUG] 2025-08-06 12:56:04.284119 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.284177 - Use default:  0
+[ERROR] 2025-08-06 12:56:04.284267 - Configuration issue with this option : duree_ms
+[DEBUG] 2025-08-06 12:56:04.284330 - Error was:  No section: 'Camera'
+[DEBUG] 2025-08-06 12:56:04.284387 - Use default:  5000
+[DEBUG] 2025-08-06 12:56:04.284514 - Config[Camera]={'camera_id': '-1', 'picture_path': '/home/pi/Pictures', 'video_path': '/home/pi/Videos', 'directory_order': '0', 'choice_of_memories': '1', 'video_res_width': '1280', 'video_res_height': '720', 'picture_res_width': '1280', 'picture_res_height': '720', 'flip_horizontal': '0', 'flip_vertical': '0', 'resolutions_available': '', 'nb_picture': '1', 'video_duration': '5', 'fps': '30', 'events': 'DB,SB,T20', 'upload_cloud': '0', 'path_google_drive': '', 'fullscreen_pop': '0', 'duree_ms': '5000'}
+[DEBUG] 2025-08-06 12:56:04.284697 - No credentials found to upload via Google Drive
+[DEBUG] 2025-08-06 12:56:04.420238 - Cleaning image cache
+[DEBUG] 2025-08-06 12:56:04.420411 - Background is now /pydarts/images/background.png
+[INFO] 2025-08-06 12:56:04.420874 - No font defined in your colorset
+[INFO] 2025-08-06 12:56:04.421300 - Version of raspydarts is V4.5.1_20250806_1245
+[DEBUG] 2025-08-06 12:56:04.421483 - Inserting image into cache /pydarts/images/background.png (/pydarts/images/background.png-True-1920-1080-True-None)
+[DEBUG] 2025-08-06 12:56:04.517820 - 1 elements in cache
+[ERROR] 2025-08-06 12:56:07.723137 - Unable to reach raspydarts.synology.me:5000/api/v1/updates?last=True&version=V4.5.1_20250806_1245 ((56, 'Recv failure: Connection reset by peer'))
+[DEBUG] 2025-08-06 12:56:07.723527 - NO availables update or error
+[DEBUG] 2025-08-06 12:56:07.723762 - Received off / None / limit = ['TARGET', 'STRIP', 'OTHER']
+[DEBUG] 2025-08-06 12:56:07.723974 - Received launch / None / limit = ['TARGET', 'STRIP', 'OTHER', 'LIGHT', 'STROBE']
+[DEBUG] 2025-08-06 12:56:07.724260 - Received msg|Bienvenue / None / limit = DMD
+[DEBUG] 2025-08-06 12:56:07.724389 - Publish on raspydarts/dmd : msg|Bienvenue
+[DEBUG] 2025-08-06 12:56:07.725590 - light_toys : False : ['LIGHT_CELEBRATION']
+[DEBUG] 2025-08-06 12:56:07.725753 - buttons=['LIGHT_CELEBRATION']
+[DEBUG] 2025-08-06 12:56:07.726261 - Launching raspberry input wizard
+[INFO] 2025-08-06 12:56:07.726404 - Lauch target's setup wizard
+[DEBUG] 2025-08-06 13:27:46.653443 - Input debug (pyGame) : escape
+[INFO] 2025-08-06 13:27:46.653859 - Lauch target's setup wizard
+[DEBUG] 2025-08-06 13:27:46.846322 - Input debug (pyGame) : escape
+[INFO] 2025-08-06 13:27:46.847033 - Lauch target's setup wizard
+[DEBUG] 2025-08-06 13:27:47.207117 - Input debug (pyGame) : escape
+[DEBUG] 2025-08-06 13:27:47.207739 - Configuration canceled by user

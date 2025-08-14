@@ -11,7 +11,7 @@ import random
 ############
 #options = {'max_round': '7'}
 #MODE AVEC OPTIONS
-OPTIONS = {'theme': 'default', 'nb_segment': 5, 'max_round': 7, 'nb_bonus_darts': 1} # by Manu script.
+OPTIONS = {'theme': 'default', 'nb_segment': 5, 'max_round': 7, 'nb_bonus_darts': 1}
 # Dictionary of stats and display order (For example : Points Per Darts and avg are displayed in descending order)
 GAME_RECORDS = {'Points Per Round': 'DESC', 'Points Per Dart': 'DESC'}
 # background image - relative to images folder - Name it like the game itself
@@ -73,7 +73,7 @@ class Game(cgame.Game):
             (3, 19, 7, 16, 8),
             (11, 14, 9, 12, 5)
         )
-# Added by Manu script.
+
         if self.nb_segment == 1:
             self.segments = (
                 (20),(6),
@@ -94,7 +94,6 @@ class Game(cgame.Game):
                 (20, 1, 18, 4),(6, 10, 15, 2),
                 (3, 19, 7, 16),(11, 14, 9, 12)
             )
-# End added by Manu script.
 
         self.Colors = ('red', 'green', 'blue', 'yellow')
 
@@ -163,7 +162,7 @@ class Game(cgame.Game):
 
         # Set score at startup
         if actual_round == 1 and player_launch == 1 and actual_player == 0:
-            self.logs.log("DEBUG", 'RESET')
+            self.logs.debug('RESET')
             self.reset_leds()
 
             #change background
@@ -187,12 +186,14 @@ class Game(cgame.Game):
             n = 0
         self.nb_darts = seq_len + n
 
-        self.logs.log("DEBUG", 'Player:{} Tour:{} Seq:{} Nb darts:{}'.format(actual_player, self.scores[actual_player], self.sequence, self.nb_darts))
+        self.logs.debug('Player:{} Tour:{} Seq:{} Nb darts:{}'.format(actual_player, self.scores[actual_player], self.sequence, self.nb_darts))
 
         return 0
 	
     def post_dart_check(self,hit,players,actual_round,actual_player,player_launch):
         ret = 0
+        handler = self.init_handler()
+        
         if hit[1:] != 'B':
             pts = int(hit[1:])
         else:
@@ -203,8 +204,8 @@ class Game(cgame.Game):
 
         finished = False
 
-        self.logs.log("DEBUG", f'Launch:{player_launch} SeqLen:{seq_len}')
-        self.logs.log("DEBUG", f'INDEX:{self.sequence_index} PTS:{pts} TARGETS:{targets} SEGMENTS:{self.segments}')
+        self.logs.debug(f'Launch:{player_launch} SeqLen:{seq_len}')
+        self.logs.debug(f'INDEX:{self.sequence_index} PTS:{pts} TARGETS:{targets} SEGMENTS:{self.segments}')
 
         if pts in targets:
             self.sequence_index += 1
@@ -220,15 +221,13 @@ class Game(cgame.Game):
                 self.scores[actual_player] += 1
                 players[actual_player].add_score(1)
                 players[actual_player].columns[self.scores[actual_player] - 1] = ['/', 'txt']
-                self.logs.log("DEBUG", 'FINI {}'.format(self.scores[actual_player]))
-                # added by Manu script.
+                self.logs.debug('FINI {}'.format(self.scores[actual_player]))
                 if player_launch != self.nb_darts:
                     self.nb_darts = player_launch
-                # end added by Manu script.
                 ret = 4
                 finished = True
         elif self.nb_darts - player_launch < seq_len - self.sequence_index:
-            self.logs.log("DEBUG", 'ERR')
+            self.logs.debug('ERR')
             ret = 1
             finished = True
         else:
@@ -245,7 +244,12 @@ class Game(cgame.Game):
             self.winner = winner
             ret = 3
 
-        return ret
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        handler['return_code'] = ret
+        return handler
+        
+        #return ret
 
     def miss_button(self, players, actual_player, actual_round, player_launch):
         '''
@@ -254,5 +258,5 @@ class Game(cgame.Game):
         print('miss')
         #players[actual_player].columns[6] = (self.moyenne, 'int')
         #players[actual_player].columns[player_launch-1] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         players[actual_player].darts_thrown += 1

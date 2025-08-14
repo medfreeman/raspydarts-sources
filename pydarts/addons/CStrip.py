@@ -13,12 +13,11 @@ import numpy as np
 from datetime import datetime
 
 #import neopixel
-from rpi_ws281x import PixelStrip, Color
+from rpi_ws281x import PixelStrip, Color, WS2811_STRIP_RGB, WS2811_STRIP_GRB
 
 # Parametrage Leds
 import Colors as CL
 
-# Pour des bandes NeoPixel RGBW, changez ORDER de RGBW à GRBW.
 OFF = [np.uint8(0), np.uint8(0), np.uint8(0)]
 MULT_COLOR = {'S': [0, 255, 0], 'D': [0, 0, 255], 'T': [255, 0, 0], 'E': [129, 12, 128]}
 TARGET_ORDER = [1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5, 20]
@@ -29,7 +28,7 @@ class CStrip(object):
     ### Init functions ###
     ######################
 
-    def __init__(self, pin, strip_length, brightness, dma_channel, device, configuration=None, leds_type=None, bgcolors=None, bgbrightness=None):
+    def __init__(self, pin, strip_length, brightness, dma_channel, device, configuration=None, leds_type=None, bgcolors=None, bgbrightness=None, strip_type='grb'):
         freq = 800000  # LED signal frequency in hertz (usually 800khz)
         if pin in (13, 19, 41, 45, 53):
             # set to '1' for GPIOs 13, 19, 41, 45 or 53
@@ -43,7 +42,10 @@ class CStrip(object):
         if bgbrightness is None:
             bgbrightness=10
 
-        self.strip = PixelStrip(strip_length, pin, freq, dma_channel, False, int(brightness*255), channel)
+        if (strip_type == 'rgb'):
+            self.strip = PixelStrip(strip_length, pin, freq, dma_channel, False, int(brightness*255), channel, strip_type=WS2811_STRIP_RGB)
+        else:
+            self.strip = PixelStrip(strip_length, pin, freq, dma_channel, False, int(brightness*255), channel, strip_type=WS2811_STRIP_GRB)
 
         self.strip.begin()
         self.strip_length = strip_length
@@ -251,26 +253,39 @@ class CStrip(object):
         #    color1 = [255, 255, 255]    # white
         #    color2 = [0, 0, 255]        # blue
         #    color3 = [255, 0, 0]        # red
-        color1 = colors[0]
-        color2 = colors[1]
-        color3 = colors[2]
         self.bgbrithness = min(bgbrightness, 100)
-
         self.segment_color = {}
         list1 = [1, 4, 6, 15, 17, 19, 16, 11, 9, 5]
         list2 = [18, 13, 10, 2, 3, 7, 8, 14, 12, 20]
+        if len(colors) <= 3 :
+            color1 = colors[0]
+            color2 = colors[1]
+            color3 = colors[2]
 
-        self.segment_color['SB'] = [0, 0, 255]
-        self.segment_color['DB'] = [255, 0, 0]
+            self.segment_color['SB'] = [0, 0, 255]
+            self.segment_color['DB'] = [255, 0, 0]
 
-        for number in list1:
-            self.segment_color[f'T{number}'] = color2
-            self.segment_color[f'D{number}'] = color2
-            self.segment_color[f'S{number}'] = color3
-        for number in list2:
-            self.segment_color[f'T{number}'] = color3
-            self.segment_color[f'D{number}'] = color3
-            self.segment_color[f'S{number}'] = color1
+            for number in list1:
+                self.segment_color[f'T{number}'] = color2
+                self.segment_color[f'D{number}'] = color2
+                self.segment_color[f'S{number}'] = color3
+            for number in list2:
+                self.segment_color[f'T{number}'] = color3
+                self.segment_color[f'D{number}'] = color3
+                self.segment_color[f'S{number}'] = color1
+        else:
+
+            self.segment_color['SB'] = colors[6]
+            self.segment_color['DB'] = colors[7]
+
+            for number in list1:
+                self.segment_color[f'T{number}'] = colors[4]
+                self.segment_color[f'D{number}'] = colors[2]
+                self.segment_color[f'S{number}'] = colors[0]
+            for number in list2:
+                self.segment_color[f'T{number}'] = colors[5]
+                self.segment_color[f'D{number}'] = colors[3]
+                self.segment_color[f'S{number}'] = colors[1]
 
     ####################################
     ### Backup / Restore strip state ###
@@ -293,7 +308,39 @@ class CStrip(object):
     #######################
     ### Basic functions ###
     #######################
+    def ReloadSegmentsColors(self, colors_receive):
+        list1 = [1, 4, 6, 15, 17, 19, 16, 11, 9, 5]
+        list2 = [18, 13, 10, 2, 3, 7, 8, 14, 12, 20]        
+        if colors_receive:   
+            if len(colors_receive) <= 3 :    
+                color1 = [v for v in colors_receive[0].split(',')]
+                color2 = [v for v in colors_receive[1].split(',')]
+                color3 = [v for v in colors_receive[2].split(',')]
 
+                self.segment_color['SB'] = [0, 0, 255]
+                self.segment_color['DB'] = [255, 0, 0]
+
+                for number in list1:
+                    self.segment_color[f'T{number}'] = color2
+                    self.segment_color[f'D{number}'] = color2
+                    self.segment_color[f'S{number}'] = color3
+                for number in list2:
+                    self.segment_color[f'T{number}'] = color3
+                    self.segment_color[f'D{number}'] = color3
+                    self.segment_color[f'S{number}'] = color1
+            else:        
+                self.segment_color['SB'] = [v for v in colors_receive[6].split(',')]
+                self.segment_color['DB'] = [v for v in colors_receive[7].split(',')]
+
+                for number in list1:
+                    self.segment_color[f'T{number}'] = [v for v in colors_receive[4].split(',')]
+                    self.segment_color[f'D{number}'] = [v for v in colors_receive[2].split(',')]
+                    self.segment_color[f'S{number}'] = [v for v in colors_receive[0].split(',')]
+                for number in list2:
+                    self.segment_color[f'T{number}'] = [v for v in colors_receive[5].split(',')]
+                    self.segment_color[f'D{number}'] = [v for v in colors_receive[3].split(',')]
+                    self.segment_color[f'S{number}'] = [v for v in colors_receive[1].split(',')]        
+        
     def Reset(self):
         for pixel in range(self.strip_length):
             if (self.pixel_min is None or pixel >= self.pixel_min) and (self.pixel_max is None or pixel <= self.pixel_max):

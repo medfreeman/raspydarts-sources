@@ -8,7 +8,7 @@ import pygame
 from addons import Colors
 
 # Dictionnay of options - Text format only
-OPTIONS = {'theme': 'default', 'max_round': 10, 'mode_random': False, 'chaos': False}
+OPTIONS = {'theme': 'default', 'max_round': 5, 'mode_random': True, 'chaos': False}
 # background image - relative to images folder - Name it like the game itself
 LOGO = 'Robin_Drink.png' # background image
 # Columns headers - Better as a string
@@ -117,6 +117,8 @@ class Game(cgame.Game):
    def pre_dart_check(self,players,actual_round,actual_player,player_launch):
         return_code = 0
 
+        handler = self.init_handler()
+        
         self.player_launch = player_launch
 
         self.display.specialbg = 'bg_robin_drink.jpg'
@@ -126,7 +128,7 @@ class Game(cgame.Game):
             try:
                 LST = self.check_handicap(players)
             except Exception as e:
-                self.logs.log("ERROR","Handicap failed : {}".format(e))
+                self.logs.error("Handicap failed : {}".format(e))
             for Player in players:
                 # Init score
                 Player.score = 0
@@ -218,7 +220,10 @@ class Game(cgame.Game):
         segmentsAsStr = "|".join("{}#{}".format(*s) for s in segments.items()) #convertion du dict segments en string
         self.rpi.set_target_leds(segmentsAsStr)
 
-        return return_code
+		
+        #return return_code
+        handler['return_code'] = return_code
+        return handler
 
    # Function launched when the  put player button before having launched all his darts
    def early_player_button(self,players,actual_player,actual_round):
@@ -227,6 +232,7 @@ class Game(cgame.Game):
         if not self.missdarts :
             players[actual_player].score+=1
             self.show_message('player',players[actual_player],1)
+            #handler['message'] =
         else :
             print('ne compte pas de penalite car deja mise avec missdarts')
             self.missdarts = False
@@ -242,9 +248,10 @@ class Game(cgame.Game):
         """
         self.nb_darts = 1
         return_code=1
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         players[actual_player].score+=1
         self.show_message('player',players[actual_player],1)
+        #handler['message'] =
         self.missdarts = True
         #pass
         
@@ -252,6 +259,8 @@ class Game(cgame.Game):
 
    def post_dart_check(self,hit,players,actual_round,actual_player,player_launch):
         return_code = 0
+        
+        handler = self.init_handler()
         self.show_hit = False
 
         self.display.sound_for_touch(hit) # Touched !
@@ -272,6 +281,7 @@ class Game(cgame.Game):
                 if p.ident != actual_player :
                     p.score+=multi
             self.show_message('all',players[actual_player],multi)
+            #handler['message'] =
             return_code = 4
 
         elif player_launch == 1 :
@@ -280,12 +290,14 @@ class Game(cgame.Game):
             # an opponent have to drink
             if int(hit[1:]) in self.segmentsOpponents :
                 self.show_message('targetOpponent',players[actual_player],multi,delay = 3000)
+                #handler['message'] =
 
             # a random opponent have to drink
             elif int(hit[1:]) in self.segmentsRamdom :
                 op = self.random_opponent(players, actual_player)
                 players[op].score += multi
                 self.show_message('opponent', players[op], multi)
+                #handler['message'] =
                 return_code = 4
 
             # the player have to drink
@@ -293,11 +305,13 @@ class Game(cgame.Game):
                 players[actual_player].score += multi
 
                 self.show_message('player', players[actual_player], multi)
+                #handler['message'] =
                 return_code = 4
 
             # pass, no penalty
             else :
                 self.show_message('pass',players[actual_player],multi)
+                #handler['message'] =
                 return_code = 4
         else :
             if multi > self.currentMulti :
@@ -310,9 +324,11 @@ class Game(cgame.Game):
                     p.score+=self.currentMulti
                     opponentHitted = True
                     self.show_message('opponent',p, self.currentMulti)
+                    #handler['message'] =
 
             if not opponentHitted :
                 self.show_message('pass',players[actual_player], self.currentMulti)
+                #handler['message'] =
                 return_code = 4
 
         # Check for end of game (no more rounds to play)
@@ -326,7 +342,12 @@ class Game(cgame.Game):
           self.winner = bestscoreid
           return_code = 3
 
-        return return_code
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        handler['return_code'] = return_code 
+        return handler
+
+        #return return_code
 
    ###############
    # Method to frefresh player.stat - Adapt to the stats you want. They represent mathematical formulas used to calculate stats. Refreshed after every launch
@@ -386,7 +407,10 @@ class Game(cgame.Game):
    # show the selection of a random player
    #
    def random_opponent(self, players, actual_player) :
-
+	  
+	 
+      handler = self.init_handler()
+      
       # list to random without actual player
       pls = []
       for j in range(0, len(players)) :
@@ -395,7 +419,8 @@ class Game(cgame.Game):
 
       o = random.randint(0, len(pls) - 1)
 
-      self.display.play_sound('robin_random')
+      #self.display.play_sound('robin_random')
+      handler['sound'] = 'robin_random'
 
       nb = 24 + random.randint(1, len(self.target_order))
       seg = 1   #random.randint(1, len(self.target_order)]
@@ -413,6 +438,8 @@ class Game(cgame.Game):
 
         seg = seg + 1
         p = (p + 1) % len(pls)
+        
+      return handler  
       return pls[o][1]
 
     ###############
@@ -429,6 +456,8 @@ class Game(cgame.Game):
    #
    def show_message(self,typeMessage,player,multi,delay = 4000,refreshbackground = True) :
 
+      handler = self.init_handler()
+      
       if refreshbackground :
           self.display.display_background('bg_robin_drink_back')
 
@@ -437,20 +466,28 @@ class Game(cgame.Game):
 
       if typeMessage == 'opponent' :
           message = self.display.lang.translate('robin-opponent')
-          self.display.play_sound('robin_opponent')
+          #self.display.play_sound('robin_opponent')
+          handler['sound'] = 'robin_opponent'
+          
       if typeMessage == 'targetOpponent' :
           message = self.display.lang.translate('robin-targetOpponent')
-          self.display.play_sound('robin_targeted')
+          #self.display.play_sound('robin_targeted')
+          handler['sound'] = 'robin_targetled'
+          
       elif typeMessage == 'player' :
           message = self.display.lang.translate('robin-player')
-          self.display.play_sound('robin_player')
+          #self.display.play_sound('robin_player')
+          handler['sound'] = 'robin_player'
       elif typeMessage == 'all' :
           message = self.display.lang.translate('robin-all')
-          self.display.play_sound('robin_bull')
+          #self.display.play_sound('robin_bull')
+          handler['sound'] = 'robin_bull'
+          
           numImg = 0
       elif typeMessage == 'pass' :
           message = self.display.lang.translate('robin-pass')
-          self.display.play_sound('robin_pass')
+          #self.display.play_sound('robin_pass')
+          handler['sound'] = 'robin_pass'
 
       glasses = f"{multi} {self.display.lang.translate('robin-glasses') if multi>1 else self.display.lang.translate('robin-glass')}"
       message = message.replace('#drink#',glasses).replace("#PlayerName#",player.name)
@@ -469,3 +506,5 @@ class Game(cgame.Game):
       self.display.update_screen()
 
       pygame.time.wait(delay)
+      
+      return handler

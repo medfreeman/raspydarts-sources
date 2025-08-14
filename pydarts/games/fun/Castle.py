@@ -65,7 +65,7 @@ class Game(cgame.Game):
             try:
                 LST = self.check_handicap(players)
             except Exception as e:
-                self.logs.log("ERROR", "Handicap failed : {}".format(e))
+                self.logs.error("Handicap failed : {}".format(e))
             for Player in players:
                 # Init score
                 Player.score = 0
@@ -134,6 +134,8 @@ class Game(cgame.Game):
 
    def post_dart_check(self, hit, players, actual_round, actual_player, player_launch):
         return_code = 0
+        
+        handler = self.init_handler()
 
         self.show_hit = True
 
@@ -162,8 +164,12 @@ class Game(cgame.Game):
                    if Player.score<0 :
                       Player.score = 0
             self.show_hit = False
-            self.display.play_sound('castle_explosion')
-            self.video_player.play_video(self.display.file_class.get_full_filename('castle/castle_bull', 'videos'))
+            #self.display.play_sound('castle_explosion')
+            handler['sound'] = 'castle_explosion'
+            
+            #self.video_player.play_video(self.display.file_class.get_full_filename('castle/castle_bull', 'videos'))
+            handler['video'] = 'castle/castle_bull'
+            
         else :
             # check d'un segment valide
             for i, Player in enumerate(players):
@@ -171,8 +177,10 @@ class Game(cgame.Game):
                     Player.score+=multi
                     players[actual_player].increment_hits(hit)
                     self.show_hit = False
-                    self.display.play_sound('castle_up')
-                    self.video_player.play_video(self.display.file_class.get_full_filename('castle/castle_up', 'videos'))
+                    #self.display.play_sound('castle_up')
+                    handler['sound'] = 'castle_up'
+                    #self.video_player.play_video(self.display.file_class.get_full_filename('castle/castle_up', 'videos'))
+                    handler['video'] = 'castle/castle_up'
 
                 if i != actual_player and Player.home == int(hit[1:]) :
                     Player.score-=multi
@@ -180,19 +188,30 @@ class Game(cgame.Game):
                         Player.score = 0
                     else :
                         self.show_hit = False
-                        self.display.play_sound('castle_down')
-                        self.video_player.play_video(self.display.file_class.get_full_filename('castle/castle_down', 'videos'))
+                        #self.display.play_sound('castle_down')
+                        handler['sound'] = 'castle_down'
+                        #self.video_player.play_video(self.display.file_class.get_full_filename('castle/castle_down', 'videos'))
+                        handler['video'] = 'castle/castle_down'
 
         # test for a winner
         if  players[actual_player].score >= self.lives:
             self.winner =  players[actual_player].ident
             return_code = 3
-            self.display.play_sound('castle_win')
-            self.video_player.play_video(self.display.file_class.get_full_filename('castle/castle_win', 'videos'))
+            #self.display.play_sound('castle_win')
+            handler['sound'] = 'castle_win'
+            
+            #self.video_player.play_video(self.display.file_class.get_full_filename('castle/castle_win', 'videos'))
+            handler['video'] = 'castle/castle_win'
+            
         elif player_launch == self.nb_darts and actual_round >= self.max_round and actual_player == len(players)-1:
+            print(f"====================> match nul")
             return_code = 2
 
-        return return_code
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        handler['return_code'] = return_code
+        
+        return handler
 
    ###############
    # Method to frefresh player.stat - Adapt to the stats you want. They represent mathematical formulas used to calculate stats. Refreshed after every launch
@@ -291,8 +310,8 @@ class Game(cgame.Game):
             val = int(player.score // ( (self.lives - 2) / 7 )) + 1
             image_file = f'castle_{player.castleColor}_{val}'
 
-        self.logs.log("DEBUG", "image_file {} for score {}".format(image_file, player.score))
-        self.display.display_image(self.display.file_class.get_full_filename(f'Castle/{image_file}', 'images'), x, y, scaleX, scaleY, True, False, False, UseCache = False)
+        self.logs.debug("image_file {} for score {}".format(image_file, player.score))
+        self.display.display_image(self.display.file_class.get_full_filename(f'Castle/{image_file}', 'images'), x, y, scaleX, scaleY, True, False, False, UseCache=True)
 
 
    #
@@ -341,7 +360,8 @@ class Game(cgame.Game):
    #
    def player_line(self, display, y, actual_player, player):
         if player.ident == actual_player:
-            bgcolor = (218, 165, 32)
+            #bgcolor = (218, 165, 32)
+            bgcolor = player.color
         else:
             bgcolor = (150, 150, 150)
         self.display.blit_rect(self.display.margin, y, self.display.pn_size - self.display.margin, self.display.line_height - self.display.margin, bgcolor)
@@ -356,5 +376,7 @@ class Game(cgame.Game):
         print('miss')
         #players[actual_player].columns[6] = (self.moyenne, 'int')
         #players[actual_player].columns[player_launch-1] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
+        
         players[actual_player].darts_thrown += 1
+        

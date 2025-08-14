@@ -10,7 +10,7 @@ if sys.version[:1] == '2':
 elif sys.version[:1] == '3':
     import configparser
 # pyDarts running Version
-pyDartsVersion = "4.4.1"
+pyDartsVersion = "4.5.1"
 # pyDarts official running wiki
 wiki="https://www.facebook.com/groups/124845401274184"
 # Official website
@@ -59,11 +59,15 @@ DefaultConfig['SectionGlobals'] = {
     'videosound_multiplier': 1,
     'sound_multiplier': 100, 
     'illumination_mode': False, 
-    'illumination_color': 'white'
+    'illumination_color': 'white',    
+    'fast_games_mode': False,
+    'only_favorites_games_mode': False,
+    'check_for_updates': True
     }
 #
 DefaultConfig['SectionAdvanced'] = {
     'bypass-stats': 1,
+    'directplay': False,
     'selectedgame': False,
     'gametype': False,
     'netgamename': False,
@@ -89,6 +93,8 @@ DefaultConfig['SectionAdvanced'] = {
     'target-bgcolor2': 'red',
     'target-bgcolor3': 'white',
     'target-bgbrightness': 10,
+    'directplay': 'False',
+    'prefered_game': '',
     'preferedclassicgame': '',
     'preferedfungame': '',
     'preferedsportgame': '',
@@ -105,43 +111,52 @@ DefaultConfig['SectionAdvanced'] = {
 DefaultConfig['Favorites'] = {
     'servers': 'raspydarts.synology.me:5005',
     'firstnames': 'Joueur 1',
-    'games': ''
+    'games': '',
+    'players_color': ''
     }
 
 #
 DefaultConfig['Events'] = {
-    'launch':{'TARGET': ['FadeRGB,1,random,10', 'Snake,100,random,50', 'Sparkle,10,gold,20'], 'STRIP': ['Strobe,5,red,20', 'Strobe,3,blue,50'], 'DMD': [], 'MATRIX': [''], 'OTHER': []},
-    'off':{'TARGET': ['off,,,'], 'STRIP': ['off,,,'], 'DMD': ['off,,,'], 'MATRIX': ['off,,,'], 'OTHER':  []},
-    'menu':{'TARGET': ['Strobe,3,gold,50'], 'STRIP': ['Strobe,3,gold,50'], 'DMD': [''], 'MATRIX': [''], 'OTHER': []},
-    'wait':{'TARGET': ['Alain2,10,red,20'], 'STRIP': ['Fireworks,1,random,1'], 'DMD': [''], 'MATRIX': [''], 'OTHER': []},
-    'quit':{'TARGET': ['Rainbow2,50,random,50'], 'STRIP': ['Rainbow,50,random,50'], 'DMD': [''], 'MATRIX': [''], 'OTHER': []},
-    'newgame':{'TARGET': [''], 'STRIP': [''], 'DMD': [''], 'MATRIX': [''], 'OTHER': []},
-    'ready':{'TARGET': [''], 'STRIP': [''], 'DMD':  [], 'MATRIX': [], 'OTHER':  []},
-    'release':{'TARGET': [''], 'STRIP': [''], 'DMD':  [], 'MATRIX': [], 'OTHER':  []},
-    'nextplayer':{'TARGET': ['Ring,20,random,50'], 'STRIP': ['Cylon,2,red,1'], 'DMD': [''], 'MATRIX': [''], 'OTHER': []},
-    'SB':{'STRIP': [''], 'DMD': [''], 'MATRIX': [''], 'OTHER': []},
-    'DB':{'STRIP': [''], 'DMD': [''], 'MATRIX': [''], 'OTHER': []},
-    'winner':{'STRIP': [''], 'TARGET': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []},
-    'miss':{'STRIP': [''], 'TARGET': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []},
-    'gameover':{'TARGET': [''], 'STRIP': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []},
-    'interrupt':{'TARGET': [''], 'STRIP': [''], 'DMD': [], 'MATRIX': [], 'OTHER': []},
-    'touch':{'STRIP': [''], 'TARGET':  [''], 'DMD': [], 'MATRIX': [], 'OTHER': []},
-    'setwinner':{'STRIP':  ['Fireworks,1,gold,10'], 'TARGET': ['Wait,15,gold,100', 'Sparkle,10,gold,5'], 'DMD': [], 'MATRIX': [], 'OTHER': []},
-    'pressure': {'TARGET': ['TheaterChase,10,blue,10'], 'STRIP': ['RunningLights,100,blue,10'], 'DMD': [], 'MATRIX': [], 'OTHER': [',,,']},
-    'nopressure': {'TARGET': ['off,,,'], 'STRIP': [''], 'DMD': [], 'MATRIX': [], 'OTHER': [',,,']}
+    'launch':{'TARGET': ['FadeRGB,1,random,10', 'Snake,100,random,50', 'Sparkle,10,gold,20'], 'STRIP': ['Strobe,5,red,20', 'Strobe,3,blue,50']},
+    'off':{'TARGET': ['off,,,'], 'STRIP': ['off,,,'], 'DMD': ['off,,,'], 'MATRIX': ['off,,,']},
+    'menu':{'TARGET': ['Strobe,3,gold,50'], 'STRIP': ['Strobe,3,gold,50']},
+    'wait':{'TARGET': ['Alain2,10,red,20'], 'STRIP': ['Fireworks,1,random,1']},
+    'quit':{'TARGET': ['Rainbow2,50,random,50'], 'STRIP': ['Rainbow,50,random,50']},
+    'newgame':{},
+    'ready':{},
+    'release':{},
+    'nextplayer':{'TARGET': ['Ring,20,random,50'], 'STRIP': ['Cylon,2,red,1']},
+    'SB':{},
+    'DB':{},
+    '180':{'LIGHT': ['LIGHT_CELEBRATION, 2500'], 'STROBE': ['LIGHT_FLASH, 10']},
+    'winner':{},
+    'miss':{},
+    'gameover':{},
+    'interrupt':{},
+    'simple':{'STROBE': ['TOY1, 1']},
+    'double':{'STROBE': ['TOY1, 2']},
+    'triple':{'STROBE': ['TOY1, 3']},
+    'setwinner':{'STRIP':  ['Fireworks,1,gold,10'], 'TARGET': ['Wait,15,gold,100', 'Sparkle,10,gold,5']},
+    'pressure': {'TARGET': ['TheaterChase,10,blue,10'], 'STRIP': ['RunningLights,100,blue,10']},
+    'nopressure': {'TARGET': ['off,,,']}
     }
+
+for letter in ['S', 'D', 'T']:
+    for number in range(1, 21):
+        DefaultConfig['Events'][f"{letter}{number}"] = {}
 
 #
 DefaultConfig['Raspberry_Leds'] = {
     'PIN_TARGETLED':0,
     'BRI_TARGETLED':0.5,
+    'TYP_TARGETLED':'grb',
     'PIN_STRIPLED':0,
     'NBR_STRIPLED':0,
-    'BRI_STRIPLED':0.5
+    'BRI_STRIPLED':0.5,
+    'TYP_STRIPLED':'grb'
     }
 #
 DefaultConfig['Raspberry'] = {
-    'EXTENDED_GPIO': '0',
     'PIN_UP': '0',
     'PIN_DOWN': '0',
     'PIN_LEFT': '0',
@@ -167,133 +182,175 @@ DefaultConfig['Raspberry'] = {
     'LIGHT_FLASH':'',
     'LIGHT_CELEBRATION':'',
     'LIGHT_CELEBRATION2':'',
-    'LIGHT_LIGHT':''
+    'LIGHT_LIGHT':'',
+    'TOY1': '',
+    'TOY2': '',
+    'TOY3': '',
+    'TOY4': '',
+    'TOY5': '',
+    'TOY6': '',
+    'TOY7': '',
+    'TOY8': '',
+    'TOY9': '',
+    'TOY10': '',
+    'TOY11': '',
+    'TOY12': '',
+    'TOY13': '',
+    'TOY14': '',
+    'TOY15': '',
+    'TOY16': ''
+    }
+#
+DefaultConfig['Camera'] = {
+    'camera_id': '-1',
+    'picture_path': '/home/pi/Pictures',
+    'video_path': '/home/pi/Videos',
+    'directory_order': '0',
+    'choice_of_memories':'1',
+    'video_res_width': '1280',
+    'video_res_height': '720',
+    'picture_res_width': '1280',
+    'picture_res_height': '720',
+    'flip_horizontal': '0',
+    'flip_vertical': '0',
+    'resolutions_available': '',
+    'nb_picture': '1',
+    'video_duration': '5',
+    'fps': '30',
+    'events': 'DB,SB,T20',
+    'upload_cloud': '0',
+    'path_google_drive': '',
+    'fullscreen_pop': '0',
+    'duree_ms': '5000'
     }
 # A deplacer dans un fichier yaml
 #
 ######### CONFIG NB JOUEURS - 2 choix
 #
-#   nomdujeu : [ min , max ]
+#   nomdujeu : [ min , max , en equipe ]
 DefaultConfig['NbOfPlayersPerGame'] = {
-    '321_Zlip': [ 2 , 12 , False ], 
-    'Batard' : [ 1 , 12 , False ],
-    'Bermuda_Triangle' : [ 1 , 12 , False ],
-    'Big6' : [ 2 , 12 , False ],
-    'Bob27' : [ 1 , 12 , False ],
-    'By_Fives' : [ 1 , 12 , False ],
-    'Color' : [ 1 , 12 , False ],
-    'Cricket' : [ 1 , 8 , False ], 
-    'High_Score' : [ 1 , 12 , False ],
-    'Ho_One' : [ 1 , 8 , False ],
-    'Kapital' : [ 1 , 12 , False ],
-    'Killer' : [ 2 , 12 , False ],
-    'Kinito' : [ 1 , 12 , False ],
-    'Low_Score' : [ 1 , 12 , False ],
-    'Mickey' : [ 1 , 8 , False ],
-    'Practice' : [ 1 , 12 , False ],
-    'Round_the_clock' : [ 1 , 12 , False ],
-    'Scram_Cricket' : [ 2 , 4 , True ],         #### NOTE : ce jeu ce joue a 2 ou a 4 , on ne peux pas jouer a 3 joueurs (d ailleurs pour moi, ce jeu ne se joue qu a 2, c est tres long commme jeu)
-    'Shanghai' : [ 1 , 12 , False ],
-    'Slider' : [ 1 , 12 , False ],
-    'Up_Down_Count_Up' : [ 1 , 12 , False ],
+    '321_Zlip': [2, 12, False], 
+    'Batard': [1, 12, False],
+    'Bermuda_Triangle': [1, 12, False],
+    'Big6': [2, 12, False],
+    'Bob27': [1, 12, False],
+    'By_Fives': [1, 12, False],
+    'Color': [1, 12, False],
+    'Cricket': [1, 8, False], 
+    'High_Score': [1, 12, False],
+    'Ho_One': [1, 8, False],
+    'Kapital': [1, 12, False],
+    'Killer': [2, 12, False],
+    'Kinito': [1, 12, False],
+    'Low_Score': [1, 12, False],
+    'Mickey': [1, 8, False],
+    'Practice': [1, 12, False],
+    'Round_the_clock': [1, 12, False],
+    'Scram_Cricket': [2, 4, True],         #### NOTE : ce jeu se joue a 2 ou a 4, on ne peux pas jouer a 3 joueurs (d ailleurs pour moi, ce jeu ne se joue qu a 2, c est tres long commme jeu)
+    'Shanghai': [1, 12, False],
+    'Slider': [1, 12, False],
+    'Up_Down_Count_Up': [1, 12, False],
     
-    'Bingo' : [ 1 , 4 , False ],
-    'Bulls' : [ 1 , 12 , False ],
-    'Castle' : [ 2 , 4 , False ],
-    'Challenge' : [ 2 , 12 , False ],
-    'Chaos' : [ 1 , 12 , False ],                    #### NOTE : nouveau jeu pas encore sorti, supprime si il faut
-    'Conquer' : [ 2 , 4 , False ],
-    'Dragon' : [ 1 , 12 , False ],                   #### NOTE : nouveau jeu pas encore fait, supprime si il faut
-    'GameOfGoose' : [ 1 , 4 , False ], 
-    'Morpion' : [ 2 , 4 , False ],
-    'Othello' : [ 2 , 4 , True ],                   #### NOTE : ce jeu ce joue a 2 ou a 4 , on ne peux pas jouer a 3 joueurs    
-    'Puissance4' : [ 2 , 4 , True ],                #### NOTE : ce jeu ce joue a 2 ou a 4 , on ne peux pas jouer a 3 joueurs
-    'Pursuit' : [ 2 , 4 , False ],   
-    'Risk' : [ 2 , 5 , False ],
-    'Robin_Drink' : [ 2 , 10 , False ],
-    'Robin_Strip' : [ 2 , 10 , False ],
-    'Sabotage' : [ 2 , 12 , False ],   
-    'Simon' : [ 2 , 12 , False ],
-    'Target' : [ 1 , 12 , False ],
-    'Tower' : [ 1 , 6 , False ],
-    'Treasure' : [ 2 , 12 , False ],
-    'Voleur' : [ 1 , 12 , False ],
+    'Bingo': [ 1 , 4 , False ],
+    'Bulls': [1, 12, False],
+    'Castle': [2, 4, False],
+    'Challenge': [2, 12, False],
+    'Chaos': [1, 12, False],                    #### NOTE : nouveau jeu pas encore sorti, supprime si il faut
+    'Conquer': [2, 4, False],
+    'Dragon': [1, 12, False],                   #### NOTE : nouveau jeu pas encore fait, supprime si il faut
+    'GameOfGoose': [1, 4, False], 
+    'Hangman': [1, 1, False], 
+    'Morpion': [2, 4, False],
+    'Othello': [2, 4, True],                   #### NOTE : ce jeu se joue a 2 ou a 4, on ne peux pas jouer a 3 joueurs    
+    'Puissance4': [2, 4, True],                #### NOTE : ce jeu se joue a 2 ou a 4, on ne peux pas jouer a 3 joueurs
+    'Pursuit': [2, 4, False],   
+    'Risk': [2, 5, False],
+    'Robin_Drink': [2, 10, False],
+    'Robin_Strip': [2, 10, False],
+    'Sabotage': [2, 12, False],   
+    'Simon': [2, 12, False],
+    'Switch': [1, 12, False],
+    'Target': [1, 12, False],
+    'Tower': [1, 6, False],
+    'Treasure': [2, 12, False],
+    'Voleur': [1, 12, False],
+    'Yahtzydarts': [1, 4, False],  
     
-    'Balltrap' : [ 1 , 12 , False ],
-    'Baseball' : [ 2 , 4 , False ],
-    'Bowling' : [ 1 , 12 , False ],   
-    'Fighters' : [ 2 , 5 , False ],
-    'Football' : [ 2 , 2 , False ],                #### NOTE : ce jeu ce joue a 2 uniquement
-    'Golf' : [ 1 , 12 , False ],
-    'Horse' : [ 1 , 4 , False ],
-    'Pingpong' : [ 2 , 12 , False ],    
-    'Punch-Out' : [ 2 , 7 , False ],       
-    'Snooker' : [ 1 , 6 , False ],
-    'Tennis' : [ 2 , 4 , True ]                   #### NOTE : ce jeu ce joue a 2 ou a 4 , on ne peux pas jouer a 3 joueurs    
+    'Balltrap': [1, 12, False],
+    'Baseball': [2, 4, False],
+    'Bowling': [1, 12, False],   
+    'Fighters': [2, 5, False],
+    'Football': [2, 2, False],                #### NOTE : ce jeu se joue a 2 uniquement
+    'Golf': [1, 12, False],
+    'Horse': [1, 4, False],
+    'Pingpong': [2, 12, False],    
+    'Punch-Out': [2, 7, False],       
+    'Snooker': [1, 6, False],
+    'Tennis': [2, 4, True]                   #### NOTE : ce jeu se joue a 2 ou a 4, on ne peux pas jouer a 3 joueurs    
     
     }
 
 #   nom du jeu : categorie
 DefaultConfig['GamePerCategory'] = {
     '321_Zlip': 'classic', 
-    'Batard' : 'classic',
-    'Bermuda_Triangle' : 'classic',
-    'Big6' : 'classic',
-    'Bob27' : 'classic',
-    'By_Fives' : 'classic',
-    'Color' : 'classic',
-    'Cricket' : 'classic', 
-    'High_Score' : 'classic',
-    'Ho_One' : 'classic',
-    'Kapital' : 'classic',
-    'Killer' : 'classic',
-    'Kinito' : 'classic',
-    'Low_Score' : 'classic',
-    'Mickey' : 'classic',
-    'Practice' : 'classic',
-    'Round_the_clock' : 'classic',
-    'Scram_Cricket' : 'classic',         #### NOTE : ce jeu ce joue a 2 ou a 4 , on ne peux pas jouer a 3 joueurs (d ailleurs pour moi, ce jeu ne se joue qu a 2, c est tres long commme jeu)
-    'Shanghai' : 'classic',
-    'Slider' : 'classic',
-    'Up_Down_Count_Up' : 'classic',
+    'Batard': 'classic',
+    'Bermuda_Triangle': 'classic',
+    'Big6': 'classic',
+    'Bob27': 'classic',
+    'By_Fives': 'classic',
+    'Color': 'classic',
+    'Cricket': 'classic', 
+    'High_Score': 'classic',
+    'Ho_One': 'classic',
+    'Kapital': 'classic',
+    'Killer': 'classic',
+    'Kinito': 'classic',
+    'Low_Score': 'classic',
+    'Mickey': 'classic',
+    'Practice': 'classic',
+    'Round_the_clock': 'classic',
+    'Scram_Cricket': 'classic',         #### NOTE : ce jeu se joue a 2 ou a 4 , on ne peux pas jouer a 3 joueurs (d ailleurs pour moi, ce jeu ne se joue qu a 2, c est tres long commme jeu)
+    'Shanghai': 'classic',
+    'Slider': 'classic',
+    'Up_Down_Count_Up': 'classic',
     
-    'Bingo' : 'fun',
-    'Castle' : 'fun',
-    'Challenge' : 'fun',
-    'Chaos' : 'fun',                    #### NOTE : nouveau jeu pas encore sorti, supprime si il faut
-    'Conquer' : 'fun',
-    'Dragon' : 'fun',                   #### NOTE : nouveau jeu pas encore fait, supprime si il faut
-    'GameOfGoose' : 'fun', 
-    'Morpion' : 'fun',
-    'Othello' : 'fun',                   #### NOTE : ce jeu ce joue a 2 ou a 4 , on ne peux pas jouer a 3 joueurs    
-    'Puissance4' : 'fun',                #### NOTE : ce jeu ce joue a 2 ou a 4 , on ne peux pas jouer a 3 joueurs
-    'Pursuit' : 'fun',   
-    'Risk' : 'fun',
-    'Robin_Drink' : 'fun',
-    'Robin_Strip' : 'fun',
-    'Sabotage' : 'fun',   
-    'Simon' : 'fun',
-    'Target' : 'fun',
-    'Tower' : 'fun',
-    'Treasure' : 'fun',
-    'Voleur' : 'fun',
+    'Bingo': 'fun',
+    'Castle': 'fun',
+    'Challenge': 'fun',
+    'Chaos': 'fun',                    #### NOTE : nouveau jeu pas encore sorti, supprime si il faut
+    'Conquer': 'fun',
+    'Dragon': 'fun',                   #### NOTE : nouveau jeu pas encore fait, supprime si il faut
+    'GameOfGoose': 'fun', 
+    'Morpion': 'fun',
+    'Othello': 'fun',                   #### NOTE : ce jeu se joue a 2 ou a 4 , on ne peux pas jouer a 3 joueurs    
+    'Puissance4': 'fun',                #### NOTE : ce jeu se joue a 2 ou a 4 , on ne peux pas jouer a 3 joueurs
+    'Pursuit': 'fun',   
+    'Risk': 'fun',
+    'Robin_Drink': 'fun',
+    'Robin_Strip': 'fun',
+    'Sabotage': 'fun',   
+    'Simon': 'fun',
+    'Target': 'fun',
+    'Tower': 'fun',
+    'Treasure': 'fun',
+    'Voleur': 'fun',
+    'Yahtzydarts': 'fun', 
     
-    'Balltrap' : 'sport',
-    'Baseball' : 'sport',
-    'Bowling' : 'sport',   
-    'Fighters' : 'sport',
-    'Football' : 'sport',                #### NOTE : ce jeu ce joue a 2 uniquement
-    'Golf' : 'sport',
-    'Horse' : 'sport',
-    'Pingpong' : 'sport',    
-    'Punch-Out' : 'sport',       
-    'Snooker' : 'sport',
-    'Tennis' : 'sport'                   #### NOTE : ce jeu ce joue a 2 ou a 4 , on ne peux pas jouer a 3 joueurs    
+    'Balltrap': 'sport',
+    'Baseball': 'sport',
+    'Bowling': 'sport',   
+    'Fighters': 'sport',
+    'Football': 'sport',                #### NOTE : ce jeu se joue a 2 uniquement
+    'Golf': 'sport',
+    'Horse': 'sport',
+    'Pingpong': 'sport',    
+    'Punch-Out': 'sport',       
+    'Snooker': 'sport',
+    'Tennis': 'sport'                   #### NOTE : ce jeu se joue a 2 ou a 4 , on ne peux pas jouer a 3 joueurs    
     
     }
 
 AlternateConfig['Raspberry'] = {
-    'EXTENDED_GPIO': '1',
     'PIN_UP': 'A0',
     'PIN_DOWN': 'A1',
     'PIN_LEFT': 'A2',
@@ -332,11 +389,18 @@ DefaultConfig['Raspberry_BoardPinsOuts'] = {}
 for pin in range(1, 11):
     DefaultConfig['Raspberry_BoardPinsOuts'][f'PIN_{pin}'] = ''
 
+# Buttons connected to gpio
+GPIO_BUTTONS_CONFIG = {
+        'PLAYERBUTTON': '', 'GAMEBUTTON': '', 'BACKUPBUTTON': '', 'EXTRABUTTON': '',
+        'MISSDART': '', 'SHOCKSENSOR': ''}
+
 #
 DefaultConfig['SectionKeys'] = {}
 
 for key in [f'{mult}{num}' for mult in ['s', 'S', 'D', 'T'] for num in range(1, 21)] + ['SB', 'DB']:
     DefaultConfig['SectionKeys'][key] = ''
+for button in GPIO_BUTTONS_CONFIG:
+    DefaultConfig['SectionKeys'][button] = ''
 
 #
 DefaultConfig['LEDTarget'] = {}
@@ -434,7 +498,7 @@ DefaultConfig['Colorset'] = {
     'message-bg': (255, 255, 255),
     'message-text': (0, 0, 0),
 
-    # Target
+    # Target LED option "Allumer tous les segments avec les couleurs d'origine":
     'target-sb': (189, 108, 109),
     'target-db': (107, 134, 176),
     'target-double1': (255, 255, 255),
@@ -462,12 +526,13 @@ DefaultConfig['Colorset'] = {
 }
 
 EXTENDED_CONFIG = {
-        'EXTENDED_GPIO': '1', 'PIN_UP': 'A0', 'PIN_DOWN': 'A1', 'PIN_LEFT': 'A2', 'PIN_RIGHT': 'A3',
+        'PIN_UP': 'A0', 'PIN_DOWN': 'A1', 'PIN_LEFT': 'A2', 'PIN_RIGHT': 'A3',
         'PIN_MINUS': 'A5', 'PIN_PLUS': 'A4', 'PIN_VALIDATE': 'A6', 'PIN_CANCEL': 'B1', 'PIN_NEXTPLAYER': 'B0',
         'PIN_BACK': 'A7', 'PIN_GAMEBUTTON': '', 'PIN_VOLUME_UP': '', 'PIN_VOLUME_DOWN': '',
         'PIN_VOLUME_MUTE': '', 'PIN_CPTPLAYER': '', 'PIN_MISSDART': '', 'LIGHT_NAVIGATE': '',
         'LIGHT_NEXTPLAYER': '', 'LIGHT_BACK': '', 'LIGHT_PLAYERS': '', 'LIGHT_LASER': '', 'LIGHT_FLASH': '',
-        'LIGHT_VALIDATE': '', 'LIGHT_CELEBRATION' :'', 'LIGHT_CELEBRATION2' :'', 'LIGHT_LIGHT': ''
+        'LIGHT_VALIDATE': '', 'LIGHT_CELEBRATION' :'', 'LIGHT_CELEBRATION2' :'', 'LIGHT_LIGHT': '',
+        'TOY1': 0, 'TOY2': 0, 'TOY3': 0, 'TOY4': 0
     }
 
 GBCardConfig = {
@@ -528,7 +593,7 @@ ClkCardConfig = {
     }
 
 JtCardConfig = {
-    'CARD_NAME': 'Carte de Julien',
+    'CARD_NAME': 'Carte de Julien V1',
     'INPUT': {
         'PIN_1': '17', 'PIN_2': '27', 'PIN_3': '22', 'PIN_4': '10', 'PIN_5': '9',
         'PIN_6': '11', 'PIN_7': '24', 'PIN_8': '25', 'PIN_9': '8', 'PIN_10': '7',
@@ -550,7 +615,35 @@ JtCardConfig = {
         'T10': '75', 'T11': '2720', 'T12': '275', 'T13': '85', 'T14': '1720', 'T15': '720',
         'T16': '2520', 'T17': '820', 'T18': '115', 'T19': '1120', 'T20': '255', 'SB': '2719',
         'DB': '1719',
-        'PLAYERBUTTON': '', 'GAMEBUTTON': '', 'BACKUPBUTTON': '', 'EXTRABUTTON': ''
+        'PLAYERBUTTON': '', 'GAMEBUTTON': '', 'BACKUPBUTTON': '', 'EXTRABUTTON': '', 'MISSDART': ''
+        },
+    'EXTENDED': EXTENDED_CONFIG
+    }
+
+Jt2CardConfig = {
+    'CARD_NAME': 'Carte de Julien V2',
+    'INPUT': {
+        'PIN_1': '17', 'PIN_2': '27', 'PIN_3': '22', 'PIN_4': '23', 'PIN_5': '24',
+        'PIN_6': '9', 'PIN_7': '25', 'PIN_8': '11', 'PIN_9': '8', 'PIN_10': '7',
+        'PIN_11': '', 'PIN_12': '', 'PIN_13': '', 'PIN_14': '', 'PIN_15': '', 'PIN_16': ''
+        },
+    'OUTPUT': {
+        'PIN_1': '20', 'PIN_2': '26', 'PIN_3': '19', 'PIN_4': '16', 'PIN_5': '13',
+        'PIN_6': '6', 'PIN_7': '5', 'PIN_8': '', 'PIN_9': '', 'PIN_10': ''
+        },
+    'KEYS': {
+        'S1':'2417','S2':'1622','S3':'822','S4':'817','S5':'1917','S6':'1617',
+        'S7':'2422','S8':'1922','S9':'617','S10':'2017','S11':'1322','S12':'1317',
+        'S13':'717','S14':'622','S15':'2022','S16':'2622','S17':'722','S18':'2517',
+        'S19':'2522','S20':'2617','D1':'2415','D2':'1610','D3':'810','D4':'815',
+        'D5':'1915','D6':'1615','D7':'2410','D8':'1910','D9':'615','D10':'2015','D11':'1310',
+        'D12':'1315','D13':'715','D14':'610','D15':'2010','D16':'2610','D17':'710',
+        'D18':'2515','D19':'2510','D20':'2615','T1':'2411','T2':'169','T3':'89',
+        'T4':'811','T5':'1911','T6':'1611','T7':'249','T8':'199','T9':'611',
+        'T10':'2011','T11':'139','T12':'1311','T13':'711','T14':'69','T15':'209',
+        'T16':'269','T17':'79','T18':'2511','T19':'259','T20':'2611','SB':'1327',
+        'DB':'627',
+        'PLAYERBUTTON': '', 'GAMEBUTTON': '', 'BACKUPBUTTON': '', 'EXTRABUTTON': '', 'MISSDART': ''
         },
     'EXTENDED': EXTENDED_CONFIG
     }
@@ -734,9 +827,55 @@ JiLedsConfig = {'S1': '99,98,97,95,94,93,92', 'S2': '29,28,27,25,24,23,22', 'S3'
     'D16': '171,170', 'D17': '19,18', 'D18': '89,88', 'D19': '191,190', 'D20': '101,100', 'T1': '96', 'T2': '26',
     'T3': '6', 'T4': '76', 'T5': '113', 'T6': '56', 'T7': '183', 'T8': '163', 'T9': '133', 'T10': '46', 'T11': '156',
     'T12': '126', 'T13': '63', 'T14': '146', 'T15': '33', 'T16': '176', 'T17': '13', 'T18': '83', 'T19': '196',
-    'T20': '106', 'E1': '', 'E2': '', 'E3': '', 'E4': '', 'E5': '', 'E6': '', 'E7': '', 'E8': '', 'E9': '', 'E10': '',
-    'E11': '', 'E12': '', 'E13': '', 'E14': '', 'E15': '', 'E16': '', 'E17': '', 'E18': '', 'E19': '', 'E20': '',
+    'T20': '106', 'E1': '223,222', 'E2': '209,208', 'E3': '205,204', 'E4': '219,218', 'E5': '227,226', 'E6': '215,214', 
+    'E7': '241,240', 'E8': '237,236', 'E9': '231,230', 'E10': '213,212', 'E11': '235,234', 'E12': '229,228', 'E13': '217,216', 
+    'E14': '233,232', 'E15': '211,210', 'E16': '239,238', 'E17': '207,206', 'E18': '221,220', 'E19': '243,242', 'E20': '225,224',
     'SB': '200,201,202', 'DB': '203'}
+
+MMWorkshopVdartsLedsConfig = {'S1':'79,78,76,75,74','S2':'23,22,20,19,18','S3':'7,6,4,3,2',
+    'S4':'63,62,60,59,58','S5':' 88,89,91,92,93','S6':'47,46,44,43,42',
+    'S7':'144,145,147,148,149','S8':'128,129,131,132,133','S9':'104,105,107,108,109',
+    'S10':'39,38,36,35,34','S11':'127,126,124,123,122','S12':'103,102,100,99,98',
+    'S13':'48,49,51,52,53','S14':'119,118,116,115,114','S15':'24,25,27,28,29',
+    'S16':'143,142,140,139,138','S17':'8,9,11,12,13','S18':'64,65,67,68,69',
+    'S19':'159,158,156,155,154','S20':'87,86,84,83,82','D1':'73,72','D2':'17,16',
+    'D3':'1,0','D4':'57,56','D5':'95,94','D6':'41,40','D7':'151,150','D8':'135,134','D9':'111,110',
+    'D10':'33,32','D11':'121,120','D12':'97,96','D13':'55,54','D14':'113,112','D15':'31,30',
+    'D16':'137,136','D17':'15,14','D18':'71,70','D19':'153,152','D20':'81,80 ','T1':'77','T2':'21',
+    'T3':'5','T4':'61','T5':'90','T6':'45','T7':'146','T8':'130','T9':'106','T10':'37','T11':'125',
+    'T12':'101','T13':'50','T14':'117','T15':'26','T16':'141','T17':'10','T18':'66','T19':'157',
+    'T20':'85','E1':'','E2':'','E3':'','E4':'','E5':'','E6':'','E7':'','E8':'','E9':'','E10':'',
+    'E11':'','E12':'','E13':'','E14':'','E15':'','E16':'','E17':'','E18':'','E19':'','E20':'',
+    'SB':'160,161,162','DB':'163'}
+
+MMWorksVDartsCardConfig = {
+    'CARD_NAME': 'MMWorkshop VDarts Card',
+    'INPUT': {
+        'PIN_1': '6', 'PIN_2': '13', 'PIN_3': '19', 'PIN_4': '26', 'PIN_5': '20',
+        'PIN_6': '16', 'PIN_7': '7', 'PIN_8': '8', 'PIN_9': '25', 'PIN_10': '24',
+        'PIN_11': '14', 'PIN_12': '4', 'PIN_13': '', 'PIN_14': '', 'PIN_15': '', 'PIN_16': ''
+        },
+    'OUTPUT': {
+        'PIN_1': '11', 'PIN_2': '9', 'PIN_3': '10', 'PIN_4': '22', 'PIN_5': '27',
+        'PIN_6': '17', 'PIN_7': '15', 'PIN_8': '', 'PIN_9': '', 'PIN_10': ''
+        },
+    'KEYS': {
+        's1':'1922', 's2':'89', 's3':'249', 's4':'69', 's5':'169', 's6':'1311',
+        's7':'49', 's8':'1410', 's9':'822', 's10':'1911', 's11':'2422', 's12':'1611',
+        's13':'611', 's14':'2522', 's15':'2611', 's16':'411', 's17':'259', 's18':'1310',
+        's19':'149', 's20':'2622', 'S1':'1917', 'S2':'810', 'S3':'2410', 'S4':'617', 'S5':'1627',
+        'S6':'1322', 'S7':'427', 'S8':'1417', 'S9':'817', 'S10':'1910', 'S11':'2417', 'S12':'1617',
+        'S13':'627', 'S14':'2517', 'S15':'2610', 'S16':'417', 'S17':'2510', 'S18':'1317', 'S19':'1422',
+        'S20':'2617', 'D1':'1915', 'D2':'710', 'D3':'727', 'D4':'615', 'D5':'2015', 'D6':'2027', 'D7':'715',
+        'D8':'1415', 'D9':'815', 'D10':'2022', 'D11':'2415', 'D12':'1615', 'D13':'2017', 'D14':'2515', 'D15':'2010',
+        'D16':'415', 'D17':'722', 'D18':'1315', 'D19':'717', 'D20':'2615', 'T1':'1927', 'T2':'811', 'T3':'2411',
+        'T4':'622', 'T5':'1610', 'T6':'139', 'T7':'410', 'T8':'1427', 'T9':'827', 'T10':'199', 'T11':'2427',
+        'T12':'1622', 'T13':'610', 'T14':'2527', 'T15':'269', 'T16':'422', 'T17':'2511', 'T18':'1327',
+        'T19':'1411', 'T20':'2627', 'SB':'711', 'DB':'2011'
+        },
+    'EXTENDED': EXTENDED_CONFIG
+    }
+
 
 #
 # Start of Config Class
@@ -744,6 +883,9 @@ JiLedsConfig = {'S1': '99,98,97,95,94,93,92', 'S2': '29,28,27,25,24,23,22', 'S3'
 class Config:
     def __init__(self, logs):
         # Define paths
+        self.GPIO_BUTTONS_CONFIG = GPIO_BUTTONS_CONFIG
+        self.default_SectionKeys = DefaultConfig['SectionKeys']
+
         self.userpath = os.path.expanduser('~')
         self.user_dir = f'{self.userpath}/.pydarts'
         self.other_dir = f'{self.user_dir}/other'
@@ -787,7 +929,7 @@ class Config:
               's3': 3, 'S3': 3, 'D3': 6, 'T3': 9,
               's2': 2, 'S2': 2, 'D2': 4, 'T2': 6,
               's1': 1, 'S1': 1, 'D1': 2, 'T1': 3,
-              'MISSDART': 0, 'MISS': 0
+              'MISS': 0
               }
         # pyDarts running Version
         self.pyDartsVersion = self.get_version()
@@ -818,6 +960,8 @@ class Config:
         self.inputs = DefaultConfig['Raspberry_BoardPinsIns']
         self.leds = DefaultConfig['Raspberry_Leds']
         self.buttons = DefaultConfig['Raspberry']
+
+        self.camera = DefaultConfig['Camera']
 
         # Print version if requested
         with open('/proc/device-tree/model') as f:
@@ -866,13 +1010,13 @@ class Config:
         self.file_exists = True
         # Create config folder in profile if necessary
         if not os.path.isfile(self.configFile):
-            self.logs.log("WARNING", f"Creating folder {self.user_dir}")
+            self.logs.warning(f"Creating folder {self.user_dir}")
             if not os.path.exists(self.user_dir):
                 os.makedirs(self.user_dir)
             self.file_exists = False
             return False
 
-        self.logs.log("DEBUG", f"Config file {self.configFile} exists. We use it so...")
+        self.logs.debug(f"Config file {self.configFile} exists. We use it so...")
         return True
 
     def config_section(self, section, text=None):
@@ -1031,6 +1175,12 @@ class Config:
         self.conf += f"illumination_mode:{Global['illumination_mode']}\n" 
         self.conf += "### light strip illumination color\n" 
         self.conf += f"illumination_color:{Global['illumination_color']}\n\n" 
+        self.conf += "### Fast games mode\n"
+        self.conf += f"fast_games_mode:{Global['fast_games_mode']}\n"
+        self.conf += "### Only favorites games mode\n"
+        self.conf += f"only_favorites_games_mode:{Global['only_favorites_games_mode']}\n"
+        self.conf += "### Check for update available\n"
+        self.conf += f"check_for_updates:{Global['check_for_updates']}\n"
 
         Advanced = self.config["SectionAdvanced"]
 
@@ -1065,6 +1215,9 @@ class Config:
         self.conf += f"target-bgcolor2:{Advanced['target-bgcolor2']}\n"
         self.conf += f"target-bgcolor3:{Advanced['target-bgcolor3']}\n"
         self.conf += f"target-bgbrightness:{Advanced['target-bgbrightness']}\n"
+        self.conf += "### Direct play : both prefered_game and firstnames must be filled\n"
+        self.conf += f"directplay:{Advanced['directplay']}\n"
+        self.conf += f"prefered_game:{Advanced['prefered_game']}\n"
         self.conf += "### Prefered Games\n"
         self.conf += f"preferedclassicgame:{Advanced['preferedclassicgame']}\n"
         self.conf += f"preferedfungame:{Advanced['preferedfungame']}\n"
@@ -1107,6 +1260,8 @@ class Config:
         self.conf += "### Close all open games in MasterServer (0 or 1):\n"
         self.conf += f"masterclosegames:{Server['masterclosegames']}\n"
 
+        self.config_section("Camera", "Camera USB settings")
+
         self.config_section("Favorites", "High level customization")
         self.config_section("Raspberry_BoardPinsIns", "Input GPIO section")
         self.config_section("Raspberry_BoardPinsOuts", "Output GPIO section")
@@ -1121,13 +1276,13 @@ class Config:
         for game in game_list:
             self.config_section(game, f"{game.replace('game-', '')}'s options")
 
-        self.logs.log("DEBUG", f"Writing config file: {self.configFile}")
+        self.logs.debug(f"Writing config file: {self.configFile}")
         try:
             file = open(self.configFile, 'w')
             file.write(self.conf)
             file.close()
         except:
-            self.logs.log("FATAL", f"Unable to write config file {self.configFile}. Please check permissions. Exiting.")
+            self.logs.fatal(f"Unable to write config file {self.configFile}. Please check permissions. Exiting.")
             exit(1)
 
     def init_section(self, section):
@@ -1147,7 +1302,7 @@ class Config:
             try:
                 self.config[section][o] = values[o]
             except:
-                self.logs.log("WARNING", f"No config for {o}")
+                self.logs.warning(f"No config for {o}")
 
     def set_game_config(self, game, values):
         """
@@ -1169,7 +1324,7 @@ class Config:
             try:
                 self.config[section][o] = values[o]
             except:
-                self.logs.log("WARNING", f"No config for {o}")
+                self.logs.warning(f"No config for {o}")
     
     def set_clk_card_config(self):
         """
@@ -1188,6 +1343,15 @@ class Config:
         self.set_config('Raspberry_BoardPinsOuts', JtCardConfig['OUTPUT'])
         self.set_config('SectionKeys', JtCardConfig['KEYS'])
         self.set_config('Raspberry', JtCardConfig['EXTENDED'])
+
+    def set_jt2_card_config(self):
+        """
+        Set Julien's card config
+        """
+        self.set_config('Raspberry_BoardPinsIns', Jt2CardConfig['INPUT'])
+        self.set_config('Raspberry_BoardPinsOuts', Jt2CardConfig['OUTPUT'])
+        self.set_config('SectionKeys', Jt2CardConfig['KEYS'])
+        self.set_config('Raspberry', Jt2CardConfig['EXTENDED'])
 
     def set_ji_card_config(self):
         """
@@ -1259,6 +1423,22 @@ class Config:
         Set Jimmy's leds config
         """
         self.set_config('LEDTarget', JiLedsConfig)
+        
+    def set_mmworks_vdartscard_config(self):
+        """
+        Set MMWorkshop VDarts card config
+        """
+        self.set_config('Raspberry_BoardPinsIns', MMWorksVDartsCardConfig['INPUT'])
+        self.set_config('Raspberry_BoardPinsOuts', MMWorksVDartsCardConfig['OUTPUT'])
+        self.set_config('SectionKeys', MMWorksVDartsCardConfig['KEYS'])
+        self.set_config('Raspberry', MMWorksVDartsCardConfig['EXTENDED'])
+
+    def set_mmworks_leds_config(self):
+        """
+        Set MMWorkshop's leds config
+        """
+        self.set_config('LEDTarget', MMWorkshopVdartsLedsConfig)
+        
 
     def read_colorset(self, colorset_file):
         """
@@ -1267,24 +1447,24 @@ class Config:
         section = 'Colorset'
         Config = configparser.ConfigParser(inline_comment_prefixes="#")
         Config.optionxform = str
-        self.logs.log("DEBUG", f"Working on Colorset's section of {colorset_file}")
+        self.logs.debug(f"Working on Colorset's section of {colorset_file}")
         try:
              Config.read(colorset_file)
         except:
-            self.logs.log("ERROR", "No {colorset_file} file")
+            self.logs.error("No {colorset_file} file")
             return None
 
         try:
             #options = self.init_section(section)
             options = {}
         except:
-            self.logs.log("WARNING", f"No {section} section in {colorset_file}")
+            self.logs.warning(f"No {section} section in {colorset_file}")
             return None
 
         try:
             file_options = Config.options(section)
         except Exception as e:
-            self.logs.log("DEBUG", f"Don't forget that you may create section named {section} in {colorset_file}")
+            self.logs.debug(f"Don't forget that you may create section named {section} in {colorset_file}")
             return None
 
         for option in file_options:
@@ -1292,9 +1472,9 @@ class Config:
                 value = Config.get(section, option)
                 options[option] = ast.literal_eval(value)
             except Exception as e:
-                self.logs.log("ERROR", f"Configuration issue with this option : {option}")
-                self.logs.log("DEBUG", f"Error was:  {e}".format(e))
-                self.logs.log("DEBUG", f"Use default:  {DefaultConfig[section][option]}")
+                self.logs.error(f"Configuration issue with this option : {option}")
+                self.logs.debug(f"Error was:  {e}".format(e))
+                self.logs.debug(f"Use default:  {DefaultConfig[section][option]}")
                 options[option] = DefaultConfig[section][option]
 
         # Store in local object
@@ -1309,29 +1489,29 @@ class Config:
 
         # If somedays you like to preserve case in options, just uncomment the following
         Config.optionxform = str
-        self.logs.log("DEBUG", f"Working on section {section} of your config file.")
+        self.logs.debug(f"Working on section {section} of your config file.")
         try:
             Config.read(self.configFile)
         except:
-            self.logs.log("FATAL", f"Your config file {self.configFile} contains errors. Correct them or rename this file (it will be regenerated).")
+            self.logs.fatal(f"Your config file {self.configFile} contains errors. Correct them or rename this file (it will be regenerated).")
             exit (1)
 
         # Init with defaults values
         try:
             options = self.init_section(section)
         except:
-            self.logs.log("WARNING", f"No default {section} section. Use config only")
+            self.logs.warning(f"No default {section} section. Use config only")
             options = {}
 
         try:
             file_options = Config.options(section)  # Try to loads options from config file
         except Exception as e:
             if section in DefaultConfig:       # Warn only if the requested section is part of the config
-                self.logs.log("WARNING", f"Your config file does not contain a section named {section}.")
-                self.logs.log("WARNING", "Will use default section values")
+                self.logs.warning(f"Your config file does not contain a section named {section}.")
+                self.logs.warning("Will use default section values")
                 file_options = DefaultConfig[section]
             else:
-                self.logs.log("DEBUG", f"Don't forget that you may create section named {section} to customize pyDarts")
+                self.logs.debug(f"Don't forget that you may create section named {section} to customize pyDarts")
                 self.config[section] = {} # Create empty config values even if the section does not exists
                 if none != None:
                     return ''
@@ -1340,7 +1520,7 @@ class Config:
 
         for option in file_options:
             if not section.startswith('game-') and not option in DefaultConfig[section]:
-                self.logs.log("WARNING", f"Unexpected {option} in {section}")
+                self.logs.warning(f"Unexpected {option} in {section}")
             else:
                 try:
                     value = Config.get(section, option)
@@ -1359,9 +1539,9 @@ class Config:
                     else:
                         options[option] = value
                 except Exception as e:
-                    self.logs.log("ERROR", f"Configuration issue with this option : {option}")
-                    self.logs.log("DEBUG", f"Error was:  {e}".format(e))
-                    self.logs.log("DEBUG", f"Use default:  {DefaultConfig[section][option]}")
+                    self.logs.error(f"Configuration issue with this option : {option}")
+                    self.logs.debug(f"Error was:  {e}".format(e))
+                    self.logs.debug(f"Use default:  {DefaultConfig[section][option]}")
                     options[option] = DefaultConfig[section][option]
 
         if section == 'Raspberry':
@@ -1370,17 +1550,17 @@ class Config:
             """
             config_v2 = True
             for option in options:
-                if options[option] != '0' and option != 'EXTENDED_GPIO':
+                if options[option] != '0':
                     config_v2 = False
 
-            if config_v2 and options['EXTENDED_GPIO'] == '1':
+            if config_v2:
                 for option in options:
                     options[option] = AlternateConfig[section][option]
 
         # Store in local object
         self.config[section] = options
 
-        self.logs.log("DEBUG", f"Config[{section}]={self.config[section]}")
+        self.logs.debug(f"Config[{section}]={self.config[section]}")
 
         # Return options
         return options
@@ -1396,7 +1576,7 @@ class Config:
         self.config[section][item] = value
 
 
-    def get_value(self, section, key, req=True, defaultValue=False):
+    def get_value(self, section, key, required=True, default_value=False, split=None):
         """
         Return value for an option (first search CLI args, then config file, then search default value)
         Break if option is required, return false otherwise
@@ -1408,13 +1588,20 @@ class Config:
             if self.config[section][key] in ('True', 'False'):
                 return bool(self.config[section][key])
             else:
-                return self.config[section][key]
+                if self.config[section][key] is False and default_value is not None and default_value != 'None':
+                    return default_value
+                if self.config[section][key] is False and default_value == 'None':
+                    return None
+                if split is not None:
+                    return self.config[section][key].split(split)
+                else:
+                    return self.config[section][key]
 
-        if req:
-            self.logs.log("FATAL", f"Error getting required config value {key}. No command line, no config found, no default. Abort")
+        if required:
+            self.logs.fatal(f"Error getting required config value {key}. No command line, no config found, no default. Abort")
             sys.exit(1)
 
-        return defaultValue
+        return default_value
 
     def get_players_names(self):
         """
@@ -1424,3 +1611,86 @@ class Config:
         if players_names:
             return players_names.split(',')
         return False
+
+    def get_players_color(self):
+        """
+        Specific config (comma separated values)
+        """
+        players_color = self.get_value('Favorites', 'players_color')
+        if players_color:
+            return eval(players_color)
+        return {}
+    
+    def get_colorset(self, personnal_dir, colorset):
+        '''
+        Init and get the ColorSet
+        '''
+        try:         
+            colorset = self.read_colorset(f"{personnal_dir}/themes/{colorset}/other/Colorset.cfg")
+        except:
+            try:
+                colorset = self.read_colorset(f"{personnal_dir}/themes/{colorset}/Colorset.cfg")
+            except:
+                try:                
+                    colorset = self.read_colorset(f"{personnal_dir}/themes/clear/other/Colorset.cfg")
+                except:
+                    try:                
+                        colorset = self.read_colorset(f"{personnal_dir}/themes/clear/Colorset.cfg")                
+                    except Exception as e:
+                        self.logs.warning("Error during load of custom colorset")
+                        self.logs.warning(f"Error was {e}")
+        return colorset
+    
+    def set_value_colorset(self, colorset_path, list_of_key_and_value):
+        '''
+        Write in the ColorSet
+        '''
+        try:
+            path = colorset_path + "/other/Colorset.cfg"
+            all_line_in_colorset_file = []
+
+            self.logs.debug(f"Reading colorset file: {path}")
+            
+            with open(path, 'r') as colorset:
+                colorset_lines = colorset.read()
+            colorset.close()
+                
+            for line in colorset_lines.split("\n"):
+                if (any(line.split(':')[0] in value for value in list_of_key_and_value)):
+                    all_line_in_colorset_file.append((f"{line.split(':')[0]}:{dict(list_of_key_and_value)[line.split(':')[0]]}"))
+                else:
+                    all_line_in_colorset_file.append(line)
+                    
+            colorset_lines = "\n".join(all_line_in_colorset_file)
+                
+            self.logs.debug(f"Writing colorset file: {path}")
+            
+            try:
+                with open(path, 'w', encoding = "utf-8") as colorset:
+                    colorset.write(colorset_lines)
+                colorset.close()
+            except:
+                self.logs.fatal(f"Unable to write colorset file {path} with cconfig.set_value_colorset(). Please check permissions. Exiting.")
+                exit(1)
+                
+        except Exception as ex:
+            self.logs.error(f"Error in cconfig set_value_colorset() : {ex}")
+    
+    def get_values_segment_colors(self, all_colorset_values):
+        '''
+        Get values only for segments colors
+        '''
+        try:
+            # 2 - list2 TLS - 20,18,13,10,2,3,7,8,14,12
+            # 1 - list1 TLS - 1,4,6,15,17,19,16,11,9,5
+            # format r,g,b sans parenthese pour convenir a 'TargetLeds_Server'
+            return [str(all_colorset_values['target-simple1']).replace('(','').replace(')','').replace(' ',''),
+                    str(all_colorset_values['target-simple2']).replace('(','').replace(')','').replace(' ',''),
+                    str(all_colorset_values['target-double1']).replace('(','').replace(')','').replace(' ',''),
+                    str(all_colorset_values['target-double2']).replace('(','').replace(')','').replace(' ',''),
+                    str(all_colorset_values['target-triple1']).replace('(','').replace(')','').replace(' ',''),
+                    str(all_colorset_values['target-triple2']).replace('(','').replace(')','').replace(' ',''),
+                    str(all_colorset_values['target-sb']).replace('(','').replace(')','').replace(' ',''),
+                    str(all_colorset_values['target-db']).replace('(','').replace(')','').replace(' ','')]
+        except Exception as ex:
+            self.logs.error(f"Error in cconfig get_values_segment_colors() : {ex}")

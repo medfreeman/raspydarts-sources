@@ -167,6 +167,9 @@ class Game(cgame.Game):
         """
         Actions done before each dart throw - for example, check if the player is allowed to play
         """
+        
+        handler = self.init_handler()
+        
         if not self.finish :
             
             if player_launch == 1:
@@ -175,7 +178,7 @@ class Game(cgame.Game):
                     for player in players:
                         player.reset_rounds(self.max_round)
     
-            return_code = 0
+            handler['return_code'] = 0
             # You will probably save the turn to be used in case of backup turn (each first launch) :
             if player_launch == 1:
                 self.save_turn(players)
@@ -269,10 +272,11 @@ class Game(cgame.Game):
                 self.rpi.set_target_leds('|'.join(leds))
    
             #return return_code
-
+            
+            
         # Print debug output
-        self.logs.log("DEBUG", self.infos)
-        return return_code
+        self.logs.debug(self.infos)
+        return handler
                 
 
     def post_dart_check(self, hit, players, actual_round, actual_player, player_launch):
@@ -280,9 +284,11 @@ class Game(cgame.Game):
         Function run after each dart throw - for example, add points to player
         """
 
+        handler = self.init_handler()
+
         if not self.finish :
             
-            return_code = 0
+            handler['return_code'] = 0
     
             # Apply the coefficient to simple double triple and bull (Master case)
             if self.master:
@@ -316,16 +322,19 @@ class Game(cgame.Game):
                     # Keep it for Stats
                     players[actual_player].increment_hits(hit)
                     # Play sound if touch is valid
-                    self.display.sound_for_touch(hit) # Play sound
+                    #self.display.sound_for_touch(hit) # Play sound
+                    handler['sound'] = hit
                     # Add value score (score equals hits in this game)
                     players[actual_player].score += hitcoeff
                     # Display hits on screen
                     players[actual_player].columns[player_launch] = (f"+{hitcoeff}", 'txt')
                     if super(Game, self).play_show(players[actual_player].darts, hit, play_special=True):
-                        self.display.sound_for_touch(hit) # Good start !
+                        #self.display.sound_for_touch(hit) # Good start !
+                        handler['sound'] = hit
                     players[actual_player].add_dart(actual_round, player_launch, hit, score=hitcoeff, check=True)
                 else:
-                    self.display.play_sound('plouf')
+                    #self.display.play_sound('plouf')
+                    handler['sound'] = 'plouf'
                     players[actual_player].add_dart(actual_round, player_launch, hit, score=0, check=False)
                     players[actual_player].columns[player_launch] = ("cross-mark", 'image')
     
@@ -336,17 +345,20 @@ class Game(cgame.Game):
                     # Keep it for Stats
                     players[actual_player].increment_hits(hit)
                     # Play sound if touch is valid
-                    self.display.sound_for_touch(hit) # Play sound
+                    #self.display.sound_for_touch(hit) # Play sound
+                    handler['sound'] = hit
                     # Add value score (score equals hits in this game)
                     hitcoeff = 3
                     players[actual_player].score += hitcoeff
                     # Display hits on screen
                     players[actual_player].columns[player_launch] = (f"+{hitcoeff}", 'txt')
                     if super(Game, self).play_show(players[actual_player].darts, hit, play_special=True):
-                        self.display.sound_for_touch(hit) # Good start !
+                        #self.display.sound_for_touch(hit) # Good start !
+                        handler['sound'] = hit
                     players[actual_player].add_dart(actual_round, player_launch, hit, score=hitcoeff, check=True)
                 else:
-                    self.display.play_sound('plouf')
+                    #self.display.play_sound('plouf')
+                    handler['sound'] = 'plouf'
                     players[actual_player].add_dart(actual_round, player_launch, hit, score=0, check=False)
                     players[actual_player].columns[player_launch] = ("cross-mark", 'image')
 #### GESTION DOUBLE            
@@ -355,17 +367,20 @@ class Game(cgame.Game):
                     # Keep it for Stats
                     players[actual_player].increment_hits(hit)
                     # Play sound if touch is valid
-                    self.display.sound_for_touch(hit) # Play sound
+                    #self.display.sound_for_touch(hit) # Play sound
+                    handler['sound'] = hit
                     # Add value score (score equals hits in this game)
                     hitcoeff = 3
                     players[actual_player].score += hitcoeff
                     # Display hits on screen
                     players[actual_player].columns[player_launch] = (f"+{hitcoeff}", 'txt')
                     if super(Game, self).play_show(players[actual_player].darts, hit, play_special=True):
-                        self.display.sound_for_touch(hit) # Good start !
+                        #self.display.sound_for_touch(hit) # Good start !
+                        handler['sound'] = hit
                     players[actual_player].add_dart(actual_round, player_launch, hit, score=hitcoeff, check=True)
                 else:
-                    self.display.play_sound('plouf')
+                    #self.display.play_sound('plouf')
+                    handler['sound'] = 'plouf'
                     players[actual_player].add_dart(actual_round, player_launch, hit, score=0, check=False)
                     players[actual_player].columns[player_launch] = ("cross-mark", 'image')
 
@@ -376,7 +391,8 @@ class Game(cgame.Game):
                         # Keep it for Stats
                         players[actual_player].increment_hits(hit)
                         # Play sound if touch is valid
-                        self.display.sound_for_touch(hit) # Play sound
+                        #self.display.sound_for_touch(hit) # Play sound
+                        handler['sound'] = hit
                         self.toucher += 1
                         ### gestion nb de touche
                         if self.toucher == 3 :
@@ -388,10 +404,12 @@ class Game(cgame.Game):
                         #players[actual_player].columns[player_launch] = (f"+{hitcoeff}", 'txt')
                         players[actual_player].columns[player_launch] = ("check-mark", 'image')
                         if super(Game, self).play_show(players[actual_player].darts, hit, play_special=True):
-                            self.display.sound_for_touch(hit) # Good start !
+                            #self.display.sound_for_touch(hit) # Good start !
+                            handler['sound'] = hit
                         players[actual_player].add_dart(actual_round, player_launch, hit, score=hitcoeff, check=True)
                 else:
-                    self.display.play_sound('plouf')
+                    #self.display.play_sound('plouf')
+                    handler['sound'] = 'plouf'
                     players[actual_player].add_dart(actual_round, player_launch, hit, score=0, check=False)
                     players[actual_player].columns[player_launch] = ("cross-mark", 'image')
         
@@ -401,7 +419,8 @@ class Game(cgame.Game):
                         # Keep it for Stats
                         players[actual_player].increment_hits(hit)
                         # Play sound if touch is valid
-                        self.display.sound_for_touch(hit) # Play sound
+                        #self.display.sound_for_touch(hit) # Play sound
+                        handler['sound'] = hit
                         self.toucher += 1
                         ### gestion nb de touche
                         if self.toucher == 3 :
@@ -413,7 +432,8 @@ class Game(cgame.Game):
                         #players[actual_player].columns[player_launch] = (f"+{hitcoeff}", 'txt')
                         players[actual_player].columns[player_launch] = ("check-mark", 'image')
                         if super(Game, self).play_show(players[actual_player].darts, hit, play_special=True):
-                            self.display.sound_for_touch(hit) # Good start !
+                            #self.display.sound_for_touch(hit) # Good start !
+                            handler['sound'] = hit
                         players[actual_player].add_dart(actual_round, player_launch, hit, score=hitcoeff, check=True)
                         
                         try :
@@ -423,7 +443,8 @@ class Game(cgame.Game):
                         except:
                             pass        
                 else:
-                    self.display.play_sound('plouf')
+                    #self.display.play_sound('plouf')
+                    handler['sound'] = 'plouf'
                     players[actual_player].add_dart(actual_round, player_launch, hit, score=0, check=False)
                     players[actual_player].columns[player_launch] = ("cross-mark", 'image')
 
@@ -442,13 +463,16 @@ class Game(cgame.Game):
                 else : 
                     pourcent = int((bestscore / 3))
                 self.display.message([self.display.lang.translate('Practice-pourcent')+ str(pourcent) + ' fois '], 5000, None, 'middle', 'big')
-                return_code = 3
+                handler['return_code'] = 3
     
             # Record total dart thrown, total hits (S=1, D=2, T=3) and refresh players stats
             players[actual_player].darts_thrown += 1
             self.refresh_stats(players, actual_round)
+
+            # Time for shot or video ?
+            handler['take_shot'] = self.time_to_take_shot_or_video(hit)
     
-            return return_code
+            return handler
         
     
 
@@ -456,10 +480,11 @@ class Game(cgame.Game):
         """
         Whan missed button pressed
         """
-        #self.logs.log("DEBUG", f"MissButtonPressed : {player_launch}")
+        #self.logs.debug(f"MissButtonPressed : {player_launch}")
         #players[actual_player].columns[player_launch - 1] = ('MISS', 'image')
         players[actual_player].columns[player_launch] = ('MISS', 'txt')
-        self.display.play_sound('treasure_crane_jaune')
+        #self.display.play_sound('miss')
+        handler['sound'] = 'treasure_crane_jaune'
         players[actual_player].darts_thrown += 1
         hitcoeff = 0
         players[actual_player].score += hitcoeff
@@ -508,7 +533,7 @@ class Game(cgame.Game):
         """
         if data is not None:
             players[actual_player].columns[0] = (data, 'txt')
-            self.logs.log("DEBUG", "Setting random value for player {actual_player} to {data}")
+            self.logs.debug("Setting random value for player {actual_player} to {data}")
         self.random_from_net = True
 
     def next_game_order(self, players):

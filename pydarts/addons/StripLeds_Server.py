@@ -15,9 +15,9 @@ import Colors as CColors
 
 def usage(msg):
     print("")
-    print("StripLeds_Server.py [-host={}] <DMA_CHANNEL> <TOPIC> <PIN> <NB_PIXELS> <BRIGHTNESS>".format(MQTT_HOST))
+    print(f"StripLeds_Server.py [-host={MQTT_HOST}] [-type='grb'] <DMA_CHANNEL> <TOPIC> <PIN> <NB_PIXELS> <BRIGHTNESS>")
     print("")
-    print(" ERROR : {}".format(msg))
+    print(f" ERROR : {msg}")
     print("")
     sys.exit(9)
 
@@ -25,7 +25,7 @@ def usage(msg):
 def on_connect(client, userdata, flags, rc):
     # on_connect() means that if we lose the connection and reconnect then subscriptions will be renewed.
     client.subscribe(MQTT_TOPIC)
-    print("[DEBUG] StripLeds_Server : Listen",MQTT_TOPIC,"on",MQTT_HOST,flush=True)
+    print("[DEBUG] StripLeds_Server : Listen ", MQTT_TOPIC, " on ", MQTT_HOST, flush=True)
 
 # The callback for when a PUBLISH message is received from the server.
 def animation(t_event, msg):
@@ -42,12 +42,12 @@ def animation(t_event, msg):
     if msg[0:5:1] == 'Light':
         animation = 'Light'
         iterations = 1
-        color = msg.replace(' ','').split(",",2)[2].replace('(','').replace(')','')
+        color = msg.replace(' ', '').split(",", 2)[2].replace('(', '').replace(')', '')
         try:
             red = int(color.split(",")[0])
             green = int(color.split(",")[1])
             blue = int(color.split(",")[2])
-            C = (red,green,blue)
+            C = (red, green, blue)
         except:
             color = msg.split(',')[2]
 
@@ -55,7 +55,7 @@ def animation(t_event, msg):
     elif msg[0:4:1] == 'Wait':
         animation = 'wait'
         try:
-            wait_time = int(msg.replace(' ','').split(",")[1]) * int(msg.replace(' ','').split(",")[3])
+            wait_time = int(msg.replace(' ', '').split(",")[1]) * int(msg.replace(' ', '').split(",")[3])
         except:
             wait_time = 500
 
@@ -73,7 +73,7 @@ def animation(t_event, msg):
         animation = msg
         iterations = 1
 
-    if C is None :
+    if C is None:
         try:
             C = Colors.GetColor(color)
         except:
@@ -84,15 +84,17 @@ def animation(t_event, msg):
             else:
                 print(f"[DEBUG] StripLeds_Server : color is {color}", flush=True)
 
+    print(f"[DEBUG] TargetLeds_Server : Launch {animation}", flush=True)
+
     try:
-        if animation == 'quit' :
+        if animation == 'quit':
             print("[DEBUG] StripLeds_Server : Disconnect. Sleep 2")
             time.sleep(1)
-            client.publish(MQTT_TOPIC + '-ack',"ack")
+            client.publish(MQTT_TOPIC + '-ack', "ack")
             client.disconnect()
         elif animation == 'wait':
             CStrip.Wait(wait_time)
-        elif animation == 'off' :
+        elif animation == 'off':
             CStrip.AllLeds(Colors.GetColor('black'))
         elif animation == 'Alain':
             CStrip.SA_Alain(t_event, delay, C, iterations)
@@ -118,10 +120,10 @@ def animation(t_event, msg):
             CStrip.SA_FallReverse(t_event, delay, C, iterations)
         elif animation == 'Fall':
             CStrip.SA_Fall(t_event, delay, C, iterations)
-        elif animation == 'FireworksReverse' :
-            CStrip.SA_FireworksReverse(t_event, delay, C, iterations,5)
-        elif animation == 'Fireworks' :
-            CStrip.SA_Fireworks(t_event, delay, C, iterations,5)
+        elif animation == 'FireworksReverse':
+            CStrip.SA_FireworksReverse(t_event, delay, C, iterations, 5)
+        elif animation == 'Fireworks':
+            CStrip.SA_Fireworks(t_event, delay, C, iterations, 5)
         elif animation == 'Flames':
             CStrip.SA_Flames(t_event, delay, C, iterations)
         elif animation == 'Light':
@@ -155,27 +157,26 @@ def animation(t_event, msg):
             C = Colors.GetColor("goldenrod")
             CStrip.SA_Strobe(t_event, delay, C, iterations)
 
-        elif animation.split('|')[0] == 'leds' :
-            CStrip.TestSegment(animation.split('|')[1],WaitTime=1500)
+        elif animation.split('|')[0] == 'leds':
+            CStrip.TestSegment(animation.split('|')[1], WaitTime=1500)
         elif animation == 'debug':
-            CStrip.Debug(delay,C,1)
-        elif animation.startswith('brightness:') :
+            CStrip.Debug(delay, C, 1)
+        elif animation.startswith('brightness:'):
             # Change brightness
             CStrip.SetBrightness(animation.split(':')[1])
 
-        elif animation != 'stroke' and animation != 'stroke:' :
+        elif animation != 'stroke' and animation != 'stroke:':
             # Dart stroke segment
             pattern=re.compile("^stroke:[S,D,T][0-9][0-9]?$")
             if ( pattern.match(animation) or animation == 'stroke:SB' ):
                 C=Colors.GetColor()
-                #CStrip.Segment(50,C,3,animation.split(':')[1],False)
                 CStrip.SA_Strobe(t_event, 100, C, 3)
     except:
-        print("[WARNING] StripLeds_Server : Animation error :",animation,flush=True)
+        print("[WARNING] StripLeds_Server : Animation error :", animation, flush=True)
 
-    if Ack :
+    if Ack:
         print("[DEBUG] StripLeds_Server : publish Ack")
-        client.publish(MQTT_TOPIC,'ack')
+        client.publish(MQTT_TOPIC, 'ack')
 
 
 # The callback for when a PUBLISH message is received from the server.
@@ -205,51 +206,59 @@ def on_message(client, userdata, msg):
 MQTT_HOST = "localhost"
 MQTT_TOPIC = "pydarts/TargetLeds"
 DMA = 10
+STRIP_TYPE='grb'
 
-if len(sys.argv) < 5 or len(sys.argv) > 7 :
+if len(sys.argv) < 5 or len(sys.argv) > 8:
     usage("Bad number of arguments")
-else :
-
+else:
     i = 1
     if sys.argv[1][0:6] == '-host=':
         MQTT_HOST = sys.argv[1].split('=')[1]
         i += 1
 
-    try :
+    if sys.argv[i][0:6] == '-type=':
+        if sys.argv[i].split('=')[1] == 'rgb':
+            STRIP_TYPE = 'rgb'
+        if sys.argv[i].split('=')[1] == 'grb':
+            STRIP_TYPE = 'grb'
+        i += 1
+
+    try:
         DMA = int(sys.argv[i])
-    except :
-        usage("DMA {} not allowed (Only 9/10)".format(DMA))
-    if DMA not in (9,10) :
-        usage("DMA {} not allowed (Only 9/10)".format(DMA))
+    except:
+        usage(f"DMA {DMA} not allowed (Only 9/10)")
+    if DMA not in (9, 10):
+        usage(f"DMA {DMA} not allowed (Only 9/10)")
 
     MQTT_TOPIC = sys.argv[i+1]
 
-    try :
+    try:
         PIN = int(sys.argv[i+2])
-    except :
-        usage("PIN {} not allowed (Only 10/12/18/21)".format(sys.argv[i]))
-    if PIN not in (10,12,18,21) :
-        usage("PIN {} not allowed (Only 10/12/18/21)".format(PIN))
+    except:
+        usage(f"PIN {sys.argv[i]} not allowed (Only 10/12/18/21)")
 
-    try :
+    if PIN not in (10, 12, 18, 21):
+        usage(f"PIN {PIN} not allowed (Only 10/12/18/21)")
+
+    try:
         NB_PIXELS = int(sys.argv[i+3])
         if NB_PIXELS == 0:
             usage("NB_PIXELS must be greater than 0")
 
-    except :
+    except:
         usage("NB_PIXELS must be an integer")
 
-    try :
+    try:
         BRIGHTNESS = float(sys.argv[i+4])
-    except :
+    except:
         usage("BRIGHTNESS must be a float between 0 and 1")
     if BRIGHTNESS > 1 and BRIGHTNESS <= 100:
         BRIGHTNESS /= 100
 
-    if BRIGHTNESS < 0 or BRIGHTNESS > 1 :
+    if BRIGHTNESS < 0 or BRIGHTNESS > 1:
         usage("BRIGHTNESS must be a float between 0 and 1")
 
-    CStrip = CStrip.CStrip(PIN, NB_PIXELS, BRIGHTNESS, DMA, 'STRIP')
+    CStrip = CStrip.CStrip(PIN, NB_PIXELS, BRIGHTNESS, DMA, 'STRIP', strip_type=STRIP_TYPE)
     Colors = CColors.CColors()
 
     try:
@@ -257,7 +266,6 @@ else :
         client.on_connect = on_connect
         t_event = Event()
         client.on_message = on_message
-
         client.connect(MQTT_HOST, 1883, 60)
 
         client.loop_forever()

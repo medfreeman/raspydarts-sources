@@ -76,6 +76,8 @@ class Game(cgame.Game):
 
    # Actions done before each dart throw - for example, check if the player is allowed to play
     def pre_dart_check(self, players, actual_round, actual_player, player_launch):
+        
+        handler = self.init_handler()
         return_code = 0
         self.infos = ''
         # Set score at startup
@@ -83,7 +85,7 @@ class Game(cgame.Game):
             try:
                 LST = self.check_handicap(players)
             except Exception as e:
-                self.logs.log("ERROR", "Handicap failed : {}".format(e))
+                self.logs.error("Handicap failed : {}".format(e))
             for player in players:
                 # Init score
                 player.score = 0
@@ -91,7 +93,8 @@ class Game(cgame.Game):
 
 ### AFFICHE LE MESSAGE AU DEBUT DU TOUR SI 7eme manche = True
         if self.septieme and actual_round == 7:
-            self.display.message([self.display.lang.translate('Baseball-septieme')], 1000, None, 'middle', 'big')
+            #self.display.message([self.display.lang.translate('Baseball-septieme')], 1000, None, 'middle', 'big')
+            handler['message'] = 'Baseball-septieme'
 
         # Determine le segment du joueur et des advs
         if player_launch == 1:
@@ -140,7 +143,10 @@ class Game(cgame.Game):
         image_bb = f'baseball_image{players[actual_player].base_occupee}'
         players[actual_player].columns[6] = [image_bb, 'image']
 
-        return return_code
+        
+        handler['return_code'] = return_code
+        return handler
+        #return return_code
 
 
     def early_player_button(self, players, actual_player, actual_round):
@@ -187,7 +193,7 @@ class Game(cgame.Game):
     def post_dart_check(self, hit, players, actual_round, actual_player, player_launch):
 
         return_code = 0
-
+        handler = self.init_handler()
         self.show_hit = True
 
         self.display.sound_for_touch(hit) # Touched !
@@ -213,11 +219,13 @@ class Game(cgame.Game):
             self.infos += f'valeur temporaire (bull) : {temporaire}'
 
             self.show_hit = False
-            self.display.play_sound('baseball_homerun')
+            #self.display.play_sound('baseball_homerun')
+            handler['sound'] = 'baseball_homerun'
 
             ### 0 à 3 bases occupée(sà
             if 1 <= temporaire <= 4:
-                self.video_player.play_video(self.display.file_class.get_full_filename(f'baseball/homerun{temporaire}', 'videos'))
+                #self.video_player.play_video(self.display.file_class.get_full_filename(f'baseball/homerun{temporaire}', 'videos'))
+                handler['video'] = 'baseball/homerun'+str(temporaire)
 
             ### RE-INITIALISE LE NOMBRE DE BASES DU JOUEUR
             image_bb = f'baseball_image{players[actual_player].base_occupee}'
@@ -233,11 +241,13 @@ class Game(cgame.Game):
             self.infos += f'valeur temporaire (bull) : {temporaire}'
 
             self.show_hit = False
-            self.display.play_sound('baseball_super_homerun')
+            #self.display.play_sound('baseball_super_homerun')
+            handler['sound'] = 'baseball_super_homerun'
 
             ### 0 à 3 bases occupée(sà
             if 2 <= temporaire <= 5:
-                self.video_player.play_video(self.display.file_class.get_full_filename(f'baseball/super_homerun{temporaire - 1}', 'videos'))
+                #self.video_player.play_video(self.display.file_class.get_full_filename(f'baseball/super_homerun{temporaire - 1}', 'videos'))
+                handler['video'] = 'baseball/homerun'+str(temporaire)
 
             ### RE-INITIALISE LE NOMBRE DE BASES DU JOUEUR
             image_bb = f'baseball_image{players[actual_player].base_occupee}'
@@ -250,11 +260,14 @@ class Game(cgame.Game):
                     self.infos += 'base occupee : {players[actual_player].base_occupee}'
                     players[actual_player].increment_hits(hit)
                     self.show_hit = False
-                    self.display.play_sound('baseball_batte')
-                    self.display.play_sound('baseball_base_acquise')
+                    #self.display.play_sound('baseball_batte')
+                    handler['sound'] = 'baseball_batte'
+                    #self.display.play_sound('baseball_base_acquise')
+                    handler['sound'] = 'baseball_base_acquise'
 
                     if 1 <= players[actual_player].base_occupee <= 3:
-                        self.video_player.play_video(self.display.file_class.get_full_filename(f'baseball/base{players[actual_player].base_occupee}_acquise', 'videos'))
+                        #self.video_player.play_video(self.display.file_class.get_full_filename(f'baseball/base{players[actual_player].base_occupee}_acquise', 'videos'))
+                        handler['video'] = 'baseball/homerun'+str(players[actual_player].base_occupee)+'_acquise'
 
                     elif players[actual_player].base_occupee > 3:
                         temporaire = (players[actual_player].base_occupee - 3)
@@ -262,11 +275,13 @@ class Game(cgame.Game):
                         players[actual_player].base_occupee = players[actual_player].base_occupee - temporaire
 
                         self.infos += f'valeur temporaire : {temporaire}'
-                        self.display.play_sound('baseball_points_gagne')
+                        #self.display.play_sound('baseball_points_gagne')
+                        handler['sound'] = 'baseball_points_gagne'
 
                         ### 1 POINT
                         if 1 <= temporaire <= 3:
-                            self.video_player.play_video(self.display.file_class.get_full_filename(f'baseball/score{temporaire}', 'videos'))
+                            #self.video_player.play_video(self.display.file_class.get_full_filename(f'baseball/score{temporaire}', 'videos'))
+                            handler['video'] = 'baseball/score'+str(temporaire)
 
 ### JOUEUR TOUCHE LE SEGMENT D UN ADVS (OK)
                 if i != actual_player and player.home == int(value):
@@ -277,8 +292,10 @@ class Game(cgame.Game):
                     ### RE-INITIALISE LES BASES DE L ADVERSAIRE
                     if player.base_occupee >= 0:
                         self.show_hit = False
-                        self.display.play_sound('baseball_joueur_out')
-                        self.video_player.play_video(self.display.file_class.get_full_filename('baseball/runner_out', 'videos'))
+                        #self.display.play_sound('baseball_joueur_out')
+                        handler['sound'] = 'baseball_joueur_out'
+                        #self.video_player.play_video(self.display.file_class.get_full_filename('baseball/runner_out', 'videos'))
+                        handler['video'] = 'baseball/runner_out'
 
 ### SEPTIEME MANCHE (si joueur ne touche pas son segment 1x sur la volee, son score est divise par 2)
                 if i == actual_player and players[actual_player].home != int(value):
@@ -288,16 +305,23 @@ class Game(cgame.Game):
                         self.nb_touche += 1
                         self.infos += f'touche : (self.nb_touche)'
                         if self.nb_touche == 3:
-                            self.display.play_sound('baseball_balle_ratee')
-                            self.video_player.play_video(self.display.file_class.get_full_filename('baseball/strike', 'videos'))
+                            #self.display.play_sound('baseball_balle_ratee')
+                            handler['sound'] = 'baseball_balle_ratee'
+                            #self.video_player.play_video(self.display.file_class.get_full_filename('baseball/strike', 'videos'))
+                            handler['video'] = 'baseball/strike'
                             players[actual_player].score = int((players[actual_player].score / 2))
                             self.nb_touche = 0
 
                 image_bb = f'baseball_image{player.base_occupee}'
                 player.columns[6] = [image_bb ,'image']
+                
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        handler['return_code'] = return_code
+        return handler
 
-        self.logs.log("DEBUG", self.infos)
-        return return_code
+        self.logs.debug(self.infos)
+        #return return_code
 
     def check_winner(self, players):
         """
@@ -322,7 +346,7 @@ class Game(cgame.Game):
         In case of "Early player button" pressed on last dart of last player round of last round
         Return id of winner of -1 if None
         """
-        self.logs.log("DEBUG", f"Post round : actual_round={actual_round} / self.max_round={self.max_round} / actual_player={actual_player}")
+        self.logs.debug(f"Post round : actual_round={actual_round} / self.max_round={self.max_round} / actual_player={actual_player}")
 
         if actual_round < self.max_round:
             return -2
@@ -332,6 +356,7 @@ class Game(cgame.Game):
             if self.noequal:
                 self.max_round += 1
                 self.display.message([self.display.lang.translate('Baseball-egalite')], 1000, None, 'middle', 'big')
+                #handler['message'] = 'Baseball-egalite'
                 # One more round
                 return -2
             return -1
@@ -350,7 +375,7 @@ class Game(cgame.Game):
         Miss button
         '''
         players[actual_player].columns[player_launch+1] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         players[actual_player].darts_thrown += 1
 
 

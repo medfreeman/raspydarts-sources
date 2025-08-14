@@ -92,7 +92,7 @@ class Client():
                 data = self.receive()
                 if data == 'TIMEOUT':
                     return 'TIMEOUT'
-            self.logs.log("DEBUG", f"Received acceptable hit : {data['PLAY']} from remote server.")
+            self.logs.debug(f"Received acceptable hit : {data['PLAY']} from remote server.")
             if isinstance(data['PLAY'], str):
                 return data['PLAY'].upper()
             else:
@@ -103,7 +103,7 @@ class Client():
                 data = self.receive()
                 if data == 'TIMEOUT':
                     return 'TIMEOUT'
-            self.logs.log("DEBUG", f"Received {data['PLAY']} from remote server, as expected !")
+            self.logs.debug(f"Received {data['PLAY']} from remote server, as expected !")
             if isinstance(data['PLAY'], str):
                 return data['PLAY'].upper()
             else:
@@ -141,7 +141,7 @@ class Client():
             while 'REQUEST' not in data:
                 time.sleep(0.2)
                 data = self.receive()
-            self.logs.log("DEBUG", f"Received next set players' list : {data}")
+            self.logs.debug(f"Received next set players' list : {data}")
 
             if data['REQUEST'] == 'NEXTSET':
                 print(f"data['PLAYERSNAMES']={data['PLAYERSNAMES']}")
@@ -161,7 +161,7 @@ class Client():
         data = []
         while "PLAYERNAMES" not in data:
             data = self.receive()
-        self.logs.log("DEBUG", f"Received players' list : {data['PLAYERSNAMES']}")
+        self.logs.debug(f"Received players' list : {data['PLAYERSNAMES']}")
         return data["PLAYERNAMES"]
 
     #@debug
@@ -217,7 +217,7 @@ class Client():
         data['ACTUALROUND']=None
         while data['REQUEST']!="RANDOMVALUES" or data['ACTUALPLAYER']!=actual_player or data['ACTUALROUND']!=actual_round or data['PLAYERLAUNCH']!=playerlaunch:
             data = self.receive()
-        self.logs.log("DEBUG","Received acceptables random values {} for player {}".format(data['RANDOMVALUES'],data['ACTUALPLAYER']))
+        self.logs.debug("Received acceptables random values {} for player {}".format(data['RANDOMVALUES'],data['ACTUALPLAYER']))
         return data['RANDOMVALUES']
 
     #@debug
@@ -233,7 +233,7 @@ class Client():
         """
         Request server version
         """
-        self.logs.log('DEBUG','Getting server version...')
+        self.logs.debug('Getting server version...')
         data = {'REQUEST':'GETVERSION','GAMENAME':gamename}
         self.send(data)
         while data['REQUEST'] != "VERSION":
@@ -266,13 +266,13 @@ class Client():
         """
         Send a message
         """
-        self.logs.log("DEBUG", f"Sending to game server : {message}... ")
+        self.logs.debug(f"Sending to game server : {message}... ")
         message = json.dumps(message) # Converting to JSON
         message = f"{message}{delimiter}" # Append delimiter
         message = message.encode('UTF-8')# Encoding in byte format - utf-8
         try:
             send_len = self.connexion.sendall(message) # UTF-8 encoding and send
-            self.logs.log("DEBUG", f"Send {message} / len(message)={len(message)}")
+            self.logs.debug(f"Send {message} / len(message)={len(message)}")
             error = self.ack() # Wait for ACK for each message
             if error is not None:
                 return error
@@ -301,22 +301,22 @@ class Client():
             time.sleep(0.2)# Avoid consuming all cpu. Was 0.1, now I prefer 0.2 to reduce cpu again
             # Try to retrieve the whole message in a specified time
             if counter > self.timeout * 5:
-                self.logs.log("FATAL", f"Timeout ({self.timeout}) because of no response from server. Aborting.")
+                self.logs.fatal(f"Timeout ({self.timeout}) because of no response from server. Aborting.")
                 return 'TIMEOUT'
             try:
                 self.connexion.settimeout(TIMEOUT) # Enable timeout for this request
                 data = self.connexion.recv(BUF) # Receive data
             except BlockingIOError:
                 # Raising this seems to be normal in python3, either with setblocking True or False, either on server and/or client.
-                #self.logs.log("DEBUG","BlockingIOError raised. Received {}".format(data))
+                #self.logs.debug("BlockingIOError raised. Received {}".format(data))
                 # So passing...
                 pass
             except socket.timeout as e: # If timeout reached
-                self.logs.log("FATAL", f"Bad data received or timeout ({self.timeout}) has been reached for connection with game server. Aborting.")
+                self.logs.fatal(f"Bad data received or timeout ({self.timeout}) has been reached for connection with game server. Aborting.")
                 #sys.exit(2)
                 return 'TIMEOUT'
             except Exception as e:
-                self.logs.log("ERROR","An error occured : {}".format(e))
+                self.logs.error("An error occured : {}".format(e))
             # Try to understand the message
             if data:
                 try:
@@ -326,11 +326,11 @@ class Client():
                     if buf.find(self.delimiter)!=-1: # If signal of end of message is found
                         msg = buf.split(self.delimiter, 1) # Remove delimiter
                         self.connexion.settimeout(old_timeout) # Restore original timeout settings
-                        self.logs.log("DEBUG","OK. Received : {}".format(buf))
+                        self.logs.debug("OK. Received : {}".format(buf))
                         return json.loads(str(msg[0])) # Return message converted to json
                 except Exception as exception:
-                    self.logs.log("ERROR", f"Wrong data : {data}")
-                    self.logs.log("ERROR", f"Exception was : {exception}")
+                    self.logs.error(f"Wrong data : {data}")
+                    self.logs.error(f"Exception was : {exception}")
                     sys.exit(1)
 
     #@debug
@@ -342,22 +342,22 @@ class Client():
             try:
                 self.connexion.settimeout(self.ack_timeout) # Enable timeout for this request
                 data = str(self.connexion.recv(19).decode('UTF-8'))
-                self.logs.log("DEBUG", f"Received : [{data}]")
+                self.logs.debug(f"Received : [{data}]")
                 if data != '':
                     data = data.split(self.delimiter, 1) # Split with delimiter
                     data = str(data[0]) # take only message part of splitted array
                     data = json.loads(data)
             except socket.timeout as exception: # If timeout reached
-                self.logs.log("DEBUG", f"Error was {exception}")
-                self.logs.log("FATAL", f"Cannot get ACK in delay ({self.ack_timeout} sec) from remote server. Aborting. Sorry the cause is probably a bug in server or a version mismatch.")
+                self.logs.debug(f"Error was {exception}")
+                self.logs.fatal(f"Cannot get ACK in delay ({self.ack_timeout} sec) from remote server. Aborting. Sorry the cause is probably a bug in server or a version mismatch.")
                 #sys.exit(2)
                 return 'TIMEOUT'
             except Exception as exception:
-                self.logs.log("WARNING", f"Problem receiving ack : {exception}")
+                self.logs.warning(f"Problem receiving ack : {exception}")
                 data = {'REQUEST': None}
                 pass
 
-        self.logs.log("DEBUG","Received : {}".format(data))
+        self.logs.debug("Received : {}".format(data))
         return None
 
     #@debug
@@ -394,7 +394,7 @@ class MasterClient():
 
     #@debug
     def connect_master(self, ip, port):
-        self.logs.log("DEBUG", f"Connect to master server: {ip}:{port}")
+        self.logs.debug(f"Connect to master server: {ip}:{port}")
 
         self.connexion = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         old_timeout = self.connexion.gettimeout() # Save old timeout settings
@@ -415,7 +415,7 @@ class MasterClient():
                 try:
                     data = json.loads(data)
                 except:
-                    self.logs.log("ERROR", f"Error loading json data for : {data}")
+                    self.logs.error(f"Error loading json data for : {data}")
                 if 'RESPONSE' in data and data['RESPONSE'] == 'EMPTY':
                     return 0
                 serverlist = data
@@ -426,7 +426,7 @@ class MasterClient():
         # Clean list from all games where there is not enough room for us
         index = 0
         filtered_serverlist = []
-        self.logs.log("DEBUG","Received :".format(serverlist))
+        self.logs.debug("Received :".format(serverlist))
         for server in serverlist:
             if int(server['PLAYERS']) + int(NuPl) <= 12: # If it goes up to the max number of players
                 filtered_serverlist.append(serverlist[index])
@@ -442,7 +442,7 @@ class MasterClient():
         """
         Send a message to the server
         """
-        self.logs.log("DEBUG","Sending to master server : {}... ".format(message))
+        self.logs.debug("Sending to master server : {}... ".format(message))
         self.connexion.sendall(json.dumps(message).encode('UTF-8'))
 
     #@debug
@@ -508,9 +508,9 @@ class MasterClient():
             try:
                 #self.connexion.settimeout(self.connexion_timeout) # Enable timeout for this request
                 data = self.connexion.recv(self.buffer_size) # Receive data
-                self.logs.log("DEBUG", f"Received : {data}")
+                self.logs.debug(f"Received : {data}")
             except socket.timeout as exception: # If timeout reached
-                self.logs.log("ERROR", "Master Server reached timeout ({self.connexion_timeout} sec)")
+                self.logs.error("Master Server reached timeout ({self.connexion_timeout} sec)")
                 return False # CX problem signal. Stop trying
             if data:
                 buf += data.decode('utf-8') # Decode utf-8 data

@@ -10,7 +10,7 @@ from include import cgame
 ############
 # Game Variables
 ############
-OPTIONS = {'theme': 'default', 'max_round': 20, 'master': False, 'reverse': False}
+OPTIONS = {'theme': 'default', 'max_round': 20, 'master': True, 'reverse': True}
 # Dictionary of stats and display order (For example : Points Per Darts and avg are displayed in ascending order)
 GAME_RECORDS = {'Segment Per Round': 'ASC', 'Nb turns to win': 'DESC'}
 # How many darts per player and per round ? Yes ! this is a feature :)
@@ -117,6 +117,8 @@ class Game(cgame.Game):
 
     # Actions done before each dart throw - for example, check if the player is allowed to play
     def pre_dart_check(self,players,actual_round,actual_player,player_launch):
+        handler = self.init_handler()
+        
         return_code = 0
 
         # gestion de l'affichage du segment
@@ -127,7 +129,7 @@ class Game(cgame.Game):
             try:
                 LST = self.check_handicap(players)
             except Exception as e:
-                self.logs.log("ERROR","Handicap failed : {}".format(e))
+                self.logs.error("Handicap failed : {}".format(e))
             for Player in players:
                 # Init score
                 Player.score = 0
@@ -135,7 +137,9 @@ class Game(cgame.Game):
 
             if not self.intro_done:
                 self.display.play_sound('pursuit_intro')
-                self.video_player.play_video(self.display.file_class.get_full_filename('pursuit/pursuit_intro', 'videos'))
+                #self.video_player.play_video(self.display.file_class.get_full_filename('pursuit/pursuit_intro', 'videos'))
+                handler['video'] = 'pursuit/pursuit_intro'
+                
                 self.intro_done = True
 
             # nombre de départ du premier joueur choisi au hasard
@@ -203,13 +207,18 @@ class Game(cgame.Game):
             return_code  = 4
 
         # Print debug output
-        self.logs.log("DEBUG",self.infos)
-        return return_code
+        self.logs.debug(self.infos)
+        handler['return_code'] = return_code
+        
+        return handler
+        #return return_code
 
     ###############
     # Function run after each dart throw - for example, add points to player
     def post_dart_check(self,hit,players,actual_round,actual_player,player_launch):
         return_code = 0
+        
+        handler = self.init_handler()
 
         self.display.sound_for_touch(hit) # Touched !
 
@@ -222,17 +231,24 @@ class Game(cgame.Game):
 
         # test DB to change orientation
         if hit[1:] == 'B' :
-            if self.reverse=='True' :
+            print('bull touche')
+            if self.reverse == True :
                 self.show_hit = False
+                
                 self.display.play_sound('pursuit_reverse')
+                print('logo changement de sens')
                 if self.sequence == ringSequenceCCW:
                     self.sequence=ringSequence
                     self.logo = 'pursuit_cw.png'
-                    self.video_player.play_video(self.display.file_class.get_full_filename('pursuit/pursuit_cw', 'videos'))
+                    #self.video_player.play_video(self.display.file_class.get_full_filename('pursuit/pursuit_cw', 'videos'))
+                    handler['video'] = 'pursuit/pursuit_cw'
+                    
                 else:
                     self.sequence=ringSequenceCCW
                     self.logo = 'pursuit_ccw.png'
-                    self.video_player.play_video(self.display.file_class.get_full_filename('pursuit/pursuit_ccw', 'videos'))
+                    #self.video_player.play_video(self.display.file_class.get_full_filename('pursuit/pursuit_ccw', 'videos'))
+                    handler['video'] = 'pursuit/pursuit_ccw'
+                    
                 # Change segment to hit for keep Kart position on the track (for all players)
                 for p in players:
                     if p.score>0:
@@ -265,7 +281,7 @@ class Game(cgame.Game):
                 for i,p in enumerate(players):
                     if i!= actual_player and p.score in segmentPass :
                         killed = False
-                        if self.master == 'True' :
+                        if self.master == True :
                             if p.score == segmentPass[0] and hit[:1] == 'S' :
                                 killed = True
                             elif len(segmentPass)>1 and p.score == segmentPass[1] and hit[:1] == 'D' :
@@ -277,7 +293,9 @@ class Game(cgame.Game):
 
                         if killed:
                             self.display.play_sound('pursuit_pass')
-                            self.video_player.play_video(self.display.file_class.get_full_filename('pursuit/pursuit_pass', 'videos'))
+                            #self.video_player.play_video(self.display.file_class.get_full_filename('pursuit/pursuit_pass', 'videos'))
+                            handler['video'] = 'pursuit/pursuit_pass'
+                            
                             forward=False
                             p.score=0 # game over for this player
                             p.trueScore = self.loosePosition
@@ -286,7 +304,9 @@ class Game(cgame.Game):
                 # play video for forward
                 if forward:
                     self.display.play_sound('pursuit_forward')
-                    self.video_player.play_video(self.display.file_class.get_full_filename('pursuit/pursuit_move', 'videos'))
+                    #self.video_player.play_video(self.display.file_class.get_full_filename('pursuit/pursuit_move', 'videos'))
+                    handler['video'] = 'pursuit/pursuit_move'
+                    
 
                 # Check for end of game (no more rounds to play or only on player is in game)
                 NbPlayerInGame=0
@@ -308,9 +328,16 @@ class Game(cgame.Game):
                     self.winner =  players[actual_player].ident
                     return_code = 3
                     self.display.play_sound('pursuit_win')
-                    self.video_player.play_video(self.display.file_class.get_full_filename('pursuit/pursuit_win', 'videos'))
+                    #self.video_player.play_video(self.display.file_class.get_full_filename('pursuit/pursuit_win', 'videos'))
+                    handler['video'] = 'pursuit/pursuit_win'
 
-        return return_code
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        handler['return_code'] = return_code
+        
+        return handler
+
+        #return return_code
         
     def miss_button(self, players, actual_player, actual_round, player_launch):
         '''
@@ -319,7 +346,7 @@ class Game(cgame.Game):
         print('miss')
         #players[actual_player].columns[6] = (self.moyenne, 'int')
         players[actual_player].columns[player_launch-1] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         players[actual_player].darts_thrown += 1
     
     def early_player_button(self,players,actual_player,actual_round):
@@ -375,7 +402,7 @@ class Game(cgame.Game):
                     segment = ringSequenceCCW[ringSequenceCCW.index(p.score)+1]
                 else :
                     segment = ringSequence[ringSequence.index(p.score)+1]
-                self.logs.log("DEBUG",'segment show {} for score {}'.format(segment,p.score))
+                self.logs.debug('segment show {} for score {}'.format(segment,p.score))
                 pos=positions[segment-1] # position sur la case d'avant pour faciliter le visuel
                 x=pos[0]*self.display.res['x']/1920-self.scaleX/2
                 y=pos[1]*self.display.res['y']/1080-self.scaleY/2
@@ -395,9 +422,6 @@ class Game(cgame.Game):
             return ClickZones
 
         self.display.update_screen()
-
-        self.logs.log("DEBUG", f"ClickZones={ClickZones}")
-        self.logs.log("DEBUG", f"end_of_game={end_of_game}")
 
         return [ClickZones]
 

@@ -160,7 +160,7 @@ class Game(cgame.Game):
 
         # darts_thrown for missing target
         players[actual_player].darts_thrown = self.nb_darts
-        self.logs.log("DEBUG","nb_dartsHitInTurn : {}/{}".format(self.nb_dartsHitInTurn, self.nb_darts))
+        self.logs.debug("nb_dartsHitInTurn : {}/{}".format(self.nb_dartsHitInTurn, self.nb_darts))
 
         players[actual_player].score -= self.nb_darts - self.nb_dartsHitInTurn
         players[actual_player].score = max(0, players[actual_player].score)
@@ -175,11 +175,13 @@ class Game(cgame.Game):
         print('miss')
         #players[actual_player].columns[6] = (self.moyenne, 'int')
         #players[actual_player].columns[player_launch-1] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         players[actual_player].darts_thrown += 1
         
    def post_dart_check(self, hit, players, actual_round, actual_player, player_launch):
         return_code = 0
+        
+        handler = self.init_handler()
 
         self.show_hit = False
 
@@ -268,7 +270,12 @@ class Game(cgame.Game):
                 if player.questCrownDone :
                     player.score +=100
 
-        return return_code
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        handler['return_code'] = return_code
+        return handler
+        
+        #return return_code
 
    ###############
    # Method to frefresh player.stat - Adapt to the stats you want. They represent mathematical formulas used to calculate stats. Refreshed after every launch

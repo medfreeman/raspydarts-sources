@@ -39,7 +39,7 @@ class CPlayerExtended(cplayer.Player):
 
 class Game(cgame.Game):
     """
-    Goose game class
+    Horse game class
     """
     def __init__(self, display, game, nb_players, options, config, logs, rpi, dmd, video_player):
         super().__init__(display, game, nb_players, options, config, logs, rpi, dmd, video_player)
@@ -206,14 +206,16 @@ class Game(cgame.Game):
         elif self.positions[players[actual_player].name] == 9 :
             leds = self.grid[9][0]     
         elif self.positions[players[actual_player].name] == 10 :
-            leds = f'SB#{self.colors[0]}|DB#{self.colors[0]}'       
+            leds = f'SB#{self.colors[0]}|DB#{self.colors[0]}'
+            #leds = f'SB#{players[actual_player].color}|DB#{players[actual_player].color}'       
         
         self.rpi.set_target_leds(f'{leds}#{self.colors[color]}')  
+        #self.rpi.set_target_leds(f'{leds}#{players[actual_player].color}')  
         
         # Backuping scores
         self.save_turn(players)
         # Send debug output to log system. Use DEBUG or WARNING or ERROR or FATAL
-        self.logs.log("DEBUG",self.infos)
+        self.logs.debug(self.infos)
          
         return return_code
 
@@ -221,6 +223,8 @@ class Game(cgame.Game):
         """
         Function run after each dart throw - for example, add points to player
         """
+        
+        handler = self.init_handler()
 
         return_code = 0
         
@@ -238,15 +242,19 @@ class Game(cgame.Game):
         if int(self.positions[players[actual_player].name]) == self.pos_player and (hit == 'SB' or hit == 'DB') and arrivee :
             self.totalTurn = 1  
             self.advance(players[actual_player].name, self.totalTurn)
-            self.display.play_sound('horse_galop')    
-            self.display.play_sound('horse_hennissement')  
+            #self.display.play_sound('horse_galop')   
+            handler['sound'] = 'horse_galop'
+            #self.display.play_sound('horse_hennissement')  
+            handler['sound'] = 'horse_hennissement'
         elif int(self.positions[players[actual_player].name]) == self.pos_player and hit == self.hit_player and not arrivee :
             self.totalTurn = 1
             self.advance(players[actual_player].name, self.totalTurn)
-            self.display.play_sound('horse_galop')  
+            #self.display.play_sound('horse_galop')
+            handler['sound'] = 'horse_galop'  
         else :
             self.dartScore = 0
-            self.display.play_sound('horse_hennissement')  
+            #self.display.play_sound('horse_hennissement')  
+            handler['sound'] = 'horse_hennissement'
             print('pas touche')    
                         
         # increment total
@@ -254,8 +262,10 @@ class Game(cgame.Game):
            
         # Victory for current player
         if self.positions[players[actual_player].name] == 11 :
-            self.video_player.play_video(self.display.file_class.get_full_filename('horse/victoire', 'videos'))
-            self.display.play_sound('horse_hennissement')  
+            #self.video_player.play_video(self.display.file_class.get_full_filename('horse/victoire', 'videos'))
+            handler['video'] = 'horse/victoire'
+            #self.display.play_sound('horse_hennissement')  
+            handler['sound'] = 'horse_hennissement'
             self.winner = players[actual_player].ident
             self.totalTurn = 0
             return_code = 3
@@ -270,8 +280,13 @@ class Game(cgame.Game):
         # It is recommanded to update stats every dart thrown
         self.refresh_stats(players, actual_round)
 
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        handler['return_code'] = return_code
+        return handler
+        
         # Return code to main
-        return return_code
+        #return return_code
         
     def refresh_game_screen(self, Players, actual_round, max_round, RemDarts, nb_darts, logo, headers, actual_player,TxtOnLogo=False, Wait=False, OnScreenButtons=None, showScores=True, end_of_game=False, endOfSet=None, Set=None, MaxSet=None):
        
@@ -390,14 +405,15 @@ class Game(cgame.Game):
             
         #playername += ' (' + str(self.positions[player.name]) +')'
 
-        if player.color == 'green':
-            txtcolor = (0, 255, 0)  # green
-        elif player.color == 'blue':
-            txtcolor = (0, 0, 255)  # blue
-        elif player.color == 'red':
-            txtcolor = (255, 0, 0) # red
-        else:
-            txtcolor = (255, 255, 0) # gold
+        #if player.color == 'green':
+        #    txtcolor = (0, 255, 0)  # green
+        #elif player.color == 'blue':
+        #    txtcolor = (0, 0, 255)  # blue
+        #elif player.color == 'red':
+        #    txtcolor = (255, 0, 0) # red
+        #else:
+        #    txtcolor = (255, 255, 0) # gold
+        txtcolor = player.color
         
         #  Player name size depends of player name number of char (dynamic size)
         scaled = self.display.scale_text(playername, self.display.pn_size - 2 * self.display.margin, self.display.line_height)
@@ -439,10 +455,8 @@ class Game(cgame.Game):
             return_code = 3
         
         if actual_round == int(self.max_round) and actual_player == self.nb_players - 1:
-            self.logs.log(
-                "DEBUG", "At last round, default action is to return game over.")
-            self.logs.log(
-                "DEBUG", "If it's not what you expect, raise a bug please.")
+            self.logs.debug("At last round, default action is to return game over.")
+            self.logs.debug("If it's not what you expect, raise a bug please.")
             # If its a early_player_button just at the last round - return GameOver
             return_code = 2
         return return_code
@@ -452,7 +466,7 @@ class Game(cgame.Game):
         EMPTY
         """
         players[actual_player].columns[player_launch+1] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         players[actual_player].darts_thrown += 1    
         pass
          

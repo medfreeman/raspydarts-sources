@@ -110,7 +110,7 @@ class Game(cgame.Game):
             try:
                 LST = self.check_handicap(players)
             except Exception as e:
-                self.logs.log("ERROR", f"Handicap failed : {e}")
+                self.logs.error(f"Handicap failed : {e}")
             for player in players:
                 # Init score
                 player.score = 0
@@ -208,6 +208,9 @@ class Game(cgame.Game):
         """
         Post dart actions
         """
+        
+        handler = self.init_handler()
+        
         if self.debug_info:
             info1 = f"post_dart_check : hit, players, actual_round, actual_player, player_launch"
             info2 = f"post_dart_check : {hit: ^3}, players, {actual_round: ^12}, {actual_player: ^13}, {player_launch: ^13}"
@@ -226,7 +229,8 @@ class Game(cgame.Game):
 
         # test SB ou DB
         if hit == 'SB' or hit == 'DB' :
-            self.display.play_sound('punch-out_bull')
+            #self.display.play_sound('punch-out_bull')
+            handler['sound'] = 'punch-out_bull'
             liste = []
 ### BOUCLE pour determiner les joueur touches et le joueur qui frappe
             for index, player in enumerate(players):
@@ -310,7 +314,8 @@ class Game(cgame.Game):
                     index99 = x
                         
 ### AJOUTE les points, JOUE le son medic                           
-                self.display.play_sound('punch-out_medic')
+                #self.display.play_sound('punch-out_medic')
+                handler['sound'] = 'punch-out_medic'
                 if self.points :
                     players[actual_player].lives += self.score_map[hit] ###multi
                 else: 
@@ -378,17 +383,24 @@ class Game(cgame.Game):
                          players[actual_player].lives += 30   ### test : ajout 1/10 des points de vies du depart a la place d augmenter le score
                 else: 
                          players[actual_player].score += 5
-                self.display.play_sound('punch-out_ko')
+                #self.display.play_sound('punch-out_ko')
+                handler['sound'] = 'punch-out_ko'
 
 ### CONDITIONS si au moins un joueur est touche            
         if playerHitted :
-            self.animation(multi, liste, len(players)) # by Manu to simplify code
+            self.animation(multi, liste, len(players))
             
         winner = self.check_winner(players, actual_round, player_launch, actual_player)
         if winner > -1:
             self.winner = winner
             return 3
-        return return_code
+        
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        handler['return_code'] = return_code
+        return handler
+
+        #return return_code
 
    def post_round_check(self, players, actual_round, actual_player):
         if self.debug_info:
@@ -521,7 +533,7 @@ class Game(cgame.Game):
            self.affiche_info(info1, info2)
        
        players[actual_player].segments[player_launch - 1] = ('MISS')   
-       self.display.play_sound('treasure_crane_jaune')  
+       self.display.play_sound('miss')  
        return_code = 0
        return return_code
 
@@ -593,7 +605,7 @@ class Game(cgame.Game):
                   
           
           self.display.display_image(self.display.file_class.get_full_filename(f'punch-out/{p.character}-{level}', 'images'),x, y, scalex, scaley, True, False, False)
-          self.logs.log("DEBUG", f"character img loaded : {p.character}-{level}.png")
+          self.logs.debug(f"character img loaded : {p.character}-{level}.png")
           
           if self.debug_info:
               print(f"level = {level}")

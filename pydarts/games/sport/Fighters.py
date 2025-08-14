@@ -95,13 +95,12 @@ class Game(cgame.Game):
             try:
                 LST = self.check_handicap(players)
             except Exception as e:
-                self.logs.log("ERROR", f"Handicap failed : {e}")
+                self.logs.error(f"Handicap failed : {e}")
             for player in players:
                 # Init score
                 player.score = 0
 
                 if self.points :
-                    print('dans if self.points true')
                     self.lives = 300
                 else :
                     self.lives = int(self.options['number_of_lives'])
@@ -191,6 +190,9 @@ class Game(cgame.Game):
         """
         Post dart actions
         """
+        
+        handler = self.init_handler()
+        
         if self.debug_info:
             info1=f"post_dart_check : hit, players, actual_round, actual_player, player_launch"
             info2=f"post_dart_check : {hit: ^3}, players, {actual_round: ^12}, {actual_player: ^13}, {player_launch: ^13}"
@@ -221,7 +223,8 @@ class Game(cgame.Game):
             else: 
                 players[actual_player].score+=(len(players))* multi
                 
-            self.video_player.play_video(self.display.file_class.get_full_filename('fighters/fighters_bull', 'videos'))
+            #self.video_player.play_video(self.display.file_class.get_full_filename('fighters/fighters_bull', 'videos'))
+            handler['video'] = 'fighters/fighters_bull'
             self.show_hit = False
             
         else :
@@ -234,8 +237,10 @@ class Game(cgame.Game):
                     
                 if players[actual_player].lives > self.lives :
                      players[actual_player].lives = self.lives
-                self.display.play_sound('fighters_medic')
-                self.video_player.play_video(self.display.file_class.get_full_filename('fighters/fighters_medic', 'videos'))
+                #self.display.play_sound('fighters_medic')
+                handler['sound'] = 'fighters_medic'
+                #self.video_player.play_video(self.display.file_class.get_full_filename('fighters/fighters_medic', 'videos'))
+                handler['video'] = 'fighters/fighters_medic'
                 self.show_hit = False
 
             # check d'un segment adversaire
@@ -254,7 +259,8 @@ class Game(cgame.Game):
                     self.show_hit = False
                     
             if playerHitted :
-                self.video_player.play_video(self.display.file_class.get_full_filename(f'fighters/fighters_hit{multi}', 'videos'))
+                #self.video_player.play_video(self.display.file_class.get_full_filename(f'fighters/fighters_hit{multi}', 'videos'))
+                handler['video'] = 'fighters/fighters_hit'+str(multi)
             else:
                 self.display.sound_for_touch(hit) # Touched !
 
@@ -268,14 +274,23 @@ class Game(cgame.Game):
                          players[actual_player].lives += 30   ### test : ajout 1/10 des points de vies du depart a la place d augmenter le score
                 else: 
                          players[actual_player].score += 5
-                self.video_player.play_video(self.display.file_class.get_full_filename('fighters/fighters_ko', 'videos'))
+                #self.video_player.play_video(self.display.file_class.get_full_filename('fighters/fighters_ko', 'videos'))
+                handler['video'] = 'fighters/fighters_ko'
 
         winner = self.check_winner(players, actual_round, player_launch, actual_player)
         if winner > -1:
-            self.video_player.play_video(self.display.file_class.get_full_filename('fighters/fighters_victory', 'videos'))
+            #self.video_player.play_video(self.display.file_class.get_full_filename('fighters/fighters_victory', 'videos'))
+            handler['video'] = 'fighters/fighters_victory'
             self.winner = winner
-            return 3
-        return return_code
+            return_code = 3
+            #return 3
+        
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        handler['return_code'] = return_code
+        return handler
+
+        #return return_code
 
    def post_round_check(self, players, actual_round, actual_player):
         if self.debug_info:
@@ -409,7 +424,7 @@ class Game(cgame.Game):
            self.affiche_info(info1, info2)
            
        players[actual_player].segments[player_launch - 1] = ('MISS') 
-       self.display.play_sound('treasure_crane_jaune')   
+       self.display.play_sound('miss')   
        return_code = 0
        return return_code
 
@@ -440,7 +455,7 @@ class Game(cgame.Game):
               level = int(5 - ((p.lives // (self.lives / 5)) + 1))
 
           self.display.display_image(self.display.file_class.get_full_filename(f'fighters/{p.character}-{level}', 'images'),x, y, scalex, scaley, True, False, False)
-          self.logs.log("DEBUG", f"character img loaded : {p.character}-{level}.png")
+          self.logs.debug(f"character img loaded : {p.character}-{level}.png")
 
           if i == actual_player :
               self.display.blit_text(p.name, x, y + scaley, scalex, scaley / 4, color=colorset['fighters-actual-player'])

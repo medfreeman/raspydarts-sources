@@ -6,20 +6,18 @@ Game by ladite et jean
 import random
 import collections
 import pygame
-from copy import deepcopy
 from include import cgame
 from include import cplayer
 from math import sqrt
-try: 
+try:
     from include import cdebug
-    DEBUG = {'debug-record': False, 'debug-replay': False, 'debug-extra_info': True} 
+    DEBUG = {'debug-record': False, 'debug-replay': False, 'debug-extra_info': True}
 except:
     print('Class cdebug not found in include')
-    
+
 VERSION = '1.0'
 LOGO = 'Mickey'
-HEADERS = ['20', '19', '18', '17', '16', '15', '14', '13', '12', 'B']
-HEADERSDT = ['D', 'T']
+HEADERS = ['20', '19', '18', '17', '16', '15', '14', '13', '12', 'B', 'D', 'T']
 OPTIONS = {'theme': 'default', 'max_round': 20, 'optioncrazy': False, 'optioncutthroat': False, 'Teaming': False, 'optionteamscore': False, 'mpr': False, 'colorised': False}
 NB_DARTS = 3
 GAME_RECORDS = {'MPR': 'DESC', 'Hits per round': 'DESC', 'GiveOut': 'ASC'}
@@ -53,9 +51,6 @@ class Game(cgame.Game):
         self.nb_darts = NB_DARTS  # Total darts the player has to play
         self.logo = LOGO
         self.headers = HEADERS[:]
-        self.headersdt = HEADERSDT[:]
-        print('self.header')
-        print(self.headers)
         self.nb_players = nb_players
         # For rpi
         self.raspberry = rpi
@@ -118,7 +113,7 @@ class Game(cgame.Game):
         self.margin = self.display.margin
         self.margin_2 = 2 * self.display.margin
         self.margin_4 = 4 * self.display.margin
-        
+
     def post_dart_check(self, hit, players, actual_round, actual_player, player_launch):
         """
         Post dart check
@@ -132,216 +127,147 @@ class Game(cgame.Game):
         play_hit = False  # Should we play the Double & triple sound ?
         play_scored = False  # Should we play the Scored sound ?
 
-        return_code = 0
+        #return_code = 0
+        handler['return_code'] = 0
         touchcount4total = False
         self.infos = f"Player {players[actual_player].ident} -\
                 Score before playing: {players[actual_player].score}\n"
-        
+
         if self.debug_info and self.debug_record:
             self.debug.record(f"{actual_player}{hit}\n")
             print(f"debug : player ({actual_player}) hit = {hit}")
-        
+
         to_add, value = self.split_key(hit, multiplier=True)
         hit_value = 0
 
-### AJOUT POUR GERER LES D et T        
+### AJOUT POUR GERER LES D et T
         to_add_spec, value_spec = self.split_key(hit, multiplier=True)
-        overtouched = 0
-         
+
         if hit[:1] == 'D' :
-            #print(value)
-#            print('value est un double - force to_add_spec_mark a 1 pour le marquage colonne')
             value_spec = 'D'
             to_add_spec_mark = 1
         elif hit[:1] == 'T' :
-#            print('value est un triple - force to_add_spec_mark a 1 pour le marquage colonne')
-#            print(value_spec)
             value_spec = 'T'
             to_add_spec_mark = 1
+        else:
+            value_spec = None
 
-            
-        if value_spec in ('D', 'T') and self.get_column_state(actual_player, players, self.headersdt.index(value_spec)+ len(self.headers)) < 4:
-            # Launch animation
-            self.ok = True
-            # column touched
-            column_hit = self.headersdt.index(value_spec) + len(self.headers)
-            # Add points ?
-            
-### overtouched - test sur condition pour qu il compte 1 si colonne 'DouT' <3 et compte 3 si colonne 'DouT'>3
-            if players[actual_player].get_col_value(column_hit) + to_add_spec_mark > 3 :  
-                overtouched = max(players[actual_player].get_col_value(column_hit) + to_add_spec - 3, 0)
-            else :
-                overtouched = max(players[actual_player].get_col_value(column_hit) + 1 - 3, 0)
+   
+        # Je traite le chiffre 
+        for key in [value, value_spec]:
+            if key is None:
+                # Cas des simples, value_spec = None
+                continue
 
-            hit_value = min(to_add_spec, 3 - players[actual_player].get_col_value(column_hit))
+            if key in ['D', 'T']:
+                to_add = 1
+            elif key not in self.headers:
+                # On tape dans le mauvais segment
+                continue
 
+            if self.get_column_state(actual_player, players, self.headers.index(key)) < 4:
+                # Launch animation
+                self.ok = True
+                # column touched
+                column_hit = self.headers.index(key)
+                # Add points ?
 
-            if players[actual_player].get_col_value(column_hit) == 0 and to_add_spec_mark < 3:
-                # column is open
-                play_open = True
-            elif players[actual_player].get_col_value(column_hit) + to_add_spec_mark >= 3 \
-                    and players[actual_player].get_col_value(column_hit) < 3:
-                # column is closed
-                play_closed = True
-            else:
-                # open and not closed : increment
-                play_hit = True
+                ### overtouched - test sur condition pour qu il compte 1 si colonne 'DouT' <3 et compte 3 si colonne 'DouT'>3
+                if players[actual_player].get_col_value(column_hit) + to_add > 3 :
+                    overtouched = max(players[actual_player].get_col_value(column_hit) + to_add - 3, 0)
+                else :
+                    overtouched = max(players[actual_player].get_col_value(column_hit) + 1 - 3, 0)
 
-### AJOUT CONDITION 'D-T' POUR NE PAS LES RANDOM
-            if self.crazy and value not in ['B','D','T'] and not play_closed:
-                self.to_randomize.append(value)
-                if self.debug_info:
-                    print('liste to_randomize crazy')
-                    print(self.to_randomize)
+                hit_value = min(to_add, 3 - players[actual_player].get_col_value(column_hit))
 
-            if self.teaming:
-                mate = self.mate(players[actual_player].ident, len(players))
-                mate_closed = players[mate].get_col_value(column_hit) >= 3
+                if self.teaming:
+                    mate = self.mate(players[actual_player].ident, len(players))
+                    mate_closed = players[mate].get_col_value(column_hit) >= 3
 
-            # Increase column
-            if players[actual_player].get_col_value(column_hit) < 3:
-                players[actual_player].increment_column_touch(column_hit, \
-                        min(to_add_spec_mark, 3 - players[actual_player].get_col_value(column_hit)))
+                # Increase column
+                if players[actual_player].get_col_value(column_hit) < 3:
+                    players[actual_player].increment_column_touch(column_hit, \
+                            min(to_add, 3 - players[actual_player].get_col_value(column_hit)))
 
-                if self.teaming and self.teamscore:
-                    # Do the same for mate's column
-                    players[mate].increment_column_touch(column_hit, \
-                        min(to_add_spec_mark, 3 - players[mate].get_col_value(column_hit)))
-            #ajout pour son
-            else :
-                play_hit = True        
-            if self.get_column_state(actual_player, players, self.headersdt.index(value_spec) + len(self.headers)) > 3:
-                overtouched = 0
-            else:
-                hit_value += overtouched
-                
+                    if self.teaming and self.teamscore:
+                        # Do the same for mate's column
+                        players[mate].increment_column_touch(column_hit, \
+                            min(to_add, 3 - players[mate].get_col_value(column_hit)))
 
-### FIN DE L AJOUT POUR D et T       
-         
-        
-            
-        #If this column is currently displayed - Valid key
-        if value in self.headers and self.get_column_state(actual_player, players, self.headers.index(value)) < 4:
-            # Launch animation
-            self.ok = True
-            # column touched
-            column_hit = self.headers.index(value)
-            # Add points ?
-            overtouched = max(players[actual_player].get_col_value(column_hit) + to_add - 3, 0)
-#            print('overtouched = ? ')
-#            print(overtouched)
-            hit_value = min(to_add, 3 - players[actual_player].get_col_value(column_hit))
-#            print('hit_value = ? ')
-#            print(hit_value)
-
-            if players[actual_player].get_col_value(column_hit) == 0 and to_add < 3:
-                # column is open
-                play_open = True
-            elif players[actual_player].get_col_value(column_hit) + to_add >= 3 \
-                    and players[actual_player].get_col_value(column_hit) < 3:
-                # column is closed
-                play_closed = True
-            else:
-                # open and not closed : increment
-                play_hit = True
-
-### AJOUT CONDITION 'D-T' POUR NE PAS LES RANDOM
-            if (self.crazy and value not in ['B','D','T'] and not play_closed):
-                self.to_randomize.append(value)
-                if self.debug_info:
-                    print('liste to_randomize crazy')
-                    print(self.to_randomize)
-
-            if self.teaming:
-                mate = self.mate(players[actual_player].ident, len(players))
-                mate_closed = players[mate].get_col_value(column_hit) >= 3
-
-            # Increase column
-            if players[actual_player].get_col_value(column_hit) < 3:
-                players[actual_player].increment_column_touch(column_hit, \
-                        min(to_add, 3 - players[actual_player].get_col_value(column_hit)))
-
-                if self.teaming and self.teamscore:
-                    # Do the same for mate's column
-                    players[mate].increment_column_touch(column_hit, \
-                        min(to_add, 3 - players[mate].get_col_value(column_hit)))
-
-            if self.get_column_state(actual_player, players, self.headers.index(value)) > 3:
-                overtouched = 0
-            else:
-                hit_value += overtouched
-
- ### CODE DEPLACE POUR LE COMPTAGE DE POINTS + SONS       
-        # Add points ? Only if column is already open
-        if overtouched > 0:
-            # Score to add
-            score_to_add = overtouched * self.score_map[f'S{value}']
-
-            play_scored = True
-            if not self.teaming:
-                if self.cutthroat:
-                    index = 0
-                    for player in players:
-                        if index != actual_player and players[index].get_col_value(column_hit) < 3:
-                            players[index].add_score(score_to_add)
-                        index += 1
+                if self.get_column_state(actual_player, players, self.headers.index(key)) > 3:
+                    overtouched = 0
                 else:
-                    players[actual_player].add_score(score_to_add)
+                    hit_value += overtouched
 
-            elif mate_closed or self.teamscore:
-                if self.teamscore and not self.cutthroat:
-                    players[actual_player].add_score(score_to_add)
-                    players[mate].add_score(score_to_add)
+                # Add points ? Only if column is already open
+                if overtouched > 0:
+                    # Score to add
+                    score_to_add = overtouched * self.score_map[f'S{value}']
 
-                elif self.cutthroat:
-                    index = 0
-                    for player in players:
-                        if index != actual_player and index != mate and players[index].get_col_value(column_hit) < 3:
-                            players[index].add_score(score_to_add)
-                        index += 1
-                else:
-                    players[actual_player].add_score(score_to_add)
-            else:
-                play_scored = False
+                    play_scored = True
+                    if not self.teaming:
+                        if self.cutthroat:
+                            index = 0
+                            for player in players:
+                                if index != actual_player and players[index].get_col_value(column_hit) < 3:
+                                    players[index].add_score(score_to_add)
+                                index += 1
+                        else:
+                            players[actual_player].add_score(score_to_add)
+
+                    elif mate_closed or self.teamscore:
+                        if self.teamscore and not self.cutthroat:
+                            players[actual_player].add_score(score_to_add)
+                            players[mate].add_score(score_to_add)
+
+                        elif self.cutthroat:
+                            index = 0
+                            for player in players:
+                                if index != actual_player and index != mate and players[index].get_col_value(column_hit) < 3:
+                                    players[index].add_score(score_to_add)
+                                index += 1
+                        else:
+                            players[actual_player].add_score(score_to_add)
+                    else:
+                        play_scored = False
+
+                # Actual player is up to date
+                ###################################################################
+                if self.ok:
+                    print(f"============= self.headers={self.headers}")
+                    if self.get_column_state(actual_player, players, self.headers.index(value)) < 3:
+                        play_hit = True
+                    elif self.get_column_state(actual_player, players, self.headers.index(value)) == 3:
+                        play_open = True
+                    elif self.get_column_state(actual_player, players, self.headers.index(value)) > 3:
+                        play_closed = True
+
+                # On randomize si la colonnes n'est pas fermée et pas les D/B/T
+                if self.crazy and not(value in ['B','D','T'] or self.get_column_state(actual_player, players, self.headers.index(key)) < 4):
+                    self.to_randomize.append(value)
 
         # Add hit
         players[actual_player].roundhits += 1
 
-        # Actual player is up to date
-        ###################################################################
-
-        # Added buttons if the player had a surplus (common to Cut Throat and Normal Mode)
-        if overtouched > 0 and touchcount4total:
-            # We add his extra hits to his total since they counted (players took points)
-            play_hit = True  # Its a valid hit, play sound
-
         # Sound handling to avoid multiple sounds playing at a time
         if play_scored:
-            self.display.play_sound('very_deep')
-            self.logs.log("DEBUG", "Playing Scored Sound")
-        elif play_open:
-            self.display.play_sound('open')
-            self.logs.log("DEBUG", "Playing Open Sound")
+            handler['sound'] = 'very_deep'
         elif play_closed:
-            self.display.play_sound('closed')
-            self.logs.log("DEBUG", "Playing Closed Sound")
+            handler['sound'] = 'closed'
+        elif play_open:
+            handler['sound'] = 'open'
         elif play_hit:
-            #if super().play_show(players[actual_player].darts, hit, play_special=True):
-            #    self.display.sound_for_touch(hit)  # Its a valid hit, play sound
-            #self.logs.log("DEBUG", "Playing Simple Hit Sound")
-            self.display.play_sound(hit)
+            handler['sound'] = hit
         else:
-            self.display.play_sound('plouf')
-        
-            
+            handler['sound'] = 'plouf'
+
         # Count darts played
         players[actual_player].add_dart(actual_round, player_launch, hit, hit_value=hit_value)
 
         # It is recommanded to update stats evry dart thrown
         self.refresh_stats(players, actual_round)
 
-        self.infos += f"Hit: {players[actual_player].get_touch_type(hit)} - Active Columns: \
-                {self.headers}{self.lf}"
+        self.infos += f"Hit: {hit} - Active Columns: {self.headers}{self.lf}"
         self.infos += f"Total number of hits for this player: \
                 {players[actual_player].get_total_hit()}{self.lf}"
         self.infos += f"Number of darts thrown from this player: {player_launch}{self.lf}"
@@ -350,28 +276,35 @@ class Game(cgame.Game):
 
         # If it was last throw and no touch : play sound for "round missed"
         if player_launch == self.nb_darts and players[actual_player].roundhits == 0:
-            self.display.play_sound('chaussette')
+            #self.display.play_sound('chaussette')
+            handler['sound'] = 'chaussette'
 
         # Check if there is a winner
         winner = self.check_winner(players, actual_round, actual_player, player_launch)
         if winner is not None:
             self.infos += f"Player {winner} wins !{self.lf}"
             self.winner = winner
-            return_code = 3
+            #return_code = 3
+            handler['return_code'] = 3
 
         # Last throw of the last round
         elif actual_round >= self.max_round and actual_player == self.nb_players - 1 \
                 and player_launch == self.nb_darts:
             self.infos += f"Last Round Reached ({actual_round}{self.lf}"
-            return_code = 2
+            #return_code = 2
+            handler['return_code'] = 2
 
         # Display Recap text
-        self.logs.log("DEBUG", self.infos)
-        if self.debug_info and return_code > 1:
+        self.logs.debug(self.infos)
+        if self.debug_info and handler['return_code'] > 1:
             self.debug.closeFile()
 
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+
         # And return code
-        return return_code
+        #return return_code
+        return handler
 
     def nb_touch(self, player):
         """
@@ -386,7 +319,7 @@ class Game(cgame.Game):
                 closed = False
 
         return (nb_hit, closed)
-    
+
     def check_winner(self, players, actual_round, actual_player, player_launch):
         """
         Method to check if there is a winnner
@@ -470,11 +403,11 @@ class Game(cgame.Game):
                                 winner_id = player.ident
                             else:
                                 #egalité must return None
-                                winner_id = None                         
+                                winner_id = None
                 return winner_id
         return None
-    
-    
+
+
     def random_header(self, actual_player, players, force=False, columns=None):
         """
         New RandomHeader Method that use the get_column_state internal method to check column.
@@ -552,14 +485,14 @@ class Game(cgame.Game):
 
         return state
 
-    
+
     def pre_dart_check(self, players, actual_round, actual_player, player_launch):
         """
         Action launched before each dart throw
         """
         print('self.header')
         print(self.headers)
-        
+
         self.infos = ""
         self.ok = False
         # If first round - set display as leds
@@ -570,7 +503,7 @@ class Game(cgame.Game):
                 for column, value in enumerate(player.columns):
                     player.columns[column] = [0, 'leds', 'game-grey2']
                 player.reset_rounds(self.max_round)
-            
+
         if player_launch == 1:
             if (self.crazy and actual_player > 0 or actual_round > 1) and not self.random_from_net:
                 self.random_header(actual_player, players, columns=self.to_randomize)
@@ -585,14 +518,13 @@ class Game(cgame.Game):
             players[actual_player].reset_darts()
 
             self.infos += f"Active columns : {self.headers}"
-            self.logs.log("DEBUG", self.infos)
+            self.logs.debug(self.infos)
             self.save_turn(players)
-        
+
         leds = []
 #        leds = self.compute_leds( actual_player, players, leds)
         if self.debug_info:
             self.debug.mickey_liste_colonne(self.headers,actual_player,players,0)
-            self.debug.mickey_liste_colonne(self.headersdt,actual_player,players,10)
         leds = self.new_compute_leds( actual_player, players, leds)
         if self.debug_info:
             print(leds)
@@ -787,7 +719,7 @@ class Game(cgame.Game):
         # If no touch for this player at this round : play sound for "round missed"
         if players[actual_player].roundhits == 0:
             self.display.play_sound('chaussette')
-            
+
         # If last round reached
         winner = self.check_winner(players, actual_round, actual_player, self.nb_darts)
         if winner is not None:
@@ -796,8 +728,8 @@ class Game(cgame.Game):
             return_code = 3
         elif actual_round == self.max_round and actual_player == self.nb_players -1:
             return_code = 2
-            
-        self.logs.log("DEBUG", self.infos)            
+
+        self.logs.debug(self.infos)
         return return_code
 
     def refresh_stats(self, players, actual_round):
@@ -883,23 +815,24 @@ class Game(cgame.Game):
         Miss button pressed
         """
         return_code = 0
-        self.logs.log("DEBUG", "MissButtonPressed")
+        self.logs.debug("MissButtonPressed")
         if player_launch == int(self.nb_darts):
             if self.debug_info and self.debug_record:
                 self.debug.record(f"{actual_player}EPB\n") #Early player button
                 print(f"debug : player ({actual_player}) hit = EPB")
-            self.logs.log("DEBUG", "Running the early_player_button method because it is last dart.")
+            self.logs.debug("Running the early_player_button method because it is last dart.")
             return_code = self.early_player_button( players, actual_player, actual_round)
-            self.logs.log("DEBUG", f"Which return {return_code}")
+            self.logs.debug(f"Which return {return_code}")
         else:
-            self.logs.log("DEBUG", "MissButtonPressed")
+            self.logs.debug("MissButtonPressed")
             players[actual_player].darts_thrown += 1
             players[actual_player].add_dart(actual_round, player_launch, 'MISS', hit_value=0)
-            self.display.play_sound('treasure_crane_jaune')
+            #self.display.play_sound('miss')
+            handler['sound'] = 'treasure_crane_jaune'
             if self.debug_info and self.debug_record:
                 self.debug.record(f"{actual_player}MB\n") #miss button
                 print(f"debug : player ({actual_player}) hit = MB")
-            
+
         return return_code
 
     def check_players_allowed(self, nb_players):
@@ -913,7 +846,7 @@ class Game(cgame.Game):
     def draw_symbol(self, color, center_x, center_y, size, thickness, score, ratio=None):
         pos_x = int(center_x - size / 2)
         pos_y = int(center_y - size / 2)
-        
+
         if ratio is None:
             for index in range(0, size + 1):
                 if score > 0:
@@ -941,12 +874,12 @@ class Game(cgame.Game):
         pos_y = rect[1]
         width = rect[2]
         height = rect[3]
-        
+
         pygame.draw.line(self.display.screen, color, (pos_x, pos_y), (pos_x, pos_y + height), thickness)
         pygame.draw.line(self.display.screen, color, (pos_x + width, pos_y), (pos_x + width, pos_y + height), thickness)
         pygame.draw.line(self.display.screen, color, (pos_x, pos_y), (pos_x + width, pos_y), thickness)
         pygame.draw.line(self.display.screen, color, (pos_x, pos_y + height), (pos_x + width, pos_y + height), thickness)
-        
+
 
     def draw_dart_score(self, dart_position, dart_value):
         mid_x = int(self.display.res_x / 4)
@@ -1020,7 +953,6 @@ class Game(cgame.Game):
 
         self.display.reset_background()
 
-        game = 'Mickey Mouse'
         hit = ''
 
         scores = players[actual_player].rounds
@@ -1152,11 +1084,6 @@ class Game(cgame.Game):
                 self.display.blit_rect(mid_x + self.margin, target_y + target_h * index, mid_w - self.margin_2, target_h, self.display.colorset['game-bg'])
             self.display.blit_text(f'{target}', target_x, target_y + target_h * index - adj // 2 , target_w+adj, target_h+adj, color=self.display.colorset['game-score'], dafont='Impact', align='Center')
             index += 1
-        for target in self.headersdt:
-            if index % 2 == 0:
-                self.display.blit_rect(mid_x + self.margin, target_y + target_h * index, mid_w - self.margin_2, target_h, self.display.colorset['game-bg'])
-            self.display.blit_text(f'{target}', target_x, target_y + target_h * index - adj // 2, target_w+adj, target_h+adj, color=self.display.colorset['game-score'], dafont='Impact', align='Center')
-            index += 1
 
         index = 0
         for player in players:
@@ -1212,8 +1139,8 @@ class Game(cgame.Game):
 
         if not end_of_game:
             if self.display.game_type == 'online':
-                self.display.display_image(self.online_icon, game_x - 40, game_y + self.margin, width=32, height=32, UseCache=True)
-            self.display.blit_text(f"{self.display.game_type} game", game_x, game_y, game_width, game_height, color=(255, 0, 0), dafont='Impact', align='Center', valign='top', margin=False)
+                self.display.display_image(self.online_icon, self.display.res['x'] - game_width - self.margin * 2 - 32, self.margin, width=32, height=32, UseCache=True)
+            self.display.blit_text(f"{self.display.game_type} game", self.display.res['x'] - game_width - self.margin, self.margin, game_width, game_height, color=(255, 0, 0), dafont='Impact', align='Center', valign='top', margin=False)
 
         self.display_players(players, actual_player, end_of_game)
 
@@ -1227,16 +1154,14 @@ class Game(cgame.Game):
 
         if self.display.colorset['game-option'] is not None:
             for option, value in self.options.items():
-                if option == 'theme':
+                if option == 'theme' or value is False:
                     continue
                 if value is True:
-                    self.display.blit_text(f'{game}-{option}', right_x, option_y, right_width, option_height, color=self.display.colorset['game-green'], dafont='Impact', align='Right')
-                elif value is False:
-                    self.display.blit_text(f'{game}-{option}', right_x, option_y, right_width, option_height, color=self.display.colorset['game-red'], dafont='Impact', align='Right')
+                    self.display.blit_text(f'Mickey-{option}', right_x, option_y, right_width, option_height, color=self.display.colorset['game-green'], dafont='Impact', align='Right')
                 else:
-                    self.display.blit_text(f'{self.display.lang.translate(game + "-" + option)} : {value}', right_x, option_y, right_width, option_height, color=self.display.colorset['game-option'], dafont='Impact', align='Right')
+                    self.display.blit_text(f'{self.display.lang.translate("Mickey-" + option)} : {value}', right_x, option_y, right_width, option_height, color=self.display.colorset['game-option'], dafont='Impact', align='Right')
                 option_y -= option_height
-        self.display.blit_text(f"{game.replace('_', ' ')}", right_x, option_y - option_height, right_width, option_height * 2, color=(255, 0, 0), dafont='Impact', align='Right')
+        self.display.blit_text("Mickey", right_x, option_y - option_height, right_width, option_height * 2, color=(255, 0, 0), dafont='Impact', align='Right')
 
         if self.debug_info:
             self.debug.mickey_cible(affiche=True)
@@ -1383,8 +1308,8 @@ class Game(cgame.Game):
         target_y = mid_y + self.margin_2
         target_w = int(self.display.res_x / 16)
         #target_h = int((mid_h - self.margin_4)/ 10)
-        target_h = int((mid_h - self.margin_4)/ 12) 
-        
+        target_h = int((mid_h - self.margin_4)/ 12)
+
         scores_m = int(self.display.res_x / 96)
         scores_x = mid_x + scores_m
         scores_y = mid_y + self.margin
@@ -1398,8 +1323,8 @@ class Game(cgame.Game):
         mid_height = int(self.display.res['y'] / 4) - self.margin_2
 
         symbol_size = int(target_h * 3 / 4 - self.margin)
-        
-        #self.symbol_thickness = self.margin_2 
+
+        #self.symbol_thickness = self.margin_2
         self.symbol_thickness = int(self.margin_2 /2)  #### divise par 2 pour un meilleur rendu
 
         rect_players = self.display_players(players, actual_player, False)
@@ -1446,7 +1371,7 @@ class Game(cgame.Game):
                 target_w = int(self.display.res_x / 16)
                 ## dessine le symbole dans les colonne  - retirerr car pas moyen de le placer correcctement
                 #self.draw_symbol(players[actual_player].color, hit_x, hit_y, self.symbol_size, self.symbol_thickness, players[actual_player].columns[column_hit][0], ratio=ratio)
-                 
+
                 rect2 = (hit_x - symbol_size, hit_y - symbol_size, 2 * symbol_size, 2 * symbol_size)
                 rect_array = [rect, rect2, rectangle_mpr, rectangle_dart]
             else:
@@ -1458,101 +1383,6 @@ class Game(cgame.Game):
         self.display.save_background()
 
     def new_compute_leds(self,actual_player,players,leds = []):
-        ind = 10
-        #double et Triple
-        for header in self.headersdt:
-            already_closed = 0
-            test_player = 0
-            column_state = self.get_column_state(actual_player, players, ind)
-            for player in players:
-                if test_player != actual_player:
-                    if isinstance(player.get_col_value(ind), int) and \
-                            player.get_col_value(ind) >= 3:
-                        already_closed += 1
-                test_player += 1
-
-            if (column_state == 4):
-                # Closed by everyone 
-                pass
-
-            elif int(players[actual_player].get_col_value(ind)) < 3 and self.teaming : ## DOUBLE ou TRIPLE
-                mate = self.mate(actual_player, len(players))
-                if column_state == 3:
-                    #bleu
-                    if ind == 10: #DOUBLE
-                        leds.extend(f'D{number}#{self.colors[2]}' for number in range(1, 21))
-                        leds.extend(f'D{letter}#{self.colors[2]}' for letter in ['B'])
-                    else:
-                        leds.extend(f'T{number}#{self.colors[2]}' for number in range(1, 21))
-                        
-                elif int(players[mate].get_col_value(ind)) == 3:
-                    #Closed by mate - jaune
-                    if ind == 10:
-                        leds.extend(f'D{number}#{self.colors[3]}' for number in range(1, 21))
-                        leds.extend(f'D{letter}#{self.colors[3]}' for letter in ['B'])
-                    else:
-                        leds.extend(f'T{number}#{self.colors[3]}' for number in range(1, 21))
-                else:
-                    ## vert
-                    if ind == 10:
-                        leds.extend(f'D{number}#{self.colors[0]}' for number in range(1, 21))
-                        leds.extend(f'D{letter}#{self.colors[0]}' for letter in ['B'])
-                    else:
-                        leds.extend(f'T{number}#{self.colors[0]}' for number in range(1, 21))
-                    
-            elif int(players[actual_player].get_col_value(ind)) < 3 and not self.teaming:
-                # Open for player
-                if column_state == 3:
-                    # And closed by one other
-                    # Blue
-                    
-                    if ind == 10:
-                        leds.extend(f'D{number}#{self.colors[2]}' for number in range(1, 21))
-                        leds.extend(f'D{letter}#{self.colors[2]}' for letter in ['B'])
-                    else:
-                        leds.extend(f'T{number}#{self.colors[2]}' for number in range(1, 21))
-
-                else:
-                    # Green
-                    if ind == 10:
-                        leds.extend(f'D{number}#{self.colors[0]}' for number in range(1, 21))
-                        leds.extend(f'D{letter}#{self.colors[0]}' for letter in ['B'])
-                    else :
-                        leds.extend(f'T{number}#{self.colors[0]}' for number in range(1, 21))
-            
-            elif column_state == 2:
-                pass
-            
-            elif self.teaming:
-                mate = self.mate(actual_player, len(players))
-                if int(players[actual_player].get_col_value(ind)) == 3 and int(players[mate].get_col_value(ind)) < 3:
-                    pass
-                
-                elif column_state == 3 and int(players[actual_player].get_col_value(ind)) < 3  :
-                    if ind == 10 :
-                        leds.extend(f'D{number}#{self.colors[2]}' for number in range(1, 21))
-                        leds.extend(f'D{letter}#{self.colors[2]}' for letter in ['B'])
-                    else :
-                        leds.extend(f'T{number}#{self.colors[2]}' for number in range(1, 21))
-
-                elif column_state == 3 :
-                    if ind == 10 :
-                        leds.extend(f'D{number}#{self.colors[1]}' for number in range(1, 21))
-                        leds.extend(f'D{letter}#{self.colors[1]}' for letter in ['B'])
-                    else :
-                        leds.extend(f'T{number}#{self.colors[1]}' for number in range(1, 21))
-                    
-            else:
-                # rouge
-                if ind == 10:
-                    leds.extend(f'D{number}#{self.colors[1]}' for number in range(1, 21))
-                    leds.extend(f'D{letter}#{self.colors[1]}' for letter in ['B'])
-                else :
-                    leds.extend(f'T{number}#{self.colors[1]}' for number in range(1, 21))
-
-            ind += 1
-            self.raspberry.set_target_leds(('|'.join(leds)))
- 
         ind = 0
         for header in self.headers:
             already_closed = 0
@@ -1564,7 +1394,7 @@ class Game(cgame.Game):
                             player.get_col_value(ind) >= 3:
                         already_closed += 1
                 test_player += 1
-            
+
             if column_state == 4:
                 # Closed by everyone
                 pass
@@ -1600,8 +1430,8 @@ class Game(cgame.Game):
                     leds.extend([f'{mult}{header}#{self.colors[1]}' for mult in ['E', 'S', 'D', 'T']])
             else:
                 leds.extend([f'{mult}{header}#{self.colors[1]}' for mult in ['E', 'S', 'D', 'T']])
-            
+
             ind += 1
             self.raspberry.set_target_leds(('|'.join(leds)))
-        
+
         return leds

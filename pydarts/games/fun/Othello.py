@@ -138,7 +138,6 @@ class Game(cgame.Game):
        self.jeton = 14 #jetons joué
        self.logo = None #pour test fin de partie sans logo (plus joli)
       
-   # Update Grid by Manu for option 4x4 6x6 8x8
    def update_grid(self):
        if self.taille_grille == 6:
            delete_me  = [7,0]
@@ -250,6 +249,8 @@ class Game(cgame.Game):
 
    def post_dart_check(self,hit,players,actual_round,actual_player,player_launch):
         return_code = 0
+        handler = self.init_handler()
+        
         self.show_hit = True
         # Record total dart thrown, total hits (S=1, D=2, T=3) and refresh players stats
         players[actual_player].darts_thrown += 1
@@ -259,7 +260,9 @@ class Game(cgame.Game):
             for k,v in enumerate(self.grid):  
                   if v[0] == 'B':
                       print('BULL TOUCHE - condition pour eviter bug base int(10) qd bull touche')
-                      self.display.play_sound('othello_miss')
+                      #self.display.play_sound('othello_miss')
+                      handler['sound'] = 'othello_miss'
+                      
         else :
         ### verifie le chiffre touche  
             for k,v in enumerate(self.grid): 
@@ -270,12 +273,14 @@ class Game(cgame.Game):
                       self.take_move(new_move[0], new_move[1])
                       self.touche += 1
                       self.jeton += 1
-                      self.display.play_sound('othello_hit')
+                      #self.display.play_sound('othello_hit')
+                      handler['sound'] = 'othello_hit'
                       break
                     
         ### si ne touche pas le bon chiffre a jouer
         if str(hit[1:]) not in (self.miss) :    
-              self.display.play_sound('othello_miss')
+              #self.display.play_sound('othello_miss')
+              handler['sound'] = 'othello_miss'
 
         ### calcul le score
         self.score()
@@ -311,7 +316,12 @@ class Game(cgame.Game):
             self.winner = 1
             return 3
 
-        return return_code
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        handler['return_code'] = return_code
+        return handler
+
+        #return return_code
 
 
 ##########
@@ -448,7 +458,7 @@ class Game(cgame.Game):
 
    def miss_button(self, players, actual_player, actual_round, player_launch):
       players[actual_player].segments[player_launch-1] = 'MISS'
-      self.display.play_sound('treasure_crane_jaune')
+      self.display.play_sound('miss')
       players[actual_player].darts_thrown += 1
                 
    ###############

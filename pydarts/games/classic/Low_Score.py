@@ -80,7 +80,7 @@ class Game(cgame.Game):
             try:
                 self.check_handicap(players)
             except Exception as exception: # pylint: disable=broad-except
-                self.logs.log("ERROR", f"Handicap failed : {exception}")
+                self.logs.error(f"Handicap failed : {exception}")
             for player in players:
                 # Init score
                 player.score = 0
@@ -110,7 +110,7 @@ class Game(cgame.Game):
             players[actual_player].columns[6] = (players[actual_player].avg(actual_round),'int')
 
         # Print debug output
-        self.logs.log("DEBUG",self.infos)
+        self.logs.debug(self.infos)
         return return_code
 
     def post_dart_check(self, hit, players, actual_round, actual_player, player_launch):
@@ -154,6 +154,10 @@ class Game(cgame.Game):
             else:
                 # No winner : last round reached
                 handler['return_code'] = 2
+
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        
         return handler
 
     def miss_button(self, players, actual_player, actual_round, player_launch):
@@ -162,7 +166,7 @@ class Game(cgame.Game):
         '''
         players[actual_player].score += self.penality
         players[actual_player].columns[player_launch-1] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         players[actual_player].darts_thrown += 1
         # play penality sound
         self.display.play_sound('penality')

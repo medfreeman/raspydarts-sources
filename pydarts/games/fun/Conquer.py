@@ -147,7 +147,7 @@ class Game(cgame.Game):
             try:
                 LST = self.check_handicap(players)
             except Exception as e:
-                self.logs.log("ERROR", "Handicap failed : {}".format(e))
+                self.logs.error("Handicap failed : {}".format(e))
             for Player in players:
                 # Init score
                 Player.score = 0
@@ -266,6 +266,9 @@ class Game(cgame.Game):
                                 bestscoreid = player.ident
                         self.winner = bestscoreid
                         handler['return_code'] = 3
+
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
 
         return handler
 
@@ -408,7 +411,7 @@ class Game(cgame.Game):
             file_path = self.display.file_class.get_full_filename(
                 f'conquer/conquer_{case + 1}_{i + 1}.png', 'images')
             self.display.display_image(
-                file_path, 0, 0, self.display.res['x'], self.display.res['y'], True, False, False, UseCache=False)
+                file_path, 0, 0, self.display.res['x'], self.display.res['y'], True, False, False, UseCache=True)
             self.display.update_screen((pos_x, pos_y, width, height))
 
     def draw_box(self, case, refresh=False):
@@ -419,7 +422,7 @@ class Game(cgame.Game):
 
         if v[1] > -1:
             self.display.display_image(self.display.file_class.get_full_filename(
-                f'conquer/conquer_{case + 1}_{v[1] + 1}.png', 'images'), 0, 0, self.display.res['x'], self.display.res['y'], True, False, False, UseCache=False)
+                f'conquer/conquer_{case + 1}_{v[1] + 1}.png', 'images'), 0, 0, self.display.res['x'], self.display.res['y'], True, False, False)
 
             # draw strength logos
             stepx = 50 * self.scale
@@ -471,6 +474,6 @@ class Game(cgame.Game):
     def miss_button(self, players, actual_player, actual_round, player_launch):
 
         players[actual_player].segments[player_launch-1] = 'MISS'
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
           
         players[actual_player].darts_thrown += 1

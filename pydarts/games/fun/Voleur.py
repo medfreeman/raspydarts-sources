@@ -136,7 +136,7 @@ class Game(cgame.Game):
             try:
                 self.check_handicap(players)
             except Exception as exception: # pylint: disable=broad-except
-                self.logs.log("ERROR", f"Handicap failed : {exception}")
+                self.logs.error(f"Handicap failed : {exception}")
 
             for player in players:
                 # Init score
@@ -275,7 +275,7 @@ class Game(cgame.Game):
 
        
         # Print debug output
-        self.logs.log("DEBUG",self.infos)
+        self.logs.debug(self.infos)
         return return_code
 
     def pnj_score(self, players, actual_player, level, player_launch):
@@ -297,6 +297,8 @@ class Game(cgame.Game):
         """
         Function run after each dart throw - for example, add points to player
         """
+        
+        handler = self.init_handler()
         
         #self.display.sound_for_touch(hit) # Touched !
         
@@ -340,7 +342,8 @@ class Game(cgame.Game):
                                                 pass
                 #message = 'segment volé'
                 #self.display.speech(message, speed=100)
-                self.display.play_sound('plouf')
+                #self.display.play_sound('plouf')
+                handler['sound'] = 'plouf'
                 #players[actual_player].darts_thrown += 1
                 score = 0
                 
@@ -428,8 +431,12 @@ class Game(cgame.Game):
                 # No winner : last round reached
                 return_code = 2
        
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        handler['return_code'] = return_code
+        return handler
         
-        return return_code       
+        #return return_code       
 
     def best_score(self, players):
         """
@@ -444,12 +451,12 @@ class Game(cgame.Game):
                 best_score = player.score
                 best_player = player.ident
                 best_count = 1
-                self.logs.log("DEBUG", \
+                self.logs.debug(\
                         f"Best found : {best_score} / Count={best_count} / player = {best_player}")
             elif player.score == best_score:
                 best_count += 1
 
-        self.logs.log("DEBUG", \
+        self.logs.debug(\
                 f"Best score : {best_score} / Count={best_count} / Player = {best_player}")
 
         if best_count == 1:

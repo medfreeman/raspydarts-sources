@@ -58,7 +58,7 @@ class Game(cgame.Game):
             # Enable display of teaming
             self.display.teaming = True
         elif self.teaming:
-            self.logs.log('ERROR','You asked for a team game but the number of players is not \
+            self.logs.error('You asked for a team game but the number of players is not \
                     a multiple of 2 players and is not at least 4 people. Disabling teaming')
             self.teaming = False
         # Fixed number of round
@@ -180,7 +180,7 @@ class Game(cgame.Game):
                 handler['show'] = (players[actual_player].darts, hit, True)
                 handler['sound'] = hit
 
-            self.infos += f"Key: {players[actual_player].get_touch_type(hit)} - \
+            self.infos += f"Key: {hit} - \
                     Active Columns: {self.headers}{self.lf}"
             self.infos += f"Total number of hits for this player: \
                     {players[actual_player].get_total_hit()}{self.lf}"
@@ -224,8 +224,11 @@ class Game(cgame.Game):
         if blink_text != "":
             handler['message'] = blink_text
 
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+
         # Print debug
-        self.logs.log('DEBUG', self.infos)
+        self.logs.debug(self.infos)
         return handler
 
     def clear_marks(self, players):
@@ -397,7 +400,7 @@ class Game(cgame.Game):
             elif self.option_crazy and not self.random_from_net:
                 self.random_header(players)
             self.infos += f"Active columns : {self.headers}"
-            self.logs.log("DEBUG", self.infos)
+            self.logs.debug(self.infos)
             self.save_turn(players)
 
             leds = []

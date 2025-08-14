@@ -208,7 +208,7 @@ class Game(cgame.Game):
             try:
                 LST = self.check_handicap(players)
             except Exception as e:
-                self.logs.log("ERROR", "Handicap failed : {}".format(e))
+                self.logs.error("Handicap failed : {}".format(e))
             for player in players:
                 # Init score
                 player.score = 0
@@ -252,6 +252,8 @@ class Game(cgame.Game):
 
     def post_dart_check(self, hit, players, actual_round, actual_player, player_launch):
         return_code = 0
+        
+        handler = self.init_handler()
 
         # Record total dart thrown, total hits (S=1, D=2, T=3) and refresh players stats
         players[actual_player].darts_thrown += 1
@@ -300,8 +302,14 @@ class Game(cgame.Game):
             
 ### AJOUT D UNE TROUPE PAR TERRITOIRE
             if players[actual_player].ident == 0 :
-                self.dmd.send_text("Renfort des troupes + 1 Territoire")
-                self.display.play_sound('risk_reinforcement')
+                #self.dmd.send_text("Renfort des troupes + 1 Territoire")
+                handler['dmd'] = 'Renfort des troupes + 1 Territoire'
+                
+                #self.display.play_sound('risk_reinforcement')
+                handler['sound'] = 'risk_reinforcement'
+                
+                
+                
                 for k, v in enumerate(self.grid):
                     ### ajoute un renfort a chaque territoire
                     if v[1] == 0 and v[2] < 3:
@@ -319,12 +327,17 @@ class Game(cgame.Game):
                         self.led.append('D'+str(v[0])+'#green')
                         self.led.append('T'+str(v[0])+'#green')
                         #
-                        self.display.play_sound('risk_annexed')
+                        #self.display.play_sound('risk_annexed')
+                        handler['sound'] = 'risk_annexed'
+                        
                         break
 
             elif players[actual_player].ident == 1 :
-                self.dmd.send_text("Renfort des troupes + 1 Territoire")
-                self.display.play_sound('risk_reinforcement')
+                #self.dmd.send_text("Renfort des troupes + 1 Territoire")
+                handler['dmd'] = 'Renfort des troupes + 1 Territoire'
+                #self.display.play_sound('risk_reinforcement')
+                handler['sound'] = 'risk_reinforcement'
+                
                 for k, v in enumerate(self.grid):
                     ### ajoute un renfort a chaque territoire
                     if v[1] == 1 and v[2] < 3:
@@ -342,12 +355,18 @@ class Game(cgame.Game):
                         self.led.append('D'+str(v[0])+'#blue')
                         self.led.append('T'+str(v[0])+'#blue')
                         #
-                        self.display.play_sound('risk_annexed')
+                        #self.display.play_sound('risk_annexed')
+                        handler['sound'] = 'risk_annexed'
+                        
                         break
               
             elif players[actual_player].ident == 2 :
-                self.dmd.send_text("Renfort des troupes + 1 Territoire")
-                self.display.play_sound('risk_reinforcement')
+                #self.dmd.send_text("Renfort des troupes + 1 Territoire")
+                handler['dmd'] = 'Renfort des troupes + 1 Territoire'
+                
+                #self.display.play_sound('risk_reinforcement')
+                handler['sound'] = 'risk_reinforcement'
+                
                 for k, v in enumerate(self.grid):
                     ### ajoute un renfort a chaque territoire
                     if v[1] == 2 and v[2] < 3:
@@ -365,12 +384,18 @@ class Game(cgame.Game):
                         self.led.append('D'+str(v[0])+'#red')
                         self.led.append('T'+str(v[0])+'#red')
                         #
-                        self.display.play_sound('risk_annexed')
+                        #self.display.play_sound('risk_annexed')
+                        handler['sound'] = 'risk_annexed'
+                        
                         break
 
             elif players[actual_player].ident == 3 :
-                self.dmd.send_text("Renfort des troupes + 1 Territoire")
-                self.display.play_sound('risk_reinforcement')
+                #self.dmd.send_text("Renfort des troupes + 1 Territoire")
+                handler['dmd'] = 'Renfort des troupes + 1 Territoire'
+                
+                #self.display.play_sound('risk_reinforcement')
+                handler['sound'] = 'risk_reinforcement'
+                
                 for k, v in enumerate(self.grid):
                     ### ajoute un renfort a chaque territoire
                     if v[1] == 3 and v[2] < 3:
@@ -388,12 +413,18 @@ class Game(cgame.Game):
                         self.led.append('D'+str(v[0])+'#yellow')
                         self.led.append('T'+str(v[0])+'#yellow')
                         #
-                        self.display.play_sound('risk_annexed')
+                        #self.display.play_sound('risk_annexed')
+                        handler['sound'] = 'risk_annexed'
+                        
                         break
                         
             elif players[actual_player].ident == 4 :
-                self.dmd.send_text("Renfort des troupes + 1 Territoire")
-                self.display.play_sound('risk_reinforcement')
+                #self.dmd.send_text("Renfort des troupes + 1 Territoire")
+                handler['dmd'] = 'Renfort des troupes + 1 Territoire'
+                
+                #self.display.play_sound('risk_reinforcement')
+                handler['sound'] = 'risk_reinforcement'
+                
                 for k, v in enumerate(self.grid):
                     ### ajoute un renfort a chaque territoire
                     if v[1] == 4 and v[2] < 3:
@@ -411,7 +442,9 @@ class Game(cgame.Game):
                         self.led.append('D'+str(v[0])+'#purple')
                         self.led.append('T'+str(v[0])+'#purple')
                         #
-                        self.display.play_sound('risk_annexed')
+                        #self.display.play_sound('risk_annexed')
+                        handler['sound'] = 'risk_annexed'
+                        
                         break
         if hit == 'DB' :   ### AJOUT D UN TERRITOIRE 
             #self.video_player.play_video(self.display.file_class.get_full_filename('conquer/conquer_bull', 'videos'))
@@ -443,8 +476,11 @@ class Game(cgame.Game):
             
             
             if players[actual_player].ident == 0 :
-                self.dmd.send_text("1 Territoire + Renfort des troupes")
-                self.display.play_sound('risk_reinforcement')
+                #self.dmd.send_text("1 Territoire + Renfort des troupes")
+                handler['dmd'] = '1 Territoire + Renfort des troupes'
+                #self.display.play_sound('risk_reinforcement')
+                handler['sound'] = 'risk_reinforcement'
+                
                 for k, v in enumerate(self.grid):
                     ### ajoute un renfort a chaque territoire
                     if v[1] == 0 and v[2] < 3:
@@ -462,12 +498,17 @@ class Game(cgame.Game):
                         self.led.append('D'+str(v[0])+'#green')
                         self.led.append('T'+str(v[0])+'#green')
                         #
-                        self.display.play_sound('risk_annexed')
+                        #self.display.play_sound('risk_annexed')
+                        handler['sound'] = 'risk_annexed'
+                        
                         break
             
             elif players[actual_player].ident == 1 :
-                self.dmd.send_text("1 Territoire + Renfort des troupes")
-                self.display.play_sound('risk_reinforcement')
+                #self.dmd.send_text("1 Territoire + Renfort des troupes")
+                handler['dmd'] = '1 Territoire + Renfort des troupes'
+                #self.display.play_sound('risk_reinforcement')
+                handler['sound'] = 'risk_reinforcement'
+                
                 for k, v in enumerate(self.grid):
                     ### ajoute un renfort a chaque territoire
                     if v[1] == 1 and v[2] < 3:
@@ -485,12 +526,17 @@ class Game(cgame.Game):
                         self.led.append('D'+str(v[0])+'#blue')
                         self.led.append('T'+str(v[0])+'#blue')
                         ##
-                        self.display.play_sound('risk_annexed')
+                        #self.display.play_sound('risk_annexed')
+                        handler['sound'] = 'risk_annexed'
+                        
                         break
               
             elif players[actual_player].ident == 2 :
-                self.dmd.send_text("1 Territoire + Renfort des troupes")
-                self.display.play_sound('risk_reinforcement')
+                #self.dmd.send_text("1 Territoire + Renfort des troupes")
+                handler['dmd'] = '1 Territoire + Renfort des troupes'
+                #self.display.play_sound('risk_reinforcement')
+                handler['sound'] = 'risk_reinforcement'
+                
                 for k, v in enumerate(self.grid):
                     ### ajoute un renfort a chaque territoire
                     if v[1] == 2 and v[2] < 3:
@@ -508,12 +554,17 @@ class Game(cgame.Game):
                         self.led.append('D'+str(v[0])+'#red')
                         self.led.append('T'+str(v[0])+'#red')
                         #
-                        self.display.play_sound('risk_annexed')
+                        #self.display.play_sound('risk_annexed')
+                        handler['sound'] = 'risk_annexed'
+                        
                         break
 
             elif players[actual_player].ident == 3 :
-                self.dmd.send_text("1 Territoire + Renfort des troupes")
-                self.display.play_sound('risk_reinforcement')
+                #self.dmd.send_text("1 Territoire + Renfort des troupes")
+                handler['dmd'] = '1 Territoire + Renfort des troupes'
+                #self.display.play_sound('risk_reinforcement')
+                handler['sound'] = 'risk_reinforcement'
+                
                 for k, v in enumerate(self.grid):
                     ### ajoute un renfort a chaque territoire
                     if v[1] == 3 and v[2] < 3:
@@ -531,12 +582,17 @@ class Game(cgame.Game):
                         self.led.append('D'+str(v[0])+'#yellow')
                         self.led.append('T'+str(v[0])+'#yellow')
                         #
-                        self.display.play_sound('risk_annexed')
+                        #self.display.play_sound('risk_annexed')
+                        handler['sound'] = 'risk_annexed'
+                        
                         break       
             
             elif players[actual_player].ident == 4 :
-                self.dmd.send_text("1 Territoire + Renfort des troupes")
-                self.display.play_sound('risk_reinforcement')
+                #self.dmd.send_text("1 Territoire + Renfort des troupes")
+                handler['dmd'] = '1 Territoire + Renfort des troupes'
+                #self.display.play_sound('risk_reinforcement')
+                handler['sound'] = 'risk_reinforcement'
+                
                 for k, v in enumerate(self.grid):
                     ### ajoute un renfort a chaque territoire
                     if v[1] == 4 and v[2] < 3:
@@ -554,7 +610,9 @@ class Game(cgame.Game):
                         self.led.append('D'+str(v[0])+'#purple')
                         self.led.append('T'+str(v[0])+'#purple')
                         #
-                        self.display.play_sound('risk_annexed')
+                        #self.display.play_sound('risk_annexed')
+                        handler['sound'] = 'risk_reinforcement'
+                        
                         break          
                             
         for k, v in enumerate(self.grid):
@@ -562,21 +620,27 @@ class Game(cgame.Game):
             if v[0] == hit[1:]:
                 if v[2] == -1 :  ### en cas ou on touche un segment n ayant pas de bouclier (territoire nu)
                     self.grid[k] = (v[0], -1, -1)
-                    self.display.play_sound('risk_miss')  
+                    #self.display.play_sound('risk_miss')  
+                    handler['sound'] = 'risk_miss'
                 
                 elif v[1] != actual_player:   ### touche le segment d un adversaire
                     ## augmente le score du  joueur (pour fin de partie si pas de gagnant)
                     players[actual_player].score += multi
                     niv = v[2] - multi
                     if niv >= 0 :
-                        self.display.play_sound('risk_attack')
-                        self.dmd.send_text("Tirs sur l'ennemi")
+                        #self.display.play_sound('risk_attack')
+                        handler['sound'] = 'risk_attack'
+                        #self.dmd.send_text("Tirs sur l'ennemi")
+                        handler['dmd'] = 'Tirs sur l ennemi'
                     if niv < 0:
                         players[actual_player].score += self.bonus
                         ### SI PLUS DE BOUCLIER, TERRITOIRE DEVIENT NU
                         self.grid[k] = (v[0], -1, -1)
-                        self.display.play_sound('risk_enemy_destroyed')
-                        self.dmd.send_text("Territoire ennemi anéanti")
+                        #self.display.play_sound('risk_enemy_destroyed')
+                        handler['sound'] = 'risk_destroyed'
+                        
+                        #self.dmd.send_text("Territoire ennemi anéanti")
+                        handler['dmd'] = 'Territoire ennemi anéanti'
                         ### SUPPRIME LES LEDS DU TERRITOIRE NU 
                         
                         if v[1] == 0 :
@@ -627,20 +691,27 @@ class Game(cgame.Game):
                     else:
                         # reduction des troupes adverses
                         self.grid[k] = (v[0], v[1], niv)
-                        self.display.play_sound('risk_attack')
-                        self.dmd.send_text("Territoire ennemi attaqué")
+                        #self.display.play_sound('risk_attack')
+                        handler['sound'] = 'risk_attack'
+                        #self.dmd.send_text("Territoire ennemi attaqué")
+                        handler['dmd'] = 'Territoire ennemi attaqué'
                 
                 elif v[1] == actual_player:   ### touche son propre segment
                     niv = v[2] - multi
                     if niv >= 0 :
-                        self.display.play_sound('risk_allied_fire')
-                        self.dmd.send_text("Tirs Alliés")
+                        #self.display.play_sound('risk_allied_fire')
+                        handler['sound'] = 'risk_allied_fire'
+                        #self.dmd.send_text("Tirs Alliés")
+                        handler['dmd'] = 'Tirs Alliés'
                     if niv < 0:
                         players[actual_player].score -= self.miss
                         ### SI PLUS DE BOUCLIER, TERRITOIRE DEVIENT NU
                         self.grid[k] = (v[0], -1, -1)
-                        self.display.play_sound('risk_friend_destroyed') 
-                        self.dmd.send_text("Territoire allié anéanti")
+                        #self.display.play_sound('risk_friend_destroyed') 
+                        handler['sound'] = 'risk_friend_destroyed'
+                        
+                        #self.dmd.send_text("Territoire allié anéanti")
+                        handler['dmd'] = 'Territoire allié anéanti'
                         ### SUPPRIMER LES LEDS DU TERRITOIRE NU 
                         if v[1] == 0 :
                             try :
@@ -692,7 +763,8 @@ class Game(cgame.Game):
                         # reduction des troupes du joueur actuel
                         self.grid[k] = (v[0], actual_player, niv)
                         #self.display.play_sound('risk_attack')
-                        self.dmd.send_text("Tirs alliés")
+                        #self.dmd.send_text("Tirs alliés")
+                        handler['dmd'] = 'Tirs alliés'
 #### A SUPPRIMER APRES TEST
                 '''
                 else:
@@ -735,8 +807,12 @@ class Game(cgame.Game):
             self.winner = winner
             return 3
  
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        handler['return_code'] = return_code
+        return handler
         
-        return return_code
+        #return return_code
 
     def check_winner(self, players, actual_round, player_launch, actual_player):
         # test for a winner
@@ -777,7 +853,7 @@ class Game(cgame.Game):
     def miss_button(self, players, actual_player, actual_round, player_launch):
 
         players[actual_player].segments[player_launch-1] = 'MISS'
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         players[actual_player].darts_thrown += 1
         
     def refresh_game_screen(self, Players, actual_round, max_round, RemDarts, nb_darts, logo, headers, actual_player, TxtOnLogo=False, Wait=False, OnScreenButtons=None, showScores=True, end_of_game=False, endOfSet=None, Set=None, MaxSet=None):
@@ -839,7 +915,7 @@ class Game(cgame.Game):
             file_path = self.display.file_class.get_full_filename(
                 f'risk/risk_{case + 1}_{i + 1}.png', 'images')
             self.display.display_image(
-                file_path, 0, 0, self.display.res['x'], self.display.res['y'], True, False, False, UseCache=False)
+                file_path, 0, 0, self.display.res['x'], self.display.res['y'], True, False, False)
             self.display.update_screen((pos_x, pos_y, width, height))
 
     def draw_box(self, case):
@@ -851,7 +927,7 @@ class Game(cgame.Game):
         
         if v[1] > -1:
             self.display.display_image(self.display.file_class.get_full_filename(
-                f'risk/risk_{case + 1}_{v[1] + 1}.png', 'images'), 0, 0, self.display.res['x'], self.display.res['y'], True, False, False, UseCache=False)
+                f'risk/risk_{case + 1}_{v[1] + 1}.png', 'images'), 0, 0, self.display.res['x'], self.display.res['y'], True, False, False)
 
             # draw strength logos
             stepx = 50 * self.scale

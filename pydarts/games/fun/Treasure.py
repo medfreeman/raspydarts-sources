@@ -13,7 +13,7 @@ from include import cgame
 ############
 # Game Variables
 ############
-OPTIONS = {'theme': 'default', 'max_round': 10, 'simple50': False}
+OPTIONS = {'theme': 'default', 'max_round': 8, 'simple50': False}
 GAME_RECORDS = {'Points Per Round': 'DESC', 'Points Per Dart': 'DESC'}
 NB_DARTS = 3  # Total darts the player has to play
 LOGO = 'Treasure.png'
@@ -119,7 +119,7 @@ class Game(cgame.Game):
             try:
                 self.check_handicap(players)
             except Exception as exception: # pylint: disable=broad-except
-                self.logs.log("ERROR", f"Handicap failed : {exception}")
+                self.logs.error(f"Handicap failed : {exception}")
 
             for player in players:
                 # Init score
@@ -146,7 +146,7 @@ class Game(cgame.Game):
             players[actual_player].columns[i] = ('', 'int')
         
         # Print debug output
-        self.logs.log("DEBUG",self.infos)
+        self.logs.debug(self.infos)
         return return_code
 
     def pnj_score(self, players, actual_player, level, player_launch):
@@ -167,6 +167,9 @@ class Game(cgame.Game):
         """
         Function run after each dart throw - for example, add points to player
         """
+        
+        handler = self.init_handler()
+        
         ### dit le chiffre touche
         self.display.sound_for_touch(hit)
 
@@ -225,9 +228,12 @@ class Game(cgame.Game):
                 '''        
         if self.items == 'boite_x25' :
                 print('boite x25 trouvee')
-                self.dmd.send_text("Segment X25")
-                self.display.play_sound('treasure_boite_x25')
-                self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/boite_x25', 'videos'))
+                #self.dmd.send_text("Segment X25")
+                handler['dmd'] = 'Segment X25'
+                #self.display.play_sound('treasure_boite_x25')
+                handler['sound'] = 'treasure_boite_x25'
+                #self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/boite_x25', 'videos'))
+                handler['video'] = 'treasure/boite_x25'
                 if player_launch == 1 :
                         players[actual_player].columns[4] = [f'treasure/boite_x25', 'image']
                 elif player_launch == 2 :
@@ -238,28 +244,35 @@ class Game(cgame.Game):
                 self.items = ''
         elif self.items == 'rubis' :
                 print('rubis trouvee')
-                self.display.play_sound('treasure_rubis')
-                self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/rubis', 'videos'))
+                #self.display.play_sound('treasure_rubis')
+                handler['sound'] = 'treasure_rubis'
+                #self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/rubis', 'videos'))
+                handler['video'] = 'treasure/rubis'
                 if player_launch == 1 :
                         players[actual_player].columns[4] = [f'treasure/rubis', 'image']
                 elif player_launch == 2 :
                         players[actual_player].columns[5] = [f'treasure/rubis', 'image']
                 elif player_launch == 3 :
                         players[actual_player].columns[6] = [f'treasure/rubis', 'image']        
-                self.dmd.send_text("Rubis Trouvé")
+                #self.dmd.send_text("Rubis Trouvé")
+                handler['dmd'] = 'Rubis Trouvé'
                 score = 750
                 self.items = ''
         elif self.items == 'coffre' : 
                 print('coffre trouve')
-                self.display.play_sound('treasure_coffre')
-                self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/coffre', 'videos'))
+                #self.display.play_sound('treasure_coffre')
+                handler['sound'] = 'treasure_coffre'
+                
+                #self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/coffre', 'videos'))
+                handler['video'] = 'treasure/coffre'
                 if player_launch == 1 :
                         players[actual_player].columns[4] = [f'treasure/coffre', 'image']
                 elif player_launch == 2 :
                         players[actual_player].columns[5] = [f'treasure/coffre', 'image']
                 elif player_launch == 3 :
                         players[actual_player].columns[6] = [f'treasure/coffre', 'image']        
-                self.dmd.send_text("Coffre Trouvé")
+                #self.dmd.send_text("Coffre Trouvé")
+                handler['dmd'] = 'Coffre Trouvé'
                 #score = 2000 
 
                 if players[actual_player].score <= 0 :
@@ -276,15 +289,18 @@ class Game(cgame.Game):
                 self.items = ''               
         elif self.items == 'bombe' :
                 print('bombe trouvee')
-                self.display.play_sound('treasure_bombe')
-                self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/bombe', 'videos'))
+                #self.display.play_sound('treasure_bombe')
+                handler['sound'] = 'treasure_bombe'
+                #self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/bombe', 'videos'))
+                handler['video'] = 'treasure/bombe'
                 if player_launch == 1 :
                         players[actual_player].columns[4] = [f'treasure/bombe', 'image']
                 elif player_launch == 2 :
                         players[actual_player].columns[5] = [f'treasure/bombe', 'image']
                 elif player_launch == 3 :
                         players[actual_player].columns[6] = [f'treasure/bombe', 'image'] 
-                self.dmd.send_text("Bombe Trouvée")
+                #self.dmd.send_text("Bombe Trouvée")
+                handler['dmd'] = 'Bombe Trouvée'
                 ### condition si joueur a un bouclier
                 if players[actual_player].bouclier :
                         score = self.score_map[hit]
@@ -304,15 +320,18 @@ class Game(cgame.Game):
         
         elif self.items == 'pistolet' :
                 print('pistolet trouve') 
-                self.display.play_sound('treasure_pistolet')
-                self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/pistolet', 'videos'))
+                #self.display.play_sound('treasure_pistolet')
+                handler['sound'] = 'treasure_pistolet'
+                #self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/pistolet', 'videos'))
+                handler['video'] = 'treasure/pistolet'
                 if player_launch == 1 :
                         players[actual_player].columns[4] = [f'treasure/pistolet', 'image']
                 elif player_launch == 2 :
                         players[actual_player].columns[5] = [f'treasure/pistolet', 'image']
                 elif player_launch == 3 :
                         players[actual_player].columns[6] = [f'treasure/pistolet', 'image'] 
-                self.dmd.send_text("Pistolet Trouvé")
+                #self.dmd.send_text("Pistolet Trouvé")
+                handler['dmd'] = 'Pistolet Trouvé'
                 
                 ### vole 750 points a un joueur 
                 index_joueur = []
@@ -347,9 +366,12 @@ class Game(cgame.Game):
               
         elif self.items == 'boite_x10' :
                 print('boite x20 trouvee')
-                self.dmd.send_text("Segment X20")
-                self.display.play_sound('treasure_boite_x10')
-                self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/boite_x10', 'videos'))
+                #self.dmd.send_text("Segment X20")
+                handler['dmd'] = 'Segment X20'
+                #self.display.play_sound('treasure_boite_x10')
+                handler['sound'] = 'treasure_boite_x10'
+                #self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/boite_x10', 'videos'))
+                handler['video'] = 'treasure/boite_x10'
                 if player_launch == 1 :
                         players[actual_player].columns[4] = [f'treasure/boite_x10', 'image']
                 elif player_launch == 2 :
@@ -361,37 +383,46 @@ class Game(cgame.Game):
                 
         elif self.items == 'boite_x2' :
                 print('boite x12 trouvee')
-                self.display.play_sound('treasure_boite_x2')
-                self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/boite_x2', 'videos'))
+                #self.display.play_sound('treasure_boite_x2')
+                handler['sound'] = 'treasure_boite_x2'
+                #self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/boite_x2', 'videos'))
+                handler['video'] = 'treasure/boite_x2'
                 if player_launch == 1 :
                         players[actual_player].columns[4] = [f'treasure/boite_x2', 'image']
                 elif player_launch == 2 :
                         players[actual_player].columns[5] = [f'treasure/boite_x2', 'image']
                 elif player_launch == 3 :
                         players[actual_player].columns[6] = [f'treasure/boite_x2', 'image']        
-                self.dmd.send_text("Segment X12")
+                #self.dmd.send_text("Segment X12")
+                handler['dmd'] = 'Segment X12'
                 score = self.score_map[hit] * 12
                 self.items = ''
                 
         elif self.items == 'boite_x3' : 
                 print('boite x3 trouvee')
-                self.display.play_sound('treasure_boite_x3')
-                self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/boite_x3', 'videos'))
+                #self.display.play_sound('treasure_boite_x3')
+                handler['sound'] = 'treasure_boite_x3'
+                #self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/boite_x3', 'videos'))
+                handler['video'] = 'treasure/boite_x3'
                 if player_launch == 1 :
                         players[actual_player].columns[4] = [f'treasure/boite_x3', 'image']
                 elif player_launch == 2 :
                         players[actual_player].columns[5] = [f'treasure/boite_x3', 'image']
                 elif player_launch == 3 :
                         players[actual_player].columns[6] = [f'treasure/boite_x3', 'image']        
-                self.dmd.send_text("Segment X14")
+                #self.dmd.send_text("Segment X14")
+                handler['dmd'] = 'Segment X14'
                 score = self.score_map[hit] * 14
                 self.items = ''
                 
         elif self.items == 'boite_x4' :
                 print('boite x4 trouvee') 
-                self.display.play_sound('treasure_boite_x4')
-                self.dmd.send_text("Segment X16")
-                self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/boite_x4', 'videos')) 
+                #self.display.play_sound('treasure_boite_x4')
+                handler['sound'] = 'treasure_boite_x4'
+                #self.dmd.send_text("Segment X16")
+                handler['dmd'] = 'Segment X16'
+                #self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/boite_x4', 'videos')) 
+                handler['video'] = 'treasure/boite_x4'
                 if player_launch == 1 :
                         players[actual_player].columns[4] = [f'treasure/boite_x4', 'image']
                 elif player_launch == 2 :
@@ -403,9 +434,12 @@ class Game(cgame.Game):
                       
         elif self.items == 'boite_x5' : 
                 print('boite x5 trouvee')
-                self.display.play_sound('treasure_boite_x5')
-                self.dmd.send_text("Segment X18")
-                self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/boite_x5', 'videos'))
+                #self.display.play_sound('treasure_boite_x5')
+                handler['sound'] = 'treasure_boite_x5'
+                #self.dmd.send_text("Segment X18")
+                handler['dmd'] = 'Segment X18'
+                #self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/boite_x5', 'videos'))
+                handler['video'] = 'treasure/boite_x5'
                 if player_launch == 1 :
                         players[actual_player].columns[4] = [f'treasure/boite_x5', 'image']
                 elif player_launch == 2 :
@@ -417,29 +451,35 @@ class Game(cgame.Game):
                 
         elif self.items == 'diamant' :
                 print('diamant trouvee')
-                self.display.play_sound('treasure_diamant')
-                self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/diamant', 'videos'))
+                #self.display.play_sound('treasure_diamant')
+                handler['sound'] = 'treasure_diamant'
+                #self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/diamant', 'videos'))
+                handler['video'] = 'treasure/diamant'
                 if player_launch == 1 :
                         players[actual_player].columns[4] = [f'treasure/diamant', 'image']
                 elif player_launch == 2 :
                         players[actual_player].columns[5] = [f'treasure/diamant', 'image']
                 elif player_launch == 3 :
                         players[actual_player].columns[6] = [f'treasure/diamant', 'image']        
-                self.dmd.send_text("Diamant Trouvé")
+                #self.dmd.send_text("Diamant Trouvé")
+                handler['dmd'] = 'Diamant Trouvé'
                 score = 1000
                 self.items = ''
                 
         elif self.items == 'lingot' : 
                 print('lingot trouvee')
-                self.display.play_sound('treasure_lingot')
-                self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/lingot', 'videos'))
+                #self.display.play_sound('treasure_lingot')
+                handler['sound'] = 'treasure_lingot'
+                #self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/lingot', 'videos'))
+                handler['video'] = 'treasure/lingot'
                 if player_launch == 1 :
                         players[actual_player].columns[4] = [f'treasure/lingot', 'image']
                 elif player_launch == 2 :
                         players[actual_player].columns[5] = [f'treasure/lingot', 'image']
                 elif player_launch == 3 :
                         players[actual_player].columns[6] = [f'treasure/lingot', 'image']        
-                self.dmd.send_text("Lingot Trouvé")
+                #self.dmd.send_text("Lingot Trouvé")
+                handler['dmd'] = 'Lingot Trouvé'
                 #score = 0 
                 for player in players :
                         if player.ident == players[actual_player].ident :
@@ -453,15 +493,18 @@ class Game(cgame.Game):
                 
         elif self.items == 'crane_jaune' :
                 print('crane jaune trouve') 
-                self.display.play_sound('treasure_crane_jaune')
-                self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/crane_jaune', 'videos'))
+                #self.display.play_sound('treasure_crane_jaune')
+                handler['sound'] = 'treasure_crane_jaune'
+                #self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/crane_jaune', 'videos'))
+                handler['video'] = 'treasure/crane_jaune'
                 if player_launch == 1 :
                         players[actual_player].columns[4] = [f'treasure/crane_jaune', 'image']
                 elif player_launch == 2 :
                         players[actual_player].columns[5] = [f'treasure/crane_jaune', 'image']
                 elif player_launch == 3 :
                         players[actual_player].columns[6] = [f'treasure/crane_jaune', 'image']        
-                self.dmd.send_text("Crane Jaune Trouvé")
+                #self.dmd.send_text("Crane Jaune Trouvé")
+                handler['dmd'] = 'Crane Jaune Trouvé'
                 
                 ### condition si joueur a un bouclier
                 if players[actual_player].bouclier :
@@ -473,8 +516,10 @@ class Game(cgame.Game):
                 
         elif self.items == 'crane_bleu' :
                 print('crane bleu trouve')    
-                self.display.play_sound('treasure_crane_bleu') 
-                self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/crane_bleu', 'videos')) 
+                #self.display.play_sound('treasure_crane_bleu') 
+                handler['sound'] = 'treasure_crane_bleu'
+                #self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/crane_bleu', 'videos')) 
+                handler['video'] = 'treasure/crane_bleu'
                 if player_launch == 1 :
                         players[actual_player].columns[4] = [f'treasure/crane_bleu', 'image']
                         players[actual_player].columns[0] = ['-' , 'txt']
@@ -487,7 +532,9 @@ class Game(cgame.Game):
                 elif player_launch == 3 :
                         players[actual_player].columns[6] = [f'treasure/crane_bleu', 'image'] 
                         players[actual_player].columns[2] = ['-' , 'txt']
-                self.dmd.send_text("Crane Bleu Trouvé")  
+                #self.dmd.send_text("Crane Bleu Trouvé")  
+                handler['dmd'] = 'Crane Bleu Trouvé'
+                
                 ### condition si joueur a un bouclier
                 if players[actual_player].bouclier :
                         score = self.score_map[hit]
@@ -506,15 +553,18 @@ class Game(cgame.Game):
                 
         elif self.items == 'crane_violet' :
                 print('crane violet trouve')
-                self.display.play_sound('treasure_crane_violet')
-                self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/crane_violet', 'videos'))
+                #self.display.play_sound('treasure_crane_violet')
+                handler['sound'] = 'treasure_crane_violet'
+                #self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/crane_violet', 'videos'))
+                handler['video'] = 'treasure/crane_violet'
                 if player_launch == 1 :
                         players[actual_player].columns[4] = [f'treasure/crane_violet', 'image']
                 elif player_launch == 2 :
                         players[actual_player].columns[5] = [f'treasure/crane_violet', 'image']
                 elif player_launch == 3 :
                         players[actual_player].columns[6] = [f'treasure/crane_violet', 'image'] 
-                self.dmd.send_text("Crane Violet Trouvé")
+                #self.dmd.send_text("Crane Violet Trouvé")
+                handler['dmd'] = 'Crane Violet Trouvé'
                 ### condition si joueur a un bouclier
                 if players[actual_player].bouclier :
                         score = self.score_map[hit]
@@ -525,15 +575,18 @@ class Game(cgame.Game):
                 
         elif self.items == 'crane_rouge' :
                 print('crane rouge trouve')
-                self.display.play_sound('treasure_crane_rouge')
-                self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/crane_rouge', 'videos'))
+                #self.display.play_sound('treasure_crane_rouge')
+                handler['sound'] = 'treasure_crane_rouge'
+                #self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/crane_rouge', 'videos'))
+                handler['video'] = 'treasure/crane_rouge'
                 if player_launch == 1 :
                         players[actual_player].columns[4] = [f'treasure/crane_rouge', 'image']
                 elif player_launch == 2 :
                         players[actual_player].columns[5] = [f'treasure/crane_rouge', 'image']
                 elif player_launch == 3 :
                         players[actual_player].columns[6] = [f'treasure/crane_rouge', 'image'] 
-                self.dmd.send_text("Crane Rouge Trouvé")
+                #self.dmd.send_text("Crane Rouge Trouvé")
+                handler['dmd'] = 'Crane Rouge Trouvé'
                 ### condition si joueur a un bouclier
                 if players[actual_player].bouclier :
                         score = self.score_map[hit]
@@ -544,15 +597,18 @@ class Game(cgame.Game):
                 
         elif self.items == 'grenade' :
                 print('grenade trouve')
-                self.display.play_sound('treasure_grenade')
-                self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/grenade', 'videos'))
+                #self.display.play_sound('treasure_grenade')
+                handler['sound'] = 'treasure_grenade'
+                #self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/grenade', 'videos'))
+                handler['video'] = 'treasure/grenade'
                 if player_launch == 1 :
                         players[actual_player].columns[4] = [f'treasure/grenade', 'image']
                 elif player_launch == 2 :
                         players[actual_player].columns[5] = [f'treasure/grenade', 'image']
                 elif player_launch == 3 :
                         players[actual_player].columns[6] = [f'treasure/grenade', 'image'] 
-                self.dmd.send_text("grenade Trouvée")
+                #self.dmd.send_text("grenade Trouvée")
+                handler['dmd'] = 'Grenade Trouvée'
                 ### condition si joueur a un bouclier
                 if players[actual_player].bouclier :
                         score = self.score_map[hit]
@@ -563,15 +619,18 @@ class Game(cgame.Game):
                 
         elif self.items == 'couteau' :
                 print('couteau trouve') 
-                self.display.play_sound('treasure_couteau')
-                self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/couteau', 'videos'))
+                #self.display.play_sound('treasure_couteau')
+                handler['sound'] = 'treasure_couteau'
+                #self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/couteau', 'videos'))
+                handler['video'] = 'treasure/couteau'
                 if player_launch == 1 :
                         players[actual_player].columns[4] = [f'treasure/couteau', 'image']
                 elif player_launch == 2 :
                         players[actual_player].columns[5] = [f'treasure/couteau', 'image']
                 elif player_launch == 3 :
                         players[actual_player].columns[6] = [f'treasure/couteau', 'image'] 
-                self.dmd.send_text("Couteau Trouvé")
+                #self.dmd.send_text("Couteau Trouvé")
+                handler['dmd'] = 'Couteau Trouvé'
                 
                 ### vole 300 points a un joueur 
                 index_joueur = []
@@ -594,15 +653,18 @@ class Game(cgame.Game):
                 
         elif self.items == 'epee' :
                 print('epee trouve')
-                self.display.play_sound('treasure_epee')
-                self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/epee', 'videos'))
+                #self.display.play_sound('treasure_epee')
+                handler['sound'] = 'treasure_epee'
+                #self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/epee', 'videos'))
+                handler['video'] = 'treasure/epee'
                 if player_launch == 1 :
                         players[actual_player].columns[4] = [f'treasure/epee', 'image']
                 elif player_launch == 2 :
                         players[actual_player].columns[5] = [f'treasure/epee', 'image']
                 elif player_launch == 3 :
                         players[actual_player].columns[6] = [f'treasure/epee', 'image'] 
-                self.dmd.send_text("Epée Trouvée")
+                #self.dmd.send_text("Epée Trouvée")
+                handler['dmd'] = 'Epée Trouvée'
                 
                 ### vole 600 points a un joueur
                 index_joueur = []
@@ -625,15 +687,18 @@ class Game(cgame.Game):
                 
         elif self.items == 'bouclier' :
                 print('bouclier trouve')
-                self.display.play_sound('treasure_bouclier')
-                self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/bouclier', 'videos'))
+                #self.display.play_sound('treasure_bouclier')
+                handler['sound'] = 'treasure_bouclier'
+                #self.video_player.play_video(self.display.file_class.get_full_filename(f'treasure/bouclier', 'videos'))
+                handler['video'] = 'treasure/bouclier'
                 if player_launch == 1 :
                         players[actual_player].columns[4] = [f'treasure/bouclier', 'image']
                 elif player_launch == 2 :
                         players[actual_player].columns[5] = [f'treasure/bouclier', 'image']
                 elif player_launch == 3 :
                         players[actual_player].columns[6] = [f'treasure/bouclier', 'image'] 
-                self.dmd.send_text("Bouclier Trouvé")
+                #self.dmd.send_text("Bouclier Trouvé")
+                handler['dmd'] = 'Bouclier Trouvé'
                 score = self.score_map[hit] 
                 ### ajoute bouclier au joueur pour neutraliser les effets negatif pendant un tour
                 players[actual_player].bouclier = True
@@ -671,8 +736,13 @@ class Game(cgame.Game):
             else:
                 # No winner : last round reached
                 return_code = 2
+                
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        handler['return_code'] = return_code
+        return handler
 
-        return return_code
+        #return return_code
 
     def post_round_check(self, players, actual_round, actual_player):
         """
@@ -702,7 +772,7 @@ class Game(cgame.Game):
         Miss button
         '''
         players[actual_player].columns[player_launch-1] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         players[actual_player].darts_thrown += 1
 
     def refresh_stats(self, players, actual_round):

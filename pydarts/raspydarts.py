@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 awesome electronic darts' game
@@ -22,6 +22,7 @@ try:
     from include import cconfig
     from include import clogs
     from include import cevent
+    from include import cfiles
 
     # Starts logger system, it will filter on a config basis
     logs = clogs.Logs()
@@ -53,6 +54,31 @@ try:
     config_input = Config.read_file("Raspberry_BoardPinsIns")
     # Read outputs
     config_output = Config.read_file("Raspberry_BoardPinsOuts")
+    # Read Config file for camera configuration
+    config_camera = Config.read_file("Camera")
+
+    ####
+    # LOAD colorset
+    ####
+    colorset_theme = config_globals['colorset']
+    # For random files
+    File = cfiles.Cfile(Config, logs, theme=colorset_theme)
+    logs.info(f"Theme dir is {File.theme_dir}")
+    logs.info(f"Personnal dir is {Config.user_dir}")
+    logs.info(f"Root dir is {Config.root_dir}")
+    # Colorset
+    config_colorset = Config.get_colorset(Config.user_dir, colorset_theme)
+    # Value for segment color exist ?
+    colors_values_for_segments = Config.get_values_segment_colors(config_colorset)
+    # Shine little dart
+    bg_colors_sending = ""
+    if colors_values_for_segments:
+        bg_colors_sending = "_".join(colors_values_for_segments)
+    else:
+        bg_colors_sending = ",".join(color for color in [Config.get_value('SectionAdvanced', 'target-bgcolor1'),
+                                                         Config.get_value('SectionAdvanced', 'target-bgcolor2'),
+                                                         Config.get_value('SectionAdvanced', 'target-bgcolor3')])
+    ####
 
     # Games' options
     for game in config_advanced['game-options-list'].split(','):
@@ -75,18 +101,16 @@ try:
         subsribers.append('Other')
 
     mqtt_broker = Config.get_value('SectionAdvanced', 'mqtt-broker')
-    logs.log("DEBUG", f"use-dmd option is set to : {Config.get_value('SectionAdvanced', 'use-dmd')}")
-    logs.log("DEBUG", f"use-matrix option is set to : {Config.get_value('SectionAdvanced', 'use-matrix')}")
-    logs.log("DEBUG", f"use-other option is set to : {Config.get_value('SectionAdvanced', 'use-other')}")
-    logs.log("DEBUG", f"mqtt-broker option is set to : {Config.get_value('SectionAdvanced', 'mqtt-broker')}")
+    logs.debug(f"use-dmd option is set to : {Config.get_value('SectionAdvanced', 'use-dmd')}")
+    logs.debug(f"use-matrix option is set to : {Config.get_value('SectionAdvanced', 'use-matrix')}")
+    logs.debug(f"use-other option is set to : {Config.get_value('SectionAdvanced', 'use-other')}")
+    logs.debug(f"mqtt-broker option is set to : {Config.get_value('SectionAdvanced', 'mqtt-broker')}")
 
     dispatcher = cevent.Event(logs, config_events, subscribers=subsribers, broker=mqtt_broker)
 
     # For old versions +> write new config file
-    logs.log("DEBUG", f"target-bgcolor1 option is set to : {Config.get_value('SectionAdvanced', 'target-bgcolor1')}")
-    logs.log("DEBUG", f"target-bgcolor2 option is set to : {Config.get_value('SectionAdvanced', 'target-bgcolor2')}")
-    logs.log("DEBUG", f"target-bgcolor3 option is set to : {Config.get_value('SectionAdvanced', 'target-bgcolor3')}")
-    logs.log("DEBUG", f"target-bgbrightness option is set to : {Config.get_value('SectionAdvanced', 'target-bgbrightness')}")
+    logs.debug(f"target segment colors option is set to : {bg_colors_sending}")
+    logs.debug(f"target-bgbrightness option is set to : {Config.get_value('SectionAdvanced', 'target-bgbrightness')}")
 
 except Exception as exception:
     print("[FATAL] Unable to load internal first level dependancies or to create basic instances. Your download seems corrupted. Please download raspydarts again.")
@@ -98,9 +122,9 @@ except Exception as exception:
 #################
 
 if Config.file_exists and config_leds['PIN_STRIPLED'] in ('10', '12', '18', '21'):
-    logs.log("DEBUG", "Starting Strip Leds Server")
+    logs.debug("Starting Strip Leds Server")
     strip_log = open('logs/StripLeds.log', "w", 1)
-    cmd = ['sudo', 'python3', '/pydarts/addons/StripLeds_Server.py'
+    cmd = ['sudo', 'python3', 'addons/StripLeds_Server.py'
             , f'-host={mqtt_broker}'
             , '9'
             , f"{dispatcher.strip_topic}"
@@ -109,21 +133,19 @@ if Config.file_exists and config_leds['PIN_STRIPLED'] in ('10', '12', '18', '21'
             , f"{config_leds['BRI_STRIPLED']}"]
     p_strip = Popen(cmd, stdout=strip_log)
     dispatcher.strip_leds = True
-    logs.log("DEBUG", f"Launched {' '.join(cmd)}")
+    logs.debug(f"Launched {' '.join(cmd)}")
     sleep(0.5)
 else:
     dispatcher.strip_leds = False
     p_strip = None
 
 if Config.file_exists and config_leds['PIN_TARGETLED'] in ('10' , '12', '18', '21'):
-    logs.log("DEBUG", "Starting Target Leds Server")
-    logs.log("DEBUG", f"Using this configuration : {config_target_leds}")
+    logs.debug("Starting Target Leds Server")
+    logs.debug(f"Using this configuration : {config_target_leds}")
     target_log = open('logs/TargetLeds.log', "w", 1)
     cmd = ['sudo', 'python3', '/pydarts/addons/TargetLeds_Server.py'
             , f'-host={mqtt_broker}'
-            , '-bgcolors={},{},{}'.format(Config.get_value('SectionAdvanced', 'target-bgcolor1')
-                , Config.get_value('SectionAdvanced', 'target-bgcolor2')
-                , Config.get_value('SectionAdvanced', 'target-bgcolor3'))
+            , f'-bgcolors={bg_colors_sending}'
             , f"-bgbrightness={Config.get_value('SectionAdvanced', 'target-bgbrightness')}"
             , '10'
             , f'{dispatcher.target_topic}'
@@ -132,30 +154,30 @@ if Config.file_exists and config_leds['PIN_TARGETLED'] in ('10' , '12', '18', '2
             , f"{config_leds['BRI_TARGETLED']}"]
     p_target = Popen(cmd, stdout=target_log)
     dispatcher.target_leds = True
-    logs.log("DEBUG", f"Launched {' '.join(cmd)}")
+    logs.debug(f"Launched {' '.join(cmd)}")
     sleep(0.5)
 else:
     dispatcher.target_leds = False
     p_target = None
 
 if Config.file_exists and Config.get_value('SectionAdvanced', 'use-hue'):
-    logs.log("DEBUG", "Starting Hue Server")
+    logs.debug("Starting Hue Server")
     hue_log = open('logs/Hue.log', "w", 1)
     cmd = ['python3', '/pydarts/addons/Hue_Server.py'
             , f'-host={mqtt_broker}'
             , f'{dispatcher.other_topic}']
     p_hue = Popen(cmd, stdout=hue_log)
     dispatcher.other = True
-    logs.log("DEBUG", f"Launched {' '.join(cmd)}")
+    logs.debug(f"Launched {' '.join(cmd)}")
 elif Config.get_value('SectionAdvanced', 'use-other'):
     dispatcher.other = True
 else:
     dispatcher.other = False
 
 
-logs.log("DEBUG", f"dispatcher.strip_leds is set to {dispatcher.strip_leds}")
-logs.log("DEBUG", f"dispatcher.target_leds is set to {dispatcher.target_leds}")
-logs.log("DEBUG", f"subsribers is set to {subsribers}")
+logs.debug(f"dispatcher.strip_leds is set to {dispatcher.strip_leds}")
+logs.debug(f"dispatcher.target_leds is set to {dispatcher.target_leds}")
+logs.debug(f"subsribers is set to {subsribers}")
 
 #################
 # Welcome
@@ -176,13 +198,14 @@ print("##############################################################")
 from include import craspberry
 from include import cdmd
 from include import cvideos
+from include import cimages
 from include import cupdate
 #from include import cplayer
 from include import cscreen
 from include import clocale
 from include import cclient
 from include import cscores
-from include import cfiles
+from include import ccamera
 
 # Create locale instance
 Lang = clocale.Locale(logs, Config)
@@ -200,7 +223,6 @@ except Exception as exception:
     print(f"[ERROR] {exception}")
 
     rpi_error = exception
-    Config_rpi['EXTENDED_GPIO'] = 0
     try:
         rpi = craspberry.Craspberry(logs, Config, config_target_leds, dispatcher, t_event=t_event)
     except Exception as exception:
@@ -208,11 +230,7 @@ except Exception as exception:
 
         rpi_error = exception
 
-# For random files
-File = cfiles.Cfile(Config, logs, theme=Config.get_value('SectionGlobals', 'colorset'))
-logs.log("INFO", f"Theme dir is {File.theme_dir}")
-logs.log("INFO", f"Personnal dir is {Config.user_dir}")
-logs.log("INFO", f"Root dir is {Config.root_dir}")
+dispatcher.add_rpi(rpi)
 
 # Manage Raspydarts dmd
 dmd = cdmd.Cdmd(logs, dispatcher, File)
@@ -224,25 +242,28 @@ try:
     videosound_multiplier = int(Config.get_value('SectionGlobals', 'videosound_multiplier'))
     if videosound_multiplier < 1 or videosound_multiplier > 5:
         raise('not valid multiplier')
-    logs.log("INFO", f"Video sound multiplier is set to {videosound_multiplier}")
+    logs.info(f"Video sound multiplier is set to {videosound_multiplier}")
 except:
     videosound_multiplier = 1
-    logs.log("ERROR", f"{Config.get_value('SectionGlobals', 'videosound_multiplier')} is not a valid videosound_multiplier(1-5). Back to 1")
+    logs.error(f"{Config.get_value('SectionGlobals', 'videosound_multiplier')} is not a valid videosound_multiplier(1-5). Back to 1")
 
 try:
     sound_multiplier = float(Config.get_value('SectionGlobals', 'sound_multiplier'))
     if sound_multiplier < 10 or sound_multiplier > 100:
         raise('not valid multiplier')
-    logs.log("INFO", f"Sound multiplier is set to {sound_multiplier}")
+    logs.info(f"Sound multiplier is set to {sound_multiplier}")
 except:
     sound_multiplier = 100
-    logs.log("ERROR", f"{Config.get_value('SectionGlobals', 'sound_multiplier')} is not a valid sound_multiplier(10-100. ex : 75). Back to 100")
+    logs.error(f"{Config.get_value('SectionGlobals', 'sound_multiplier')} is not a valid sound_multiplier(10-100. ex : 75). Back to 100")
 
 video_player = cvideos.Videos(logs, File, level=video_level, volume=volume, multiplier=videosound_multiplier)
+image_player = cimages.Images(logs, File, level=video_level)
 
 #display = cscreen.Screen(Config, logs, File, Lang, rpi, dmd, video_player, Font=font, wait_event_time=wait_event_time, t_event=t_event)
-display = cscreen.Screen(Config, logs, File, Lang, rpi, dmd, video_player, Font=font, wait_event_time=wait_event_time)
+display = cscreen.Screen(Config, logs, File, Lang, rpi, dmd, video_player, image_player, Font=font, wait_event_time=wait_event_time)
 display.set_soundmultiplier(sound_multiplier)
+
+image_player.set_display(display)
 
 rpi.set_play_sound(display.play_sound)
 rpi.set_send_insult(dmd.send_insult)
@@ -250,22 +271,43 @@ rpi.set_send_insult(dmd.send_insult)
 if rpi_error is not None:
     display.mcp_error(rpi_error)
 
+# Manage Webcam USB
+camera = ccamera.Camera(Config, display, logs)
+
 # Client of Master Server
 NetMasterClient = cclient.MasterClient(logs)
 # v1.2 SQlite score storage
 scores = cscores.Scores(Config, logs)
+
+#################################
+# Install additional librairies # 
+#    Delete script if succeed   #
+#################################
+
+update_lib = "/pydarts/scripts/update_lib.sh"
+if os.path.isfile(update_lib):
+    logs.info("================================================================")
+    logs.info("Install additional librairies\n")
+    display.message(['Install_additional_librairies'], 0, None, 'middle')
+    code_retour = os.system(f"sh {update_lib}")
+    if code_retour == 0:
+        logs.info("Install additional librairies succeed !\n")
+        os.remove(update_lib)
+    else:
+        logs.erreur(f"Erreur lors de l'exécution du script (code {code_retour})")
+    logs.info("================================================================")
 
 #####################
 # Update librairies #
 #####################
 
 if not Config.file_exists and False:
-    logs.log("INFO", "================================================================")
-    logs.log("INFO", "Updating librairies\n")
+    logs.info("================================================================")
+    logs.info("Updating librairies\n")
     display.message(['Updating_librairies'], 0, None, 'middle')
     cmd = '/pydarts/scripts/update_tool.sh'
     os.system(cmd)
-    logs.log("INFO", "================================================================")
+    logs.info("================================================================")
 
 ##############
 # AUTO UPDATE
@@ -275,50 +317,49 @@ game_type = None
 display.init_colorset()
 
 version = cupdate.get_version(logs)
-try:
-    display.message(['update-check'], 0, None, 'middle')
-    last, new_version, size = cupdate.get_last(logs, \
-            config_favorites['servers'].split(',')[0].split(':')[0], '5000', version)
+if Config.get_value('SectionGlobals', 'check_for_updates', False):
+    try:
+        display.message(['update-check'], 0, None, 'middle')
+        last, new_version, size = cupdate.get_last(logs, \
+                config_favorites['servers'].split(',')[0].split(':')[0], '5000', version)
 
-    if last is not None:
-        display.message(['update-download'], 0, None, 'middle')
-        last, size = cupdate.download_update(logs, \
-                config_favorites['servers'].split(',')[0].split(':')[0], '5000', last, size)
+        if last is not None:
+            display.message(['update-download'], 0, None, 'middle')
+            last, size = cupdate.download_update(logs, \
+                    config_favorites['servers'].split(',')[0].split(':')[0], '5000', last, size)
 
-        if last is None:
-            display.message(['update-failed'], 0, None, 'middle')
-        else:
-            response = display.wait_validation("update-available")
-            if response:
-                display.message(['updating'], 0, None, 'middle')
-                cupdate.apply_update(logs, last, new_version)
-                display.message([f'Version {new_version} installée', 'restarting'], \
-                        1000,  'middle', bg_color='menu-ok')
-                version = new_version
+            if last is None:
+                display.message(['update-failed'], 0, None, 'middle')
+            else:
+                response = display.wait_validation("update-available")
+                if response:
+                    display.message(['updating'], 0, None, 'middle')
+                    cupdate.apply_update(logs, last, new_version)
+                    display.message([f'Version {new_version} installée', 'restarting'], \
+                            1000,  'middle', bg_color='menu-ok')
+                    version = new_version
 
-                game_type = 'restart'
-except Exception as exception:
-    print("[WARNING] Unable to check/get updates.")
-    print(f"[WARNING] Error was {exception}")
-    print(f"version is {version}")
+                    game_type = 'restart'
+    except Exception as exception:
+        print("[WARNING] Unable to check/get updates.")
+        print(f"[WARNING] Error was {exception}")
+        print(f"version is {version}")
 
 ##############
 # INIT
 ##############
 
 # Give translations to object rpi
-rpi.Lang = Lang
-
 dispatcher.publish('off', limit=['TARGET', 'STRIP', 'OTHER'])
-dispatcher.publish('launch', limit=['TARGET', 'STRIP', 'OTHER'])
+dispatcher.publish('launch', limit=['TARGET', 'STRIP', 'OTHER', 'LIGHT', 'STROBE'])
 
 # Beautiful intro screen
 if game_type != 'restart' and rpi_error is None:
     if bool(config_advanced['launch-game-celebration']):
-        rpi.light_buttons(['LIGHT_CELEBRATION'])
+        rpi.light_toys(['LIGHT_CELEBRATION'])
     dmd.send_text(Lang.translate('Welcome'))
     #display.nice_shot(Lang.translate('Welcome'))
-    rpi.light_buttons(['LIGHT_CELEBRATION'], False)
+    rpi.light_toys(['LIGHT_CELEBRATION'], False)
 
 # If exists, display version's changelog
 display.display_changelog(version)
@@ -329,8 +370,8 @@ if volume:
 
 # Sys requirements check
 if sys.version[:3] not in Config.supported_python_versions:
-    logs.log("WARNING", f"Your version of python {sys.version[:3]} is not known as raspydarts compatible.")
-    logs.log("WARNING", f"Please execute raspydarts with one of this version of python : {Config.supported_python_versions}.")
+    logs.warning(f"Your version of python {sys.version[:3]} is not known as raspydarts compatible.")
+    logs.warning(f"Please execute raspydarts with one of this version of python : {Config.supported_python_versions}.")
 
 # Verbosity
 debuglevel = int(Config.get_value('SectionGlobals', 'debuglevel'))
@@ -341,16 +382,14 @@ if debuglevel >= 1 and debuglevel <= 4:
 # Calibration Wizard
 ####################
 
-rpi.gpio_connect()
-
 if not Config.file_exists:
-    logs.log("DEBUG", "Launching raspberry input wizard")
+    logs.debug("Launching raspberry input wizard")
 
     config_done = False
     cancel = 0
     while not config_done:
         if cancel > 2:
-            logs.log("DEBUG", "Configuration canceled by user")
+            logs.debug("Configuration canceled by user")
             sys.exit(0)
 
         cancel += 1
@@ -381,52 +420,68 @@ try:
 except:
     competition_mode = False
 
-#logs.log("DEBUG", f"Solo option is set to : {solo}s")
-logs.log("DEBUG", f"play_firstname option is set to : {play_firstname}")
-logs.log("DEBUG", f"print_dartstroke option is set to : {print_dartstroke}")
-logs.log("DEBUG", f"light_target option is set to : {light_target}")
-logs.log("DEBUG", f"light_strip option is set to : {light_strip}")
-logs.log("DEBUG", f"illumination_mode option is set to : {illumination_mode}")  
-logs.log("DEBUG", f"illumination color option is set to : {illumination_color}")  
-logs.log("DEBUG", f"pnj_time option is set to : {pnj_time}ms")
-logs.log("DEBUG", f"nextplayer_sound_duration option is set to : {sound_duration}ms")
-logs.log("DEBUG", f"wait_event_time option is set to : {wait_event_time}ms")
+#logs.debug(f"Solo option is set to : {solo}s")
+logs.debug(f"play_firstname option is set to : {play_firstname}")
+logs.debug(f"print_dartstroke option is set to : {print_dartstroke}")
+logs.debug(f"light_target option is set to : {light_target}")
+logs.debug(f"light_strip option is set to : {light_strip}")
+logs.debug(f"illumination_mode option is set to : {illumination_mode}")
+logs.debug(f"illumination color option is set to : {illumination_color}")
+logs.debug(f"pnj_time option is set to : {pnj_time}ms")
+logs.debug(f"nextplayer_sound_duration option is set to : {sound_duration}ms")
+logs.debug(f"wait_event_time option is set to : {wait_event_time}ms")
 
 stats_screen = False  # Return value of Stats Screen (start again a new game with same parameters)
-direct_play = None  # Direct play functionnlity (play without having to use menus)
 netgamename = Config.get_value('SectionAdvanced', 'netgamename', False)  # Game Name
 
 if game_type != 'restart':
     game_type = 'local'
-players_bank = Config.get_value('SectionAdvanced', 'localplayers', False).split(',')  # Local players
-selected_game = Config.get_value('SectionAdvanced', 'selected_game', False)            # Selected game
+
+local_players = Config.get_value('Favorites', 'firstnames', False, None, split=',')
+players_bank = Config.get_value('SectionAdvanced', 'localplayers', False, split=',')         # Local players
+selected_game = Config.get_value('SectionAdvanced', 'selectedgame', False, 'None')            # Selected game
+if selected_game is not None and local_players is not None:
+    direct_play = Config.get_value('SectionAdvanced', 'directplay', False, False)            # By-passs menus, use dirstnames and selected_game parameters
+else:
+    direct_play = False
 pref_fun_game = Config.get_value('SectionAdvanced', 'preferedfungame', False, None)
 pref_classic_game = Config.get_value('SectionAdvanced', 'preferedclassicgame', False, None)
 pref_sport_game = Config.get_value('SectionAdvanced', 'preferedsportgame', False, None)
 pref_category = Config.get_value('SectionAdvanced', 'preferedcategory', False, None)
 nb_sets = int(Config.get_value('SectionAdvanced', 'nb_sets', False, None))
 
+favorites_players = Config.get_value('Favorites', 'firstnames', False, split=',')
+
+logs.debug(f"firstnames option is set to : {local_players}")
+logs.debug(f"localplayers option is set to : {players_bank}")
+logs.debug(f"local_players option is set to : {local_players}")
+logs.debug(f"selected_game option is set to : {selected_game}")
+logs.debug(f"direct_play option is set to : {direct_play}")
+logs.debug(f"pref_fun_game option is set to : {pref_fun_game}")
+logs.debug(f"pref_sport_game option is set to : {pref_sport_game}")
+logs.debug(f"pref_classic_game option is set to : {pref_classic_game}")
+logs.debug(f"pref_category option is set to : {pref_category}")
+
+wait_finish = not File.is_dir('next_player', 'sounds')
+
+# Load game's logo
+display.message(['Loading logos...'], 0, None, 'middle')
+
+for category in ('classic', 'fun', 'sport'):
+    games = display.get_games_list(category)
+    display.game_menu(category, games, config_favorites['games'], 1, load=True)
+    display.game_menu(category, games, config_favorites['games'], 2, load=True)
+del games
+
 if pref_category is None:
     category = 'classic'
 else:
     category = pref_category
 
-favorites_players = Config.get_value('Favorites', 'firstnames', False).split(',')
-local_players = Config.get_value('Favorites', 'firstnames', False).split(',')
-
-logs.log("DEBUG", f"localplayers option is set to : {players_bank}")
-logs.log("DEBUG", f"local_players option is set to : {local_players}")
-logs.log("DEBUG", f"pref_fun_game option is set to : {pref_fun_game}")
-logs.log("DEBUG", f"pref_sport_game option is set to : {pref_sport_game}")
-logs.log("DEBUG", f"pref_classic_game option is set to : {pref_classic_game}")
-logs.log("DEBUG", f"pref_category option is set to : {pref_category}")
-
-wait_finish = not File.is_dir('next_player', 'sounds')
 ######################
 ######## SOFTWARE LOOP
 ######################
 
-selected_game = None
 versionGame = ''
 
 try:
@@ -458,8 +513,8 @@ try:
                         all_players = local_players
                         players_count = len(local_players)
                     except Exception as exception:
-                        logs.log("ERROR", "Unable to order players from previous results.")
-                        logs.log("ERROR", f"Error was {exception}")
+                        logs.error("Unable to order players from previous results.")
+                        logs.error(f"Error was {exception}")
             elif game_type in ('netjoin', 'netcreate'):
                 players_count = len(local_players)
                 menu = 'connect'
@@ -467,17 +522,17 @@ try:
         ###
         ### DIRECT PLAY MODE (possibility to launch a game without passing thru menus).
         ### Only available if it hasen't be disabled by any process
-        elif game_type == 'local' and local_players and selected_game and direct_play:
+        elif game_type == 'local' and local_players is not None and selected_game is not None and direct_play:
             try:
                 Game = selected_game.replace(' ', '_')
                 menu = True
                 all_players = local_players
                 players_count = len(local_players)
                 choosed_game = __import__("games.{Game}", fromlist=["games"])
-                    
+
                 # Merge config file options and default game options
                 default_game_options = choosed_game.OPTIONS
-                # New Added by Manu for debug 24-02-2024
+
                 if debuglevel == 2:
                     try:
                         debug_game_options = choosed_game.DEBUG
@@ -510,7 +565,7 @@ try:
                 # Enable Direct Play mode
                 direct_play = True
             except Exception as exception:
-                logs.log("ERROR", f"Unable launch Direct Play mode. Error was {exception}")
+                logs.error(f"Unable launch Direct Play mode. Error was {exception}")
                 menu = 'gametype'
         else:
             menu = 'gametype'
@@ -520,45 +575,54 @@ try:
         #######################
         while menu is not True:
 
+            fast_games_mode = bool(Config.get_value('SectionGlobals', 'fast_games_mode', False))
+            only_favorites_games_mode = bool(Config.get_value('SectionGlobals', 'only_favorites_games_mode', False))
+
             ########
             # MAIN MENU - GAME TYPE (LOCAL, NETWORK, NETWORK MANUAL)
             ########
-            if menu == 'gametype':
-                rpi.light_buttons(['LIGHT_NAVIGATE', 'LIGHT_VALIDATE'])
-                rpi.light_buttons(['LIGHT_BACK'], False)  
-                dispatcher.publish('menu', limit=['TARGET', 'STRIP', 'OTHER'])
+            if (menu == 'gametype' and not fast_games_mode) or (menu == 'mainmenu' and fast_games_mode) :
+                rpi.light_toys(['LIGHT_NAVIGATE', 'LIGHT_VALIDATE'])
+                rpi.light_toys(['LIGHT_BACK'], False)
+                dispatcher.publish('menu', limit=['TARGET', 'STRIP', 'OTHER', 'LIGHT', 'STROBE'])
                 game_type = display.main_menu()
                 if game_type in ('restart', 'quit', 'shutdown'):
-                    rpi.light_buttons(['LIGHT_VALIDATE'], False)  
+                    rpi.light_toys(['LIGHT_VALIDATE'], False)
                     break
                 elif game_type == 'infos':
                     display.infos_menu(Config)
                 elif game_type != 'miscellaneous':
+                    menu = 'players'
+            elif menu == 'gametype' and fast_games_mode :
                     menu = 'players'
 
             ########
             # PLAYERS NAMES
             ########
             if menu == 'players':
-                dispatcher.publish('menu', limit=['TARGET', 'STRIP', 'OTHER'])
-                rpi.light_buttons(['LIGHT_PLAYERS'])
-                rpi.light_buttons(['LIGHT_BACK'])  
+                dispatcher.publish('menu', limit=['TARGET', 'STRIP', 'OTHER', 'LIGHT', 'STROBE'])
+                rpi.light_toys(['LIGHT_PLAYERS'])
+                rpi.light_toys(['LIGHT_BACK'])
                 # Display menu anyway
                 nb_sets = int(Config.get_value('SectionAdvanced', 'nb_sets', False, None))
-                #if game_type == 'netcreate':
-                #    nb_sets, players_list, competition_mode = \
-                #            display.players_menu(local_players, bank=players_bank, sets=nb_sets, context=game_type)
-                #elif game_type == 'netjoin':
+                # Get players favorite color
+                players_favorite_color = Config.get_players_color()
+
                 if game_type in ('netjoin', 'netcreate'):
-                    nb_sets, players_list, competition_mode = \
-                            display.players_menu(local_players, bank=players_bank, sets=None, context=game_type)
+                    nb_sets, players_list, competition_mode, players_favorite_color = \
+                            display.players_menu(local_players, bank=players_bank, sets=None, context=game_type,
+                                                 colors_available = dispatcher.get_colors(), players_color = players_favorite_color)
                     nb_sets = 1
                 else:
-                    nb_sets, players_list, competition_mode = \
-                            display.players_menu(local_players, bank=players_bank, sets=nb_sets, competition_mode=competition_mode)
+                    nb_sets, players_list, competition_mode, players_favorite_color = \
+                            display.players_menu(local_players, bank=players_bank, sets=nb_sets, competition_mode=competition_mode,
+                                                 colors_available = dispatcher.get_colors(), players_color = players_favorite_color)
 
                 if players_list == 'escape':
-                    menu = 'gametype'
+                    if not fast_games_mode :
+                        menu = 'gametype'
+                    elif  fast_games_mode :
+                        menu = 'mainmenu'
                 else:
                     local_players = players_list[::]
                     players_count = len(local_players)  # players_count = Number of players
@@ -567,10 +631,11 @@ try:
                         menu = 'serverlist'
                     elif game_type == 'local':
                         menu = 'gamecategory'
-                rpi.light_buttons(['LIGHT_PLAYERS'], False)
+                rpi.light_toys(['LIGHT_PLAYERS'], False)
 
                 if competition_mode:
                     video_player.set_level(0)
+                    image_player.set_level(0)
                     #solo = -1
                     releasedartstime = 1
                     display.set_blinktime(500)
@@ -581,15 +646,17 @@ try:
                     display.set_blinktime(int(Config.get_value('SectionGlobals', 'blinktime')))
 
                     video_player.set_level(video_level)
-                logs.log("DEBUG", f"Competition mode : {competition_mode}")
-                logs.log("DEBUG", f"Video : {video_player.level}")
-                logs.log("DEBUG", f"releasedartstime  : {releasedartstime}")
+                    image_player.set_level(video_level)
+                logs.debug(f"Competition mode : {competition_mode}")
+                logs.debug(f"Video : {video_player.level}")
+                logs.debug(f"Image : {image_player.level}")
+                logs.debug(f"releasedartstime  : {releasedartstime}")
 
             ########
             # NETWORK USING MASTER SERVER
             ########
             if menu == 'serverlist':  # Choice server (when several)
-                dispatcher.publish('menu', limit=['TARGET', 'STRIP', 'OTHER'])
+                dispatcher.publish('menu', limit=['TARGET', 'STRIP', 'OTHER', 'LIGHT', 'STROBE'])
                 if config_favorites['servers'] == '':
                     display.message(["Aucun server paramétré."], wait=5, refresh=True)
                     menu = 'servers'
@@ -602,7 +669,7 @@ try:
                     serverport = 25005
                     masterserverport = 25006 #int(Server.split(':')[1])
                     serveralias = Server.split('.')[0]
-                    logs.log("DEBUG", f"Using {servername}:{masterserverport}")
+                    logs.debug(f"Using {servername}:{masterserverport}")
                     if Server == 'escape':
                         # Back to home
                         menu = 'gametype'
@@ -613,7 +680,7 @@ try:
             if menu == 'createorjoin':
                 menu = 'connect'
                 if game_type == 'netjoin':
-                    logs.log("DEBUG", f"Get remote game list on {servername}:{masterserverport}")
+                    logs.debug(f"Get remote game list on {servername}:{masterserverport}")
                     netgamename = display.net_game_list(NetMasterClient, players_count, servername, masterserverport)
                     if netgamename == 'escape':
                         menu = 'gametype'
@@ -625,7 +692,7 @@ try:
             ########
             # If network, connect to server
             if game_type in ('netjoin', 'netcreate') and menu == 'connect':
-                logs.log("DEBUG", "Net game requested.")
+                logs.debug("Net game requested.")
                 releasedartstime = 0 # In case of online game, force the SOLO MODE OFF from config (players must push PLAYERBUTTON every rounds, mandatory)
                 try:
                     display.display_background()
@@ -633,18 +700,18 @@ try:
                     net_client.connect_host(servername, serverport)    #int(serverport))
                     menu = 'net1'
                 except Exception as exception:
-                    logs.log("ERROR", f"Unable to reach server : {servername}:{serverport}. Error is {exception}")
+                    logs.error(f"Unable to reach server : {servername}:{serverport}. Error is {exception}")
                     display.display_background()
                     display.message([Lang.translate('game-client-no-connection')])
                     menu = 'gametype'
 
             if game_type in ('netjoin', 'netcreate') and menu == 'net1':
                 # Check client/server version compatibility
-                logs.log("DEBUG", "Join {} remote game".format(netgamename))
+                logs.debug("Join {} remote game".format(netgamename))
                 serverversion = net_client.get_server_version(netgamename)
                 display.version_check(serverversion)
                 net_status = net_client.join2(netgamename)
-                logs.log("DEBUG", "net_status = {}".format(net_status))
+                logs.debug("net_status = {}".format(net_status))
                 # If you are master go to the game selector
                 if net_status == 'YOUAREMASTER' and stats_screen != 'startagain':
                     menu = 'gamecategory'
@@ -654,27 +721,36 @@ try:
 
             if game_type == 'miscellaneous':
                 # PREFERENCES
-                rpi.light_buttons(['LIGHT_BACK'])  
+                rpi.light_toys(['LIGHT_BACK'])
                 if menu != 'servers':
                     dispatcher.publish('menu', limit=['TARGET', 'STRIP', 'OTHER'])
-                    Misc = display.miscellaneous()
+                    Misc = display.miscellaneous((cupdate,config_favorites))
 
                     if Misc == 'escape':
-                        menu = 'gametype'
+                        if not fast_games_mode :
+                            menu = 'gametype'
+                        elif  fast_games_mode :
+                            menu = 'mainmenu'
+                    elif Misc == 'restart':
+                        game_type = Misc
                     else:
                         menu = Misc
 
                 if menu == 'firstnames':
                     # FAVORITE PLAYERS
-                    rpi.light_buttons(['LIGHT_PLAYERS'])
+                    rpi.light_toys(['LIGHT_PLAYERS'])
                     dispatcher.publish('menu', limit=['TARGET', 'STRIP', 'OTHER'])
-                    useless, firstnames = display.players_menu(favorites_players, context='pref', bank=players_bank)
+                    # Get players favorite color
+                    players_favorite_color = Config.get_players_color()
+                    useless, firstnames, players_favorite_color = display.players_menu(favorites_players, context='pref', bank=players_bank,
+                                                                 colors_available = dispatcher.get_colors(), players_color = players_favorite_color)
                     if firstnames != 'escape':
+                        config_favorites['players_color'] = str(players_favorite_color)
                         config_favorites['firstnames'] = ','.join(firstnames)
                         favorites_players = firstnames[::]
                         local_players = firstnames[::]
                         Config.write_file()
-                    rpi.light_buttons(['LIGHT_PLAYERS'], False)
+                    rpi.light_toys(['LIGHT_PLAYERS'], False)
 
                 elif menu == 'games':
                     # FAVORITE GAMES
@@ -717,13 +793,13 @@ try:
 
                         elif setup == 'setup-buttons':
                             try:
-                                DefButtons = rpi.gpio.get_defaults()
+                                buttons = rpi.gpio.get_defaults()
                             except:
-                                DefButtons = rpi.get_defaults()
-                            setupbuttons = display.setup_buttons_menu(Config_rpi, DefButtons)
+                                buttons = rpi.get_defaults()
+                            setupbuttons = display.setup_buttons_menu(Config_rpi, buttons)
                             if setupbuttons != 'escape':
                                 Config_rpi = setupbuttons
-                                if not rpi.set_buttons(setupbuttons):
+                                if not rpi.set_io(setupbuttons):
                                     display.message(['config-noMCP'], None, 'red', 'middle', 'big')
                                 else:
                                     rpi.config.set_config('Raspberry', setupbuttons)
@@ -773,18 +849,40 @@ try:
                                 rpi.config.set_config('Raspberry_Leds', config_leds)
                                 Config.write_file()
 
+                        elif setup == 'setup-couleurs-segments':
+                            tmp = display.setup_couleurs_segments_menu(dispatcher.get_colors(), dispatcher)
+                            if tmp != 'escape':
+                                Config.set_value_colorset(File.theme_dir,tmp)
+                                color_values = []
+                                for (key, value) in tmp:
+                                    color_values.append(str(value).replace('(','').replace(')','').replace(' ',''))
+                                dispatcher.publish('reload', "|".join(color_values), limit=['TARGET','STRIP','OTHER'])
+
+                        elif setup == 'setup-cam':
+                            tmp = display.setup_cam_menu(config_camera)
+                            if tmp != 'escape':
+                                config_camera = tmp
+                                rpi.config.set_config('Camera', config_camera)
+                                Config.write_file()
+                                camera = ccamera.Camera(Config, display, logs)
+
                         setup = display.setup_menu()
 
                 elif menu == 'firstname-bank':
                     # Firstnames bank menu
                     dispatcher.publish('menu', limit=['TARGET', 'STRIP', 'OTHER'])
-                    rpi.light_buttons(['LIGHT_PLAYERS'])
-                    useless, bank = display.players_menu(players_bank, context='bank')
+                    rpi.light_toys(['LIGHT_PLAYERS'])
+                    # Get players favorite color
+                    players_favorite_color = Config.get_players_color()
+                    #
+                    useless, bank, players_favorite_color = display.players_menu(players_bank, context='bank',
+                                                             colors_available = dispatcher.get_colors(), players_color = players_favorite_color)
                     if bank != 'escape':
+                        config_favorites['players_color'] = str(players_favorite_color)
                         config_advanced['localplayers'] = ','.join(bank)
                         Config.write_file()
                         players_bank = bank[::]
-                    rpi.light_buttons(['LIGHT_PLAYERS'], False)
+                    rpi.light_toys(['LIGHT_PLAYERS'], False)
 
                 elif menu == 'backups':
                     # BACKUP MENU
@@ -797,13 +895,14 @@ try:
                 elif menu == 'customization':
                     # CUSTOMIZATION
                     dispatcher.publish('menu', limit=['TARGET', 'STRIP', 'OTHER'])
-                    cust = display.customization_menu(Config.config['SectionGlobals'])
+                    cust = display.customization_menu(Config.config['SectionGlobals'], dispatcher.get_colors())
                     if cust != 'escape':
                         Config.config['SectionGlobals'] = cust
                         Config.write_file()
                         config_globals = Config.read_file("SectionGlobals")
                         video_level = int(Config.get_value('SectionGlobals', 'videos'))
                         video_player.set_level(video_level)
+                        image_player.set_level(video_level)
                         video_player.set_volume(int(Config.get_value('SectionGlobals', 'soundvolume')))
                         display.sound_volume = int(Config.get_value('SectionGlobals', 'soundvolume'))
                         #solo = int(Config.get_value('SectionGlobals', 'solo'))
@@ -813,14 +912,14 @@ try:
                         light_target = bool(Config.get_value('SectionGlobals', 'light_target'))
                         light_strip = bool(Config.get_value('SectionGlobals', 'light_strip'))
                         competition_mode = bool(Config.get_value('SectionGlobals', 'competition_mode'))
-                        illumination_mode = bool(Config.get_value('SectionGlobals', 'illumination_mode'))  
-                        illumination_color = Config.get_value('SectionGlobals', 'illumination_color')  
+                        illumination_mode = bool(Config.get_value('SectionGlobals', 'illumination_mode'))
+                        illumination_color = Config.get_value('SectionGlobals', 'illumination_color')
 
                         logs.update_facility(int(Config.get_value('SectionGlobals', 'debuglevel')))
                         display.wait_event_time = int(Config.get_value('SectionGlobals', 'waitevent_time'))
                         display.file_class.reset_theme(Config.get_value('SectionGlobals', 'colorset'))
                         display.init_colorset()
-                        display.define_constants(True, Font=cust['font'])
+                        #display.define_constants(True, Font=cust['font'])
 
                 elif menu == 'animations':
                     # LEDS ANIMATIONS
@@ -838,11 +937,16 @@ try:
                                 animation = None
 
                         anim = display.event_menu(event, dispatcher.get_strip(), dispatcher.get_target(), dispatcher.get_colors(), animation)
-
+                        
                         if anim[0:3:1] == 'try':
-                            work = anim.split('|')[1]
-                            for a in anim.split('|')[2::]:
-                                dispatcher.publish('special', a, limit=['TARGET', 'STRIP', 'OTHER'])
+                            if anim.find('hue') >= 0:
+                                work = "{" + anim.split('{')[1].split('}|')[0] + "}"
+                                for a in anim.split('}|')[1::]:
+                                    dispatcher.publish('special', a, limit=['TARGET', 'STRIP', 'OTHER'])
+                            else:
+                                work = anim.split('|')[1]
+                                for a in anim.split('|')[2::]:
+                                    dispatcher.publish('special', a, limit=['TARGET', 'STRIP', 'OTHER'])
                         elif anim == 'escape':
                             dispatcher.publish('menu', limit=['TARGET', 'STRIP', 'OTHER'])
                             event = display.animations_menu(dispatcher.get_events(), selected_event=event)
@@ -859,7 +963,7 @@ try:
                 else:
                     break
 
-            if (net_status == 'YOUAREMASTER' or game_type == 'local') and menu == 'gamecategory':
+            if (net_status == 'YOUAREMASTER' or game_type == 'local') and menu == 'gamecategory' and not only_favorites_games_mode:
                 # GAME CATEGORY SELECTION
                 # Display game category
                 dispatcher.publish('menu', limit=['TARGET', 'STRIP', 'OTHER'])
@@ -869,7 +973,6 @@ try:
                 else:
                     response = display.game_category_menu(True, category=category)
                 if response == 'escape':
-                    rpi.gpio_flush()
                     menu = 'players'
                     if net_status is not None:
                         net_client.leave_game(netgamename, local_players, net_status)
@@ -884,7 +987,12 @@ try:
                             selected_game = f"{pref_classic_game}"
                         elif category == 'sport':
                             selected_game = f"{pref_sport_game}"
+                        if selected_game is not None:
+                            selected_game = selected_game.replace('_', ' ')
                     menu = 'gamelist'
+            elif (net_status == 'YOUAREMASTER' or game_type == 'local') and menu == 'gamecategory' and only_favorites_games_mode:
+                    menu = 'gamelist'
+                    category = 'favoris'
 
             if (net_status == 'YOUAREMASTER' or game_type == 'local') and menu == 'gamelist':
                 # GAME SELECTION
@@ -893,12 +1001,21 @@ try:
                     games = display.get_games_list(category, favorites=config_favorites['games'])
                 else:
                     games = display.get_games_list(category)
-                dispatcher.publish('menu', limit=['TARGET', 'STRIP', 'OTHER'])
-                display.update_screen(display.message(["Loading"], wait=0, refresh=False))
-                Game = display.game_menu(category, games, config_favorites['games'], selected_game=selected_game , Nb_player=players_count)
+
+                if category == 'favoris' and len(games) == 0 and only_favorites_games_mode:
+                    display.update_screen(display.message(["no-favs-games"], wait=3000, size='big', refresh=True))
+                    Game = 'escape'
+                else:
+                    dispatcher.publish('menu', limit=['TARGET', 'STRIP', 'OTHER'])
+                    display.update_screen(display.message(["Loading"], wait=0, refresh=False))
+                    Game = display.game_menu(category, games, config_favorites['games'], players_count, selected_game=selected_game)
 
                 if Game == 'escape':
-                    menu = 'gamecategory'
+                    if not only_favorites_games_mode:
+                        menu = 'gamecategory'
+                    else:
+                        menu = 'players'
+                        category = ''
                 else:
                     choosed_game = __import__(f"games.{Game.replace(' ', '_')}", fromlist=["games"])
                     Game = Game.split('.')[1]
@@ -911,11 +1028,11 @@ try:
                         if not playersOk:
                             display.message([f"{Lang.translate('bad-numberofplayers')}"], 2500, 'menu-ko', 'middle', 'big')
                         else:
-                            logs.log("DEBUG", f"Ok, {players_count} players allowed")
+                            logs.debug(f"Ok, {players_count} players allowed")
                             selected_game = Game
                             menu = 'gameoptions'
                     except:
-                        logs.log("DEBUG", f"KO, cannot check if {players_count} players allowed")
+                        logs.debug(f"KO, cannot check if {players_count} players allowed")
                         selected_game = Game
                         menu = 'gameoptions'
 
@@ -923,7 +1040,6 @@ try:
                 # GAME OPTIONS
                 # Display game choice and option only for game creators (local and netcreate)
                 default_game_options = choosed_game.OPTIONS
-                # New Added by Manu for debug in game 24-02-2024
                 if debuglevel == 2:
                     try:
                         debug_game_options = choosed_game.DEBUG
@@ -960,7 +1076,7 @@ try:
                 else:
                     menu = 'net3'
 
-    
+
             if net_status == 'YOUAREMASTER' and menu == 'net3':
                 # MasterPlayer send game info to server
                 # Send Game info (gamename and selected options - can be merged)
@@ -968,12 +1084,12 @@ try:
                 net_client.send_options(game_options, choosed_game.NB_DARTS, nb_sets)
                 menu = 'starting'
                 try:  # Check if it is the right place
-                    logs.log("DEBUG", f"Sending game info to master server {servername}:{masterserverport}")
+                    logs.debug(f"Sending game info to master server {servername}:{masterserverport}")
                     NetMasterClient.connect_master(servername, masterserverport)
                     NetMasterClient.send_game_info(servername, serveralias, serverport, netgamename, Game.replace(' ', '_'), config_globals['netgamecreator'], players_count, nb_sets)
                     NetMasterClient.close_connection()
                 except Exception as exception:
-                    logs.log("WARNING", f"Unable to reach Master Server {servername} on port {masterserverport}. Error was : {exception}")
+                    logs.warning(f"Unable to reach Master Server {servername} on port {masterserverport}. Error was : {exception}")
 
             """
             Notice Master server that we joined and add local players to game on
@@ -986,7 +1102,7 @@ try:
                     NetMasterClient.close_connection()
                     menu = 'starting'
                 except:
-                    logs.log("WARNING", "Unable to add local players to Master Server")
+                    logs.warning("Unable to add local players to Master Server")
 
             if menu == 'starting':
                 """
@@ -1036,7 +1152,7 @@ try:
                 game_options, nb_sets = net_client.get_options()
                 display.game_options = game_options
                 display.selected_game = Game.replace(' ', '_')
-                logs.log("DEBUG", "Starting a network game of {} (with options {} with {} players : {}".format(Game.replace(' ', '_'), game_options, players_count, all_players))
+                logs.debug("Starting a network game of {} (with options {} with {} players : {}".format(Game.replace(' ', '_'), game_options, players_count, all_players))
                 menu = True
 
             if net_status == "YOUAREMASTER" and menu == 'net4':
@@ -1048,29 +1164,25 @@ try:
                     NetMasterClient.launch_game(netgamename)
                     NetMasterClient.close_connection()
                 except Exception as e:
-                    logs.log("WARNING", f"Unable to reach Master Server {servername} on port {masterserverport} in order to remove game")
+                    logs.warning(f"Unable to reach Master Server {servername} on port {masterserverport} in order to remove game")
 
         """ END OF MENU LOOP """
         if game_type not in ('restart' ,'quit' ,'shutdown'):
             if stats_screen == 'startagain':
-                old_players = players[:]
-
+                old_player = players[:]
             # Now create players objects
             players = []
             nbcol = int(Config.get_value('SectionGlobals','nbcol'))
-
+            
             for ident in range(0, players_count):
-                # Get Player color
-                player_color = display.colorset[f'player{ident + 1}']
                 # Create Player object
                 try:
                     players.append(choosed_game.CPlayerExtended(ident, nbcol, interior=Config.get_value('SectionAdvanced','interior')))
                 except:
                     players.append(choosed_game.CPlayerExtended(ident, nbcol))
-
-                players[ident].init_color(player_color)
+                    
                 players[ident].name = all_players[ident]
-
+                
                 if all_players[ident].find("]") != -1:
                     players[ident].computer = True
                     if all_players[ident].find('[NoOb]') != -1:
@@ -1088,18 +1200,6 @@ try:
                     else:
                         players[ident].level = 5
                         players[ident].name = players[ident].name.replace('[ExperT]','')
-
-            if stats_screen == 'startagain' and config_globals['keeporder']:
-                for ident in range(0, players_count):
-                    for other in range(0, players_count):
-                        if players[ident].name == old_players[other].name:
-                            players[ident].level = old_players[other].level
-                            if players[ident].level > 0:
-                                players[ident].computer = True
-                            continue
-            if stats_screen == 'startagain':
-                del old_players
-
             stats_screen = False
 
             ################
@@ -1126,14 +1226,12 @@ try:
             actual_player = 0
             # Create Game objects and init var
             display.teaming = False
-            # by Manu adding game version to follow update of each game
             try:
                 versionGame=choosed_game.VERSION
             except:
                 versionGame='' # game has no version at this time
             game = choosed_game.Game(display, Game.replace(' ', '_'), players_count, game_options, Config, logs, rpi, dmd, video_player)
-            game_is_ok_for_color = game.game_is_ok_for_color  
-            # Added by Manu check players now for options (Cricket game)
+            game_is_ok_for_color = game.game_is_ok_for_color
             try:
                 playersOk = game.check_players_allowed(players_count)
             except:
@@ -1147,13 +1245,17 @@ try:
                 set_done = True
                 interrupted = True
                 continue
-            # End Added by Manu
 
-            for ident in range(0, players_count):
-                if display.teaming and ident >= int(players_count / 2):
-                    players[ident].init_color(players[ident - int(players_count / 2)].color)
-                else:
-                    players[ident].init_color(display.colorset[f'player{ident + 1}'])
+            if stats_screen != 'startagain':
+                for ident in range(0, players_count):
+                    # Override existing color
+                    if players[ident].name in players_favorite_color :
+                        players[ident].init_color(players_favorite_color[players[ident].name])
+                    else:
+                        if display.teaming and ident >= int(players_count / 2):
+                            players[ident].init_color(players[ident - int(players_count / 2)].color)
+                        else:
+                            players[ident].init_color(display.colorset[f'player{ident + 1}'])
 
             try:
                 game_theme = game_options['theme']
@@ -1161,7 +1263,7 @@ try:
                     display.file_class.reset_theme(game_theme)
                     display.init_colorset()
             except:
-                logs.log("ERROR", f"No personnalisable theme for {game}")
+                logs.error(f"No personnalisable theme for {game}")
             display.define_constants(players_count, Font=config_globals['font'])
 
             game.dispatcher = dispatcher
@@ -1191,7 +1293,7 @@ try:
             try:
                 game.check_handicap(players)
             except Exception as exception:
-                logs.log("ERROR", f"Handicap failed : {exception}")
+                logs.error(f"Handicap failed : {exception}")
 
             # Store game properties in local DB
             data = {'game_options': ""}
@@ -1200,18 +1302,20 @@ try:
             data['game_name'] = Game.replace(' ', '_')
             data['nb_players'] = players_count
             game_id = scores.add_game(data)
-            logs.log("DEBUG", f"Local game id is : {game_id}")
+            logs.debug(f"Local game id is : {game_id}")
             # Reinit leds
-            dispatcher.publish('newgame', limit=['TARGET', 'STRIP', 'OTHER'])
+            dispatcher.publish('newgame', limit=['TARGET', 'STRIP', 'OTHER', 'LIGHT', 'STROBE'])
             rpi.target_leds = ''
             rpi.target_leds_blink = ''
-            logs.log("DEBUG", "###### NEW GAME #########")
+            logs.debug("###### NEW GAME #########")
             # Disable videos during online game
             if net_status in ('YOUARESLAVE', 'YOUAREMASTER') or competition_mode:
                 video_player.set_level(0)
+                image_player.set_level(0)
             intro_done = False
             played_video = None
-            cupdate.send_infos(logs, Game, players_count, game_options, Config.rpi_version, Config.rpi_serial, "start", competition_mode, play_id)
+            played_sound = None
+            cupdate.send_infos(logs, Game, players_count, game_options, Config.rpi_version, Config.rpi_serial, "start", competition_mode, play_id, version=version)
 
         else:
             match_done = True
@@ -1221,19 +1325,19 @@ try:
         while not match_done:
             while not set_done:
                 post_round_handler = game.init_handler()
-                rpi.light_buttons(['LIGHT_NAVIGATE', 'LIGHT_VALIDATE', 'LIGHT_PLAYERS'], False)
-                rpi.light_buttons(['LIGHT_NEXTPLAYER'])
+                rpi.light_toys(['LIGHT_NAVIGATE', 'LIGHT_VALIDATE', 'LIGHT_PLAYERS'], False)
+                rpi.light_toys(['LIGHT_NEXTPLAYER'])
 
                 if player_launch == 1 :
-                    rpi.light_buttons(['LIGHT_BACK'], False)
+                    rpi.light_toys(['LIGHT_BACK'], False)
                 else:
-                    rpi.light_buttons(['LIGHT_BACK'], True)
+                    rpi.light_toys(['LIGHT_BACK'], True)
 
                 if players[actual_player].computer:
-                    rpi.light_buttons(['LIGHT_LASER'], False)
+                    rpi.light_toys(['LIGHT_LASER'], False)
                 else:
-                    rpi.light_buttons(['LIGHT_LIGHT'])
-                    rpi.light_buttons(['LIGHT_LASER'])
+                    rpi.light_toys(['LIGHT_LIGHT'])
+                    rpi.light_toys(['LIGHT_LASER'])
 
                 ##############
                 # Step 1 : The player plays
@@ -1243,8 +1347,6 @@ try:
                 post_round = -2
                 early_player_button = -1
                 missed_dart = -1
-                played_sound = None
-                
                 if not intro_done:
                     if File.is_dir('game_start', 'sounds'):
                         played_video = game.play_intro_only_video()
@@ -1254,16 +1356,15 @@ try:
                     intro_done = True
 
                 # Display debug every round
-                logs.log("DEBUG", "###### NEW ROUND #########")
-                logs.log("DEBUG",
-                         f"Game Round {actual_round}. Round of player {players[actual_player].name}.\
+                logs.debug("###### NEW ROUND #########")
+                logs.debug(f"Game Round {actual_round}. Round of player {players[actual_player].name}.\
                                  Dart {player_launch}.")
 
                 # Backup round
                 try :
                     game.backup_round(players, player_launch)
                 except:
-                    logs.log("ERROR", "Cannot backup round")
+                    logs.error("Cannot backup round")
                     pass
 
                 # Pre Play Checks
@@ -1272,7 +1373,7 @@ try:
                         randomval = net_client.get_random(actual_round, actual_player, player_launch)
                         game.set_random(players, actual_round, actual_player, player_launch, randomval)
                     except Exception as exception:
-                        logs.log("ERROR", f"Problem getting and setting random value from master client : {exception}")
+                        logs.error(f"Problem getting and setting random value from master client : {exception}")
                         # On eteint la cible si besoin
                         dispatcher.publish('off', limit=['TARGET', 'STRIP', 'OTHER'])
 
@@ -1283,7 +1384,7 @@ try:
 
                 if player_launch == 1 and len(magickey) == 0 and pre_dart != 4:
                     dmd.send_text(players[actual_player].name)
-                    logs.log("DEBUG", f"Display {players[actual_player].name}")
+                    logs.debug(f"Display {players[actual_player].name}")
                     if handler['announcement'] is None:
                         display.message([players[actual_player].name], 0, None, 'middle', 'big')
                     # Play sound for first dart (playername otherwise default)
@@ -1296,7 +1397,7 @@ try:
                         randomval = game.get_random(players, actual_round, actual_player, player_launch)
                         net_client.send_random(randomval, actual_round, actual_player, player_launch)
                     except Exception as exception:
-                        logs.log("ERROR", f"Problem sending random value to slave clients : {exception}")
+                        logs.error(f"Problem sending random value to slave clients : {exception}")
                         # On eteint la cible si besoin
                         dispatcher.publish('off', limit=['TARGET', 'STRIP', 'OTHER'])
 
@@ -1305,13 +1406,13 @@ try:
 
                     try :
                         # For Simon game
-                        logs.log("DEBUG", "POSTPRE")
+                        logs.debug("POSTPRE")
                         for element in game.post_pre_dart_check(players, actual_round, actual_player, player_launch):
-                            logs.log("DEBUG", f"POSTPRE : {element}")
+                            logs.debug(f"POSTPRE : {element}")
                             if element == 'PRESSURE':
-                                dispatcher.publish('pressure', limit=['TARGET', 'STRIP', 'OTHER'])
+                                dispatcher.publish('pressure', limit=['TARGET', 'STRIP', 'OTHER', 'LIGHT', 'STROBE'])
                             if element == 'NOPRESSURE':
-                                dispatcher.publish('nopressure', limit=['TARGET', 'STRIP', 'OTHER'])
+                                dispatcher.publish('nopressure', limit=['TARGET', 'STRIP', 'OTHER', 'LIGHT', 'STROBE'])
 
                     except:
                         pass
@@ -1323,10 +1424,10 @@ try:
                                         )
 
                     # On illumine si besoin
-                    if light_target and game_is_ok_for_color:  
+                    if light_target and game_is_ok_for_color:
                         dispatcher.publish('Background', limit=['TARGET', 'STRIP', 'OTHER'])
-                    if illumination_mode:  
-                        dispatcher.publish('special', f'STRIP:Light, 0.3,{illumination_color}', limit=['TARGET', 'STRIP', 'OTHER'])  
+                    if illumination_mode:
+                        dispatcher.publish('special', f'STRIP:Light, 0.3,{illumination_color}', limit=['TARGET', 'STRIP', 'OTHER'])
                     elif light_strip:
                         dispatcher.publish('special', f'STRIP:Light, 0.3,{players[actual_player].color}', limit=['TARGET', 'STRIP', 'OTHER'])
 
@@ -1358,29 +1459,29 @@ try:
                                 # PNJ
                                 dart_stroke = rpi.listen_inputs(ktype,
                                      ['PLAYERBUTTON', 'GAMEBUTTON', 'BACKUPBUTTON',
-                                      'TOGGLEFULLSCREEN', 'resize', 'JOKER', 'CHEAT', 'double-click', 'MISSDART',
+                                      'TOGGLEFULLSCREEN', 'resize', 'JOKER', 'CHEAT', 'double-click', 'MISS',
                                       'VOLUME-UP', 'VOLUME-DOWN', 'VOLUME-MUTE', 'enter', 'single-click', 'escape', 'space'],
-                                      context='game', timeout=pnj_time)
+                                      context='game', timeout=pnj_time, video_process=played_video, sound_process=played_sound)
                                 if dart_stroke is False :    # Time out reached : PNJ has to play
                                     PnJ = game.pnj_score(players, actual_player, players[actual_player].level, player_launch)
-                                    if PnJ == 'PNE' or PnJ == 'TB' :    # Simplier to treate TB here than on each game, considered as MISSDART
-                                        dart_stroke = 'MISSDART'
+                                    if PnJ == 'PNE' or PnJ == 'TB' :    # Simplier to treate TB here than on each game, considered as MISS
+                                        dart_stroke = 'MISS'
                                     else:
                                         dart_stroke = PnJ
                             elif game.time > 0:
                                 dart_stroke = rpi.listen_inputs(ktype,
                                      ['PLAYERBUTTON', 'GAMEBUTTON', 'BACKUPBUTTON',
-                                      'TOGGLEFULLSCREEN', 'resize', 'JOKER', 'CHEAT', 'double-click', 'MISSDART',
+                                      'TOGGLEFULLSCREEN', 'resize', 'JOKER', 'CHEAT', 'double-click', 'MISS',
                                       'VOLUME-UP', 'VOLUME-DOWN', 'VOLUME-MUTE', 'enter', 'single-click', 'escape', 'space', 'special'],
                                       context='game', timeout=game.time, video_process=played_video, sound_process=played_sound)
 
                                 if dart_stroke is False:
-                                    logs.log("DEBUG", f"Timeout {game.time}")
+                                    logs.debug(f"Timeout {game.time}")
                                     pre_dart = game.pre_dart_check(players, actual_round, actual_player, player_launch)
                                     ClickZones = game.refresh_game_screen(players, actual_round, game.max_round, game.nb_darts - player_launch + 1,
                                                 game.nb_darts, game.logo, game.headers, actual_player, OnScreenButtons=config_globals['onscreenbuttons'],
                                                 Set=Set, MaxSet=nb_sets)
-                                    if light_target and game_is_ok_for_color:  
+                                    if light_target and game_is_ok_for_color:
                                         dispatcher.publish('Background', limit=['TARGET', 'STRIP', 'OTHER'])
                                     else:
                                         dispatcher.publish('off', limit=['TARGET', 'STRIP', 'OTHER'])
@@ -1392,10 +1493,9 @@ try:
 
                                     continue
                             else:
-                                # Human  added DEBUG for  game debug mode  by Manu
                                 dart_stroke = rpi.listen_inputs(ktype,
                                      ['PLAYERBUTTON', 'GAMEBUTTON', 'BACKUPBUTTON',
-                                      'TOGGLEFULLSCREEN', 'resize', 'JOKER', 'CHEAT', 'DEBUG', 'double-click', 'MISSDART',
+                                      'TOGGLEFULLSCREEN', 'resize', 'JOKER', 'CHEAT', 'DEBUG', 'double-click', 'MISS',
                                       'VOLUME-UP', 'VOLUME-DOWN', 'VOLUME-MUTE', 'enter', 'single-click', 'escape', 'space', 'special'],
                                       context='game',
                                       events=[(wait_event_time, 'LIGHT', ['LIGHT_NEXTPLAYER']), \
@@ -1405,10 +1505,10 @@ try:
 
                                 # Unexpected button pressed
                                 if dart_stroke in ('BTN_LEFT', 'BTN_RIGHT', 'BTN_UP', 'BTN_DOWN', 'BTN_CPTPLAYER'):
-                                    rpi.strobe_buttons(['LIGHT_NAVIGATE', 'LIGHT_VALIDATE'], iterations=2)
+                                    rpi.strobe_toys(['LIGHT_NAVIGATE', 'LIGHT_VALIDATE'], iterations=2)
                                     continue
                                 if dart_stroke == 'BTN_VALIDATE':
-                                    dart_stroke = 'MISSDART'
+                                    dart_stroke = 'MISS'
 
                             ##### INPUT #######
 
@@ -1420,12 +1520,12 @@ try:
 
                             # If at this stage dart_stroke is still a tuple, we loop again (clicked on screen)
                             if isinstance(dart_stroke, tuple):
-                                logs.log("DEBUG", "Stop clicking nowhere !")
+                                logs.debug("Stop clicking nowhere !")
                                 continue
 
                             # Backup turn on first round => NO !!
                             #if dart_stroke in ['BTN_BACK', 'BACKUPBUTTON'] and actual_player == 0 and actual_round == 1 and player_launch == 1:
-                            #    logs.log("WARNING", "Backup Turn is disabled on first round of first player ! Naughty you !")
+                            #    logs.warning("Backup Turn is disabled on first round of first player ! Naughty you !")
                             #    continue
 
                             # Toggle full-screen or resize
@@ -1458,36 +1558,36 @@ try:
                                 break
 
                         if dart_stroke == 'DEBUG': # by Manu enterring game debug mode
-                            logs.log("DEBUG", f"Using 'd' key for sending game debug property")
+                            logs.debug(f"Using 'd' key for sending game debug property")
                             # mode debug game uniquement si develloper et game ready
                             if not hasattr(game, 'debug_info'):
-                                logs.log ("DEBUG", f"game not ready for using debug mode")
+                                logs.debug(f"game not ready for using debug mode")
                                 continue
                             if game.debug_info is True:
-                                logs.log ("DEBUG", f"game use debug mode (True)")
+                                logs.debug(f"game use debug mode (True)")
                                 if hasattr(game, 'actual_round'):
-                                    logs.log("ERROR", f"game overwrite: actual_round ({actual_round}) = {game.actual_round}")
+                                    logs.error(f"game overwrite: actual_round ({actual_round}) = {game.actual_round}")
                                     actual_round = game.actual_round #overwrite actual_round
                                 if hasattr(game, 'player_launch'):
-                                    logs.log("ERROR", f"game overwrite: player_launch ({player_launch}) = {game.player_launch}")
+                                    logs.error(f"game overwrite: player_launch ({player_launch}) = {game.player_launch}")
                                     player_launch = game.player_launch #overwrite player_launch
                                 if hasattr(game,'actual_player'):
-                                    logs.log("ERROR", f"game overwrite: actual_player ({actual_player}) = {game.actual_player}")
+                                    logs.error(f"game overwrite: actual_player ({actual_player}) = {game.actual_player}")
                                     actual_player = game.actual_player #overwrite actual_player
                                 continue
                             else:
-                                logs.log ("DEBUG", f"game don't use debug mode (False)")
+                                logs.debug(f"game don't use debug mode (False)")
                         # If magickey is set and you hit enter - it's validated - similar to JOKER but without random
                         if dart_stroke == 'enter' and len(magickey) > 0:
                             # If you hit R21, it jump directly to round 21, for instance
                             if magickey[:1] in ['r', 'R']:
                                 actual_round = int(magickey[1:])
-                                logs.log("DEBUG", f"Jumping to round : {actual_round}")
+                                logs.debug(f"Jumping to round : {actual_round}")
                                 magickey = ''
                                 continue
                             # Otherwise we keep what you pressed as a valid hit (cheating)
                             dart_stroke = magickey.upper()
-                            logs.log("DEBUG", f"Not fair to cheat nasty boy ! Get this : {dart_stroke}")
+                            logs.debug(f"Not fair to cheat nasty boy ! Get this : {dart_stroke}")
                             magickey = ''
 
                         # Rewrite by a random hit (when pressing 'r' Joker key)
@@ -1496,21 +1596,24 @@ try:
                             RandList = list(ConfigKeys)
                             # remove buttons from list to prevent missing dart, going back a turn,
                             # skipping a turn or closing game (pop with None arg remove only if exists)
-                            if 'playerbutton' in RandList:RandList.remove('playerbutton')
-                            if 'gamebutton' in RandList:RandList.remove('gamebutton')
-                            if 'backupbutton' in RandList:RandList.remove('backupbutton')
-                            if 'extrabutton' in RandList:RandList.remove('extrabutton')
+                            if 'PLAYERBUTTON' in RandList:RandList.remove('PLAYERBUTTON')
+                            if 'GAMEBUTTON' in RandList:RandList.remove('GAMEBUTTON')
+                            if 'BACKUPBUTTON' in RandList:RandList.remove('BACKUPBUTTON')
+                            if 'EXTRABUTTON' in RandList:RandList.remove('EXTRABUTTON')
+                            if 'SHOCKSENSOR' in RandList:RandList.remove('SHOCKSENSOR')
+                            if 'MISSDART' in RandList:RandList.remove('MISSDART')
+                            RandList.append('MISS')
                             # Try to choose random value from ConfigKeys
                             try:
                                 dart_stroke = random.choice(list(RandList)).upper()
-                                logs.log("DEBUG", f"Looking up for a random hit... Lucky guy ! {dart_stroke}")
+                                logs.debug(f"Looking up for a random hit... Lucky guy ! {dart_stroke}")
                             except Exception as e:
                                 dart_stroke = 'S20'
-                                logs.log("WARNING", f"Unable to get a random hit. Your board is probably not calibrated ! I give you a {dart_stroke}.")
-                                logs.log("DEBUG", f"Looking up for a random hit... Lucky guy ! {dart_stroke}")
+                                logs.warning(f"Unable to get a random hit. Your board is probably not calibrated ! I give you a {dart_stroke}.")
+                                logs.debug(f"Looking up for a random hit... Lucky guy ! {dart_stroke}")
 
                         # What did we play ?
-                        logs.log("DEBUG", f"Input restrained is : {dart_stroke}")
+                        logs.debug(f"Input restrained is : {dart_stroke}")
 
                         # Send dart_stroke to server if player has played
                         if net_status is not None:
@@ -1520,7 +1623,7 @@ try:
 
                     else:
                         # Else its a net game and it's our turn to wait from network !
-                        logs.log("DEBUG", "Waiting for remote player (Player {} and Round {})...".format(actual_player, actual_round))
+                        logs.debug("Waiting for remote player (Player {} and Round {})...".format(actual_player, actual_round))
                         dart_stroke = str(net_client.wait_someone_play(actual_round, actual_player, player_launch))
                         while dart_stroke is False:
                             sleep(0.2)
@@ -1529,7 +1632,7 @@ try:
                         if dart_stroke == 'FINALPLAYERBUTTON':
                             dart_stroke = 'PLAYERBUTTON'
                         elif light_segment:
-                            dispatcher.publish('stroke', dart_stroke.upper(), limit=['TARGET', 'STRIP', 'OTHER'])
+                            dispatcher.publish('stroke', dart_stroke.upper(), limit=['TARGET', 'STRIP', 'OTHER', 'LIGHT', 'STROBE'])
 
                     if dart_stroke in ['BTN_BACK', 'BACKUPBUTTON'] and back_count < 3:
                         # Simulate BTN_CANCEL or BTN_GAMEBUTTON
@@ -1544,14 +1647,14 @@ try:
                     # GAMEBUTTON button pressed : game interrupted
                     if dart_stroke in ['escape', 'GAMEBUTTON', 'BTN_CANCEL', 'BTN_GAMEBUTTON', 'BTN_BACK3', 'BTN_CANCEL2', 'TIMEOUT']:
                         if dart_stroke == 'TIMEOUT':
-                            logs.log("DEBUG", f"Timeout from player {actual_player}")
+                            logs.debug(f"Timeout from player {actual_player}")
                             # Dispacth messages
                             dispatcher.publish('timeout', limit=['TARGET', 'STRIP', 'OTHER'])
                             dmd.send_text(Lang.translate('timeout'))
 
                             display.message([Lang.translate('timeout')], None, 'menu-ko', 'middle', 'big')
                         else:
-                            logs.log("DEBUG", "Who has pushed the Game Button ?")
+                            logs.debug("Who has pushed the Game Button ?")
 
                             # Dispacth messages
                             dispatcher.publish('interrupt', limit=['TARGET', 'STRIP', 'OTHER'])
@@ -1564,12 +1667,12 @@ try:
                         set_done = True
                         interrupted = True
                         last_game_screen = None
-                        cupdate.send_infos(logs, Game, players_count, game_options, Config.rpi_version, Config.rpi_serial, "canceled", competition_mode, play_id)
+                        cupdate.send_infos(logs, Game, players_count, game_options, Config.rpi_version, Config.rpi_serial, "canceled", competition_mode, play_id, version=version)
                         continue
 
                     # CANCEL button ppressed : back to 1st dart of same player
                     if dart_stroke in ['BTN_CANCEL', 'BTN_BACK2']:
-                        logs.log("DEBUG", "Who has pushed the Cancel Button ?")
+                        logs.debug("Who has pushed the Cancel Button ?")
 
                         # Dispacth messages
                         dispatcher.publish('round_cancel', limit=['TARGET', 'STRIP', 'OTHER'])
@@ -1590,7 +1693,7 @@ try:
 
                     # BACK button ppressed : back to previous dart
                     if dart_stroke in ['BTN_BACK1']:
-                        logs.log("DEBUG", "Who has pushed the Back Button ?")
+                        logs.debug("Who has pushed the Back Button ?")
                         # Impossible cases
                         if player_launch == 1 and actual_round == 1 and actual_player == 0:
                             pass
@@ -1606,7 +1709,7 @@ try:
                                 dmd.send_text(Lang.translate('Bounce out !'))
                                 display.message([Lang.translate('Bounce out !')], None, None, 'middle', 'big')
 
-                                logs.log("DEBUG", "restore_round {}, player_launch={}, actual_player={}, actual_round={}".format(1 + (actual_round + 1) % 3,player_launch,actual_player,actual_round))
+                                logs.debug("restore_round {}, player_launch={}, actual_player={}, actual_round={}".format(1 + (actual_round + 1) % 3,player_launch,actual_player,actual_round))
                                 if player_launch == 1:
                                     # Back to last round of previous player
                                     # player_launch = 3
@@ -1623,23 +1726,23 @@ try:
                         except:
                             dmd.send_text(Lang.translate('Not available !'))
                             display.message([Lang.translate('Not available !')], None, None, 'middle', 'big')
-                            logs.log("ERROR", "restore_round unavailable for this game !")
+                            logs.error("restore_round unavailable for this game !")
                         continue
 
                     # INFO : From here the dart_stroke should be something included in config file keys, or it loop again.
                     # Print error and loop again if key has not been found in config file
-                    if dart_stroke not in ConfigKeys and dart_stroke not in ('BTN_MISSDART', 'MISSDART', 'PLAYERBUTTONFIRST', 'PLAYERBUTTON', 'BTN_NEXTPLAYER'):
-                        logs.log("ERROR", f"Key \"{dart_stroke}\" must exists in your local config file and it has not been found. We recommand you to calibrate your board again.")
-                        logs.log("DEBUG", "Jumping back to start of the loop.")
+                    if dart_stroke not in ConfigKeys and dart_stroke not in ('MISS', 'PLAYERBUTTONFIRST', 'PLAYERBUTTON', 'BTN_NEXTPLAYER'):
+                        logs.error(f"Key \"{dart_stroke}\" must exists in your local config file and it has not been found. We recommand you to calibrate your board again.")
+                        logs.debug("Jumping back to start of the loop.")
                         continue
 
                     # EARLY PLAYERBUTTON PRESSED
                     if dart_stroke in ['BTN_NEXTPLAYER', 'PLAYERBUTTON'] and player_launch <= game.nb_darts:
-                        logs.log("DEBUG", "You pushed Playerbutton early... Hum !")
+                        logs.debug("You pushed Playerbutton early... Hum !")
                         try:
                             early_player_button = game.early_player_button(players, actual_player, actual_round)
                         except Exception as error:
-                            logs.log("ERROR", f"EARLYPLAYERBUTTON is not handled properly by this game. Error was {error}")
+                            logs.error(f"EARLYPLAYERBUTTON is not handled properly by this game. Error was {error}")
                             early_player_button = 1
 
                         for i in range(0, game.nb_darts - player_launch):
@@ -1656,11 +1759,10 @@ try:
                     # Other button than BACKUP : reinit counter
                     back_count = 0
 
-                    # Post Darts Checks
-                    if dart_stroke in ConfigKeys:
-                        logs.log("DEBUG", f"You pushed {dart_stroke}")
-                        if light_segment:
-                            dispatcher.publish('stroke', dart_stroke.upper(), limit=['TARGET', 'STRIP', 'OTHER'])
+                    # Post Darts Checks (len()< 4 : To avoid buttons) / Miss allowed
+                    if dart_stroke in ConfigKeys and len(dart_stroke) < 5:
+                        threads = []
+                        logs.debug(f"You pushed {dart_stroke}")
 
                         players[actual_player].add_histo(dart_stroke)
                         # POST DART CHECKS
@@ -1670,10 +1772,11 @@ try:
                         #  2 - Game is over
                         #  3 - There is a winner (self.winner must hold winner id)
                         #  4 - The player is not allowed to play (jump to next player)
-                        logs.log("DEBUG", f"Key {dart_stroke} found in config file.")
-                        #handler = {'return_code': 0, 'message': None, 'show': None, 'sound': None, 'lights': None, 'strobe': None, 'speech': None, 'speech_speed': None}
+                        logs.debug(f"Key {dart_stroke} found in config file.")
+                        #handler = {'return_code': 0, 'message': None, 'show': None, 'sound': None, 'lights': None,
+                        #           'strobe': None, 'speech': None, 'speech_speed': None, 'announcement': None, 'take_shot': None}
                         handler = game.post_dart_check(dart_stroke.upper(), players, actual_round, actual_player, player_launch)
-                        logs.log("DEBUG", f"handler received : {handler}")
+                        logs.debug(f"handler received : {handler}")
 
                         if not hasattr(game, "refresh_game_screen"):
                             display.refresh_scores(players, actual_player, refresh=True)
@@ -1688,69 +1791,70 @@ try:
                         played_sound = None
                         played_video = None
 
+                        if handler['take_shot'] is not None:
+                            # Cheeeeese
+                            if camera is not None:
+                                try:
+                                    camera.action(f"{Game}_{play_id}", f"{players[actual_player].name}_r{actual_round}d{player_launch}_{dart_stroke}")
+                                except Exception as ex:
+                                    print(f"{ex}")
+
                         if game.display_dmd():
                             if handler['dmd'] is not None:
-                                logs.log("DEBUG", f"Send dmd : {handler['dmd']}")
+                                logs.debug(f"Send dmd : {handler['dmd']}")
                                 dmd.send_text(handler['dmd'])
                             else:
-                                logs.log("DEBUG", f"Send dmd : {player_launch},{dart_stroke}")
+                                logs.debug(f"Send dmd : {player_launch},{dart_stroke}")
                                 dmd.send_score(player_launch, dart_stroke)
 
-                        if handler['strobe'] is not None or handler['light'] is not None or (post_dart in [0, 1, 2] and dart_stroke in ('SB', 'DB')):
-                            # Turn OFF light to appreciate other celebrations
-                            rpi.light_buttons(['LIGHT_LIGHT'], state=False)
-
-                        if handler['strobe'] is not None:
-                            logs.log("DEBUG", f"strobe_buttons({handler['strobe'][0]}, {handler['strobe'][1]}, {handler['strobe'][2]})")
-                            rpi.strobe_buttons(handler['strobe'][0], handler['strobe'][1], handler['strobe'][2])
+                        next_handler = True
+                        if handler['event'] is not None:
+                            next_handler = False
+                            threads += dispatcher.publish(handler['event'])
                         else:
-                            # Default
-                            if post_dart in [0, 1, 2] and dart_stroke == 'SB':
-                                logs.log("DEBUG", f"rpi.strobe_buttons(['LIGHT_FLASH'])")
-                                rpi.strobe_buttons(['LIGHT_FLASH'], iterations=3, delay=50)
+                            event = None
+                            dartStroke = dart_stroke.upper()
+                            if handler['show'] is not None:
+                                if all(x == 'T20' for x in handler['show'][0]):
+                                    dartStroke = '180'
+                            if post_dart in [0, 1, 2] and light_segment:
+                                threads += dispatcher.publish('stroke', dartStroke, limit=['TARGET', 'STRIP', 'OTHER', 'STROBE', 'LIGHT'])
 
-                            if post_dart in [0, 1, 2] and dart_stroke == 'DB':
-                                logs.log("DEBUG", f"rpi.light_buttons(['LIGHT_CELEBRATION']")
-                                rpi.light_buttons(['LIGHT_CELEBRATION'], delay=int(config_advanced['db-celebration-delay']))
-
-                        if handler['light'] is not None:
-                            logs.log("DEBUG", f"rpi.light_buttons({handler['light'][0]}, {handler['light'][1]})")
-                            rpi.light_buttons(handler['light'][0], handler['light'][1])
-                        else:
-                            #default
-                            if post_dart in [0, 1, 2] and dart_stroke == 'DB':
-                                rpi.strobe_buttons(['LIGHT_FLASH'], iterations=5)
-
-                        if handler['video'] is not None and not competition_mode:
-                            logs.log("DEBUG", f"video_player.play_video({handler['video']}")
-                            played_video = video_player.play_video(File.get_full_filename(handler['video'], 'videos'))
+                        if handler['video'] is not None:    # and not competition_mode:
+                            logs.debug(f"video_player.play_video({handler['video']}")
+                            if not image_player.show_image(handler['video'], handler['sound']):     
+                                played_video = video_player.play_video(File.get_full_filename(handler['video'], 'videos'))
+                                # Gere le son après la vidéo muette
+                                if handler['sound'] is not None:
+                                    logs.debug(f"display.play_sound({handler['sound']})")
+                                    played_sound = display.play_sound(handler['sound'])
 
                         elif handler['show'] is not None and not competition_mode:
-                            logs.log("DEBUG", f"video_player.play_show({handler['show'][0]}, {handler['show'][1]}, {handler['show'][2]})")
-#                            if not video_player.play_show(handler['show'][0], handler['show'][1], handler['show'][2]):
-                            played_video = video_player.play_show(handler['show'][0], handler['show'][1], handler['show'][2])
-                            if played_video is None:
-                                if handler['sound'] is not None:
-                                    played_sound = display.play_sound(handler['sound'])
+                            logs.debug(f"video_player.play_show({handler['show'][0]}, {handler['show'][1]}, {handler['show'][2]})")
+                            if not image_player.show_image(handler['show'][1], handler['sound']):                                
+                                played_video = video_player.play_show(handler['show'][0], handler['show'][1], handler['show'][2])
+                                if played_video is None:
+                                    if handler['sound'] is not None:
+                                        played_sound = display.play_sound(handler['sound'])
                         else:
                             if handler['message'] is not None and len(handler['message']) > 0:
                                 display.message([handler['message']], 0, None, 'middle', 'big')
 
                             if handler['sound'] is not None:
-                                logs.log("DEBUG", f"display.play_sound({handler['sound']})")
+                                logs.debug(f"display.play_sound({handler['sound']})")
                                 played_sound = display.play_sound(handler['sound'])
                             elif handler['speech'] is not None:
-                                logs.log("DEBUG", f"speech {handler['speech']} ({handler['speech_speed']})")
+                                logs.debug(f"speech {handler['speech']} ({handler['speech_speed']})")
                                 if handler['speech_speed'] is not None:
                                     display.speech(handler['speech'], speed=handler['speech_speed'])
                                 else:
                                     display.speech(handler['speech'])
+                        
 
                         if post_dart != 1:
-                            rpi.strobe_buttons(['LIGHT_NEXTPLAYER', 'LIGHT_NAVIGATE', 'LIGHT_VALIDATE', 'LIGHT_BACK'])
                             # Winner
                             # Display score in differents ways depending on options
-                            if hasattr(game, "display_hit") and callable(game.display_hit):
+                            if hasattr(game, "display_hit") and callable(game.display_hit) :
                                 game.display_hit(ClickZones, players, actual_player, player_launch, dart_stroke)
                             else:
                                 if player_launch == game.nb_darts:
@@ -1766,23 +1870,28 @@ try:
                                     else:
                                         display.message([dart_stroke], None, None, 'middle', 'huge')
 
+                        if threads is not None and len(threads) > 0:
+                            for thread in threads:
+                                thread.join()
                     # MISSDART BUTTON PRESSED
                     # early_player_button for Golf
-                    elif early_player_button != 4 or dart_stroke == 'BTN_MISSDART':
-                        logs.log("DEBUG", f"Missed that dart : {early_player_button}!")
+                    elif early_player_button != 4 or dart_stroke == 'MISS':
+                        logs.debug(f"Missed that dart : {early_player_button}!")
                         # Show message on Raspydarts dmd
                         dmd.send_text(Lang.translate('Missed !'))
+                        if light_segment:
+                            dispatcher.publish('miss', dart_stroke.upper(), limit=['TARGET', 'STRIP', 'OTHER'])
 
                         try:
                             missed_dart = game.miss_button(players, actual_player, actual_round, player_launch)
                             if hasattr(game, "display_hit") and callable(game.display_hit):
-                                game.display_hit(ClickZones, players, actual_player, player_launch, 'MISSDART')
+                                game.display_hit(ClickZones, players, actual_player, player_launch, 'MISS')
 
                             if early_player_button > 0 and post_dart != 3:
                                 for i in range(1, game.nb_darts - player_launch + 1):
                                     game.miss_button(players, actual_player, actual_round, player_launch + i)
                                     if hasattr(game, "display_hit") and callable(game.display_hit):
-                                        game.display_hit(ClickZones, players, actual_player, player_launch, 'MISSDART')
+                                        game.display_hit(ClickZones, players, actual_player, player_launch, 'MISS')
                                 player_launch = game.nb_darts
                             if player_launch == game.nb_darts:
                                 ClickZones = game.refresh_game_screen(players, actual_round, game.max_round,
@@ -1791,7 +1900,7 @@ try:
                                             Set=Set, MaxSet=nb_sets)
 
                         except Exception as e:
-                            logs.log("ERROR", "MISSDART is not handled properly by this game. Error was {}".format(e))
+                            logs.error("MISSDART is not handled properly by this game. Error was {}".format(e))
                             # Show message on screen
                             display.message([Lang.translate('Missed !')], None, None, 'middle', 'big')
                     else:
@@ -1802,7 +1911,7 @@ try:
                     if  (releasedartstime > 0
                             and (player_launch == game.nb_darts or (dart_stroke in ('BTN_NEXTPLAYER', 'PLAYERBUTTON') and player_launch < game.nb_darts))
                             and post_dart not in (2,3)):
-                        rpi.light_buttons(['LIGHT_LASER'], False)
+                        rpi.light_toys(['LIGHT_LASER'], False)
                         dispatcher.publish('release', limit=['TARGET', 'STRIP', 'OTHER'])
                         if releasedartstime > 0:
                             dmd.send_text(Lang.translate("release-darts"))
@@ -1811,7 +1920,7 @@ try:
                     """
                     Need a bit of clarification
                     """
-                    # WAIT For Player Button... (MISSDART AND PLAYERBUTTON are voluntarily absent of this list)
+                    # WAIT For Player Button... (MISS AND PLAYERBUTTON are voluntarily absent of this list)
                     if (
                           (net_status is None or players[actual_player].name in local_players)
                           and releasedartstime == 0
@@ -1821,7 +1930,7 @@ try:
                           or dart_stroke == 'PLAYERBUTTONFIRST'
                        ):
                         dart_stroke = 'PLAYERBUTTONFIRST'
-                        rpi.light_buttons(['LIGHT_NEXTPLAYER', 'LIGHT_BACK'], False)
+                        rpi.light_toys(['LIGHT_NEXTPLAYER', 'LIGHT_BACK'], False)
                         ClickZones = game.refresh_game_screen(players, actual_round, game.max_round, 0, game.nb_darts, game.logo, game.headers,
                                     actual_player, OnScreenButtons=config_globals['onscreenbuttons'],
                                     Set=Set, MaxSet=nb_sets)
@@ -1829,13 +1938,13 @@ try:
                         if net_status is None:
                             display.press_player(Lang.translate('release-darts-and-press-player'))
                             dispatcher.publish('release', limit=['TARGET', 'STRIP', 'OTHER'])
-                        rpi.light_buttons(['LIGHT_LASER'], False)
+                        rpi.light_toys(['LIGHT_LASER'], False)
 
                         # Game context, wait for PLAYERBUTTON only...
                         while dart_stroke not in ('PLAYERBUTTON', 'BTN_NEXTPLAYER', 'BTN_VALIDATE') and net_status is None:
-                            logs.log("DEBUG", "Waiting for player to push PLAYERBUTTON...")
+                            logs.debug("Waiting for player to push PLAYERBUTTON...")
                             if players[actual_player].computer:
-                                logs.log("DEBUG", "Player is computer...")
+                                logs.debug("Player is computer...")
                                 dart_stroke = rpi.listen_inputs(['num', 'alpha', 'fx', 'arrows'],
                                             ['escape', 'GAMEBUTTON', 'PLAYERBUTTON', 'single-click'],
                                                 context='game',
@@ -1850,8 +1959,8 @@ try:
                                             events=[(350, 'STROBE', ['LIGHT_NEXTPLAYER']), (wait_event_time, 'EVENT', 'wait'), \
                                                     (wait_event_time * 2, 'SOUND', 'snoring')], video_process=played_video, sound_process=played_sound)
 
-                            logs.log("DEBUG", f'dart_stroke = {dart_stroke}')
-                            logs.log("DEBUG", f'ClickZones = {ClickZones}')
+                            logs.debug(f'dart_stroke = {dart_stroke}')
+                            logs.debug(f'ClickZones = {ClickZones}')
                             if ClickZones:
                                 Clicked = display.is_clicked(ClickZones[0], dart_stroke)
                                 if Clicked:
@@ -1865,7 +1974,7 @@ try:
                             if net_client.play(actual_round, actual_player, player_launch, 'FINALPLAYERBUTTON') == 'TIMEOUT':
                                 break
 
-                    # OR Wait that the REMOTE player has pushed PLAYERBUTTON (Net game only) (MISSDART AND PLAYERBUTTON are voluntarily absent of this list)
+                    # OR Wait that the REMOTE player has pushed PLAYERBUTTON (Net game only) (MISS AND PLAYERBUTTON are voluntarily absent of this list)
                     elif (
                              net_status is not None
                              and players[actual_player].name not in local_players
@@ -1880,7 +1989,7 @@ try:
                         #        Set=Set, MaxSet=nb_sets)
                         display.press_player(Lang.translate('press-player-remote'), 'menu-alternate')
                         # Else its a net game and it's our turn to wait from network !
-                        logs.log("DEBUG", "Waiting for remote player to push the FINALPLAYERBUTTON...")
+                        logs.debug("Waiting for remote player to push the FINALPLAYERBUTTON...")
                         # Wait to receive PLAYERBUTTON
                         #net_client.wait_someone_play(actual_round, actual_player, player_launch, 'FINALPLAYERBUTTON')
                         # If received, rewrite to PLAYERBUTTON for client
@@ -1894,26 +2003,19 @@ try:
                     else:
                         dart_stroke = 'PLAYERBUTTON'
 
-#                if pre_dart == 4:
-                    #may be a winner on pre_dart that is why 4 for current player
-                    # game Othello
-#                    if game.winner is not None: #gagnant (pas d'égalité)
-#                        post_round = game.winner
-#                        pre_dart = 3 #winner is
-
                 dispatcher.publish('off', limit=['TARGET', 'STRIP', 'OTHER'])
                 #
                 # Step 2 : All the differents possibilities
                 #
 
-                logs.log("DEBUG", f"At this stage, post_dart returns {post_dart}, early_player_button is {early_player_button}, and missed_dart is {missed_dart}")
-                logs.log("DEBUG", "Memo: 0: nothing special, 1: jump to next player,  2: game over, 3: victory, 4: current player not allowed to play")
+                logs.debug(f"At this stage, post_dart returns {post_dart}, early_player_button is {early_player_button}, and missed_dart is {missed_dart}")
+                logs.debug("Memo: 0: nothing special, 1: jump to next player,  2: game over, 3: victory, 4: current player not allowed to play")
 
                 # Is there a winner after this round ?
                 if actual_player + 1 >= players_count and (player_launch >= game.nb_darts or pre_dart == 4):
                     # post_round_check return id of winner
                     post_round_handler = game.post_round_check(players, actual_round, actual_player)
-                    logs.log("DEBUG", f"At this stage, post_round returns {post_round_handler}")
+                    logs.debug(f"At this stage, post_round returns {post_round_handler}")
                     if type(post_round_handler) is int:
                         post_round = post_round_handler
                         post_round_handler = game.init_handler()
@@ -1921,8 +2023,19 @@ try:
                     else:
                         post_round = post_round_handler['return_code']
 
+                # Maybe draw
+                if post_round is None:
+                    best_scores = []
+                    set_winner = ""
+                    # Find max score
+                    for player in players: best_scores.append(player.score)
+                    for player in players:
+                        if player.score == max(best_scores):
+                            set_winner += ("," if set_winner != "" else "") + str(player.name)
+                    set_done = True                    
+                        
                 # Victory
-                if post_round >= 0:
+                elif post_round >= 0:
                     # Set win
                     players[actual_player].sets += 1
                     set_winner = post_round
@@ -1934,14 +2047,14 @@ try:
                     # Set win
                     players[actual_player].sets += 1
                     set_winner = game.winner
-                    logs.log("DEBUG", "Set won by {}".format(set_winner))
+                    logs.debug("Set won by {}".format(set_winner))
                     set_done = True
                     Sets[Set][3] = game.get_player_name(players, set_winner)
                     Sets[Set][5] = game.get_darts_thrown(players, set_winner)
 
                 # Game Over
                 elif post_dart == 2 or early_player_button == 2 or missed_dart == 2 or post_round == -1:
-                    logs.log("DEBUG", "Last round reached. No winner ...")
+                    logs.debug("Last round reached. No winner ...")
 
                     # Dispacth messages
                     dispatcher.publish('gameover', limit=['TARGET', 'STRIP', 'OTHER'])
@@ -1959,27 +2072,27 @@ try:
 
                 if not match_done and not set_done:
                     # Next hit, please !
-                    if not game.free_launch: # by Manu script.
+                    if not game.free_launch:
                         player_launch += 1
 
                     # Next Player ?
                     if player_launch > game.nb_darts or post_dart in (1, 4) or dart_stroke == 'PLAYERBUTTON':
                         if played_sound is not None:
-                            logs.log("DEBUG", f"Waif for end of sound")
+                            logs.debug(f"Waif for end of sound")
                             display.wait_end_sound(played_sound)
 
                         if not players[actual_player].computer:
-                            rpi.light_buttons(['LIGHT_LASER'])
+                            rpi.light_toys(['LIGHT_LASER'])
                         # dont show/play next player if a player is not allowed to play
                         if pre_dart != 4:
-                            dispatcher.publish('nextplayer', players[actual_player].name, limit=['TARGET', 'STRIP', 'OTHER'])
+                            dispatcher.publish('nextplayer', players[actual_player].name, limit=['TARGET', 'STRIP', 'OTHER', 'LIGHT', 'STROBE'])
                             if handler['announcement'] is not None:
-                                logs.log("DEBUG", f"announcement {handler['announcement']} ({handler['speech_speed']})")
+                                logs.debug(f"announcement {handler['announcement']} ({handler['speech_speed']})")
                                 dmd.send_text(handler['announcement'])
                                 display.message([handler['announcement']], 0, None, 'middle', 'big')
                                 display.speech(handler['announcement'], speed=handler['speech_speed'])
                             else:
-                                display.play_sound('next_player', wait_finish=wait_finish, duration=sound_duration)
+                                played_sound = display.play_sound('next_player', wait_finish=wait_finish, duration=sound_duration)
 
                         actual_player += 1
                         player_launch = 1
@@ -1990,14 +2103,13 @@ try:
                         actual_round += 1
 
                 elif not interrupted:
-                    cupdate.send_infos(logs, Game, players_count, game_options, Config.rpi_version, Config.rpi_serial, "finished", competition_mode, play_id)
-                    rpi.gpio_flush()
+                    cupdate.send_infos(logs, Game, players_count, game_options, Config.rpi_version, Config.rpi_serial, "finished", competition_mode, play_id, version=version)
                 else:
-                    cupdate.send_infos(logs, Game, players_count, game_options, Config.rpi_version, Config.rpi_serial, "interrupt", competition_mode, play_id)
+                    cupdate.send_infos(logs, Game, players_count, game_options, Config.rpi_version, Config.rpi_serial, "interrupt", competition_mode, play_id, version=version)
                     last_game_screen = None
 
             # Set Done
-            rpi.light_buttons(['LIGHT_LASER'], False)
+            rpi.light_toys(['LIGHT_LASER'], False)
             i = 0
             Sets[Set][2] = datetime.datetime.now()
             Sets[Set][4] = actual_round
@@ -2013,65 +2125,76 @@ try:
 
             if not interrupted:
                 if set_winner is not None:
-                    Sets[Set][5] = game.get_darts_thrown(players, set_winner)
-                    logs.log("DEBUG", "Set {} won by {}".format(Set, game.get_player_name(players, set_winner)))
+                    if type(set_winner) is str and set_winner.find(',') > 0:
+                        logs.debug("Draw by {}".format(set_winner))
+                    else:
+                        Sets[Set][5] = game.get_darts_thrown(players, set_winner)
+                        logs.debug("Set {} won by {}".format(Set, game.get_player_name(players, set_winner)))
 
                 if match_done or nb_sets == 1:
                     if set_winner is not None:
-                        logs.log("DEBUG", "And the winner is...")
-                        txtwinner = "{} : {}".format(Lang.translate('winner'), game.get_player_name(players, set_winner))
+                        logs.debug("And the winner is...")
+                        if type(set_winner) is str and set_winner.find(',') > 0:
+                            txtwinner = "{} : {}".format(Lang.translate('winner'), set_winner)
+                        else:
+                            txtwinner = "{} : {}".format(Lang.translate('winner'), game.get_player_name(players, set_winner))
 
                         #display.message([txtwinner], None, None, 'middle', 'big', bg_color='menu-ok')
                         display.set_end_of_game_winner(txtwinner)
                         dmd.send_text(txtwinner)
-                        dispatcher.publish('winner', limit=['TARGET', 'STRIP', 'OTHER'])
-                        rpi.light_buttons(['LIGHT_CELEBRATION'], delay=int(config_advanced['victory-celebration-delay']))
-                        if nb_sets > 1:
-                            display.play_sound('set_victory', duration=sound_duration)
+                        dispatcher.publish('winner', limit=['TARGET', 'STRIP', 'OTHER', 'LIGHT', 'STROBE'])
+                        rpi.light_toys(['LIGHT_CELEBRATION'], delay=int(config_advanced['victory-celebration-delay']))
+                        if type(set_winner) is str and set_winner.find(',') > 0:
+                            display.sound_end_game(set_winner)
                         else:
                             display.sound_end_game(game.get_player_name(players, set_winner))
                     else:
-                        logs.log("DEBUG", "No winner")
+                        logs.debug("No winner")
                         txtwinner = Lang.translate('nowinner')
                         #display.message([txtwinner], None, None, 'middle', 'big', bg_color='menu-warning')
                         display.set_end_of_game_winner(txtwinner)
                         dmd.send_text(txtwinner)
-
+                        
+                    camera.show_qr_code_for_pictures_videos()
+                          
                     if nb_sets > 1:
                         last_game_screen = display.display_sets(Sets, end_of_game=match_done)
                     else:
                         last_game_screen = game.refresh_game_screen(players, actual_round, game.max_round, game.nb_darts - player_launch + 1,
                                 game.nb_darts, game.logo, game.headers, actual_player, OnScreenButtons=config_globals['onscreenbuttons'], end_of_game=True)
-                    logs.log("DEBUG", f"You choosed {last_game_screen} nb_sets={nb_sets}")
+                    logs.debug(f"You choosed {last_game_screen} nb_sets={nb_sets}")
                     if last_game_screen == 'startagain':
                         stats_screen = 'startagain'
                     else:
                         if net_status in ('YOUARESLAVE', 'YOUAREMASTER') or competition_mode:
                             video_player.set_level(Config.get_value('SectionGlobals', 'videos'))
+                            image_player.set_level(Config.get_value('SectionGlobals', 'videos'))
 
                 else:
                     if set_winner is not None:
                         # Set won by ...set_winner
                         txtwinner = f"{Lang.translate('setwinneris')} {game.get_player_name(players, set_winner)}"
-                        logs.log("DEBUG", f"txtwinner = {txtwinner}")
-                        dispatcher.publish('setwinner', limit=['TARGET', 'STRIP', 'OTHER'])
+                        logs.debug(f"txtwinner = {txtwinner}")
+                        dispatcher.publish('setwinner', limit=['TARGET', 'STRIP', 'OTHER', 'LIGHT', 'STROBE'])
                         dmd.send_text(txtwinner)
-                        rpi.light_buttons(['LIGHT_CELEBRATION'], delay=int(config_advanced['set-celebration-delay']))
-                        #display.message([txtwinner], None, None, 'middle', 'big', bg_color='menu-ok')
+                        rpi.light_toys(['LIGHT_CELEBRATION'], delay=int(config_advanced['set-celebration-delay']))
                         display.set_end_of_game_winner(txtwinner)
-                        display.speech(txtwinner)                        
+                        display.speech(txtwinner)
+
+                        display.play_sound('set_victory', duration=sound_duration)
                         
-                        if nb_sets > 1:
-                            display.play_sound('set_victory', duration=sound_duration)
+                        camera.show_qr_code_for_pictures_videos()
 
                         last_game_screen = game.refresh_game_screen(players, actual_round, game.max_round, game.nb_darts - player_launch + 1,
                             game.nb_darts, game.logo, game.headers, actual_player, OnScreenButtons=config_globals['onscreenbuttons'], endOfSet=[Sets, players[set_winner].name],
                             Set=Set, MaxSet=nb_sets)
-                    else:
+                    else:         
+                        camera.show_qr_code_for_pictures_videos()
+                        
                         last_game_screen = game.refresh_game_screen(players, actual_round, game.max_round, game.nb_darts - player_launch + 1,
                             game.nb_darts, game.logo, game.headers, actual_player, OnScreenButtons=config_globals['onscreenbuttons'], Set=Set, MaxSet=nb_sets)
 
-                    logs.log("DEBUG", f"You choosed {last_game_screen} nb_sets={nb_sets}")
+                    logs.debug(f"You choosed {last_game_screen} nb_sets={nb_sets}")
 
                     if net_status == 'YOUAREMASTER':
                         display.display_sets(Sets, end_of_game=match_done)
@@ -2103,12 +2226,12 @@ try:
                     Set += 1
                     Sets.append([Set + 1, datetime.datetime.now(), None, -1, 0, 0])
 
-                    logs.log("DEBUG", "config_globals['keeporder']={}".format(config_globals['keeporder']))
+                    logs.debug("config_globals['keeporder']={}".format(config_globals['keeporder']))
                     if not config_globals['keeporder'] or net_status is not None:
                         try:
                             game.next_set_order(players)
                         except Exception as exception:
-                            logs.log("ERROR", "Unable to order players from previous results. Error was {exception}")
+                            logs.error("Unable to order players from previous results. Error was {exception}")
 
                     for player in players:
                         player.new_set()
@@ -2120,7 +2243,10 @@ try:
             else:
                 if net_status in ('YOUARESLAVE', 'YOUAREMASTER') or competition_mode:
                     video_player.set_level(Config.get_value('SectionGlobals', 'videos'))
-
+                    image_player.set_level(Config.get_value('SectionGlobals', 'videos'))
+                  
+        camera.close_qr_popup()                    
+        
         display.file_class.reset_theme(Config.get_value('SectionGlobals', 'colorset'))
         display.define_constants(True, Font=config_globals['font'])
         display.init_colorset()
@@ -2132,28 +2258,27 @@ try:
             ###############
 
             # Quit if it was a network game
-            logs.log("DEBUG", "This game is over")
+            logs.debug("This game is over")
             if net_status is not None:
                 net_client.close_host()
 
             # On eteint la cible si besoin
             dispatcher.publish('off', limit=['TARGET', 'STRIP', 'OTHER'])
-            rpi.gpio_flush()
 
             # Grab stats from the game and write them in local DB
             if last_game_screen == 'stats':
-                rpi.light_buttons(['LIGHT_NEXTPLAYER', 'LIGHT_BACK'], False)
-                rpi.light_buttons(['LIGHT_NAVIGATE'])
+                rpi.light_toys(['LIGHT_NEXTPLAYER', 'LIGHT_BACK'], False)
+                rpi.light_toys(['LIGHT_NAVIGATE'])
 
                 for player in players :
                     try:
                         display.heat_map(player.name, player.get_histo())
                     except Exception as e:
-                        logs.log("ERROR", "Problem displaying stats")
+                        logs.error("Problem displaying stats")
                 try:
                     game.game_stats(players, actual_round, scores)
                 except Exception as e:
-                    logs.log("ERROR", "Problem inserting stats")
+                    logs.error("Problem inserting stats")
 
                 try:
                     first = True
@@ -2174,15 +2299,15 @@ try:
                             break
                 except Exception as exception:
                     stats_screen = 'escape'
-                    logs.log("ERROR", f"Problem displaying Stats table with screen.")
-                    logs.log("ERROR", f"DisplayRecords method : {exception}")
+                    logs.error(f"Problem displaying Stats table with screen.")
+                    logs.error(f"DisplayRecords method : {exception}")
 
             # Exiting if it was direct_play mode and that the user pressed escape
             if stats_screen == 'escape' and direct_play:
-                logs.log("DEBUG", "Exiting game because of \"direct_play\" mode enabled. Bye !")
-                sys.exit(0)
+                direct_play = False
 
 finally:
+    rpi.gpio_flush()
     # Quit or restart
     if dispatcher.target_leds and p_target.poll() is not None:
         dispatcher.target_leds = False
@@ -2190,12 +2315,12 @@ finally:
     if dispatcher.strip_leds and p_strip.poll() is not None:
         dispatcher.strip_leds = False
 
-    rpi.light_buttons(['LIGHT_NEXTPLAYER', 'LIGHT_BACK', 'LIGHT_CELEBRATION', 'LIGHT_NAVIGATE'], \
+    rpi.light_toys(['LIGHT_NEXTPLAYER', 'LIGHT_BACK', 'LIGHT_CELEBRATION', 'LIGHT_NAVIGATE'], \
             False)
 
     display.message(["Shutting down servers"], wait=0, refresh=True)
 
-    logs.log("DEBUG", "Sending quit signal to external servers")
+    logs.debug("Sending quit signal to external servers")
     if game_type == 'shutdown':
         # Volontary exit : play leds animation
         dispatcher.publish('quit', ack=True, limit=['TARGET', 'STRIP', 'DMD', 'OTHER'])
@@ -2205,20 +2330,18 @@ finally:
      #   display.thread.join()
 
     if game_type == 'quit':
-        # added by Manu script.
         if display.fullscreen and debuglevel == 2:
              display.create_screen(True, False)
              display.display_background()
              display.update_screen()
-             logs.log("DEBUG", "Actived by debuglevel == 2 : no FULLSCREEN when EXIT")
+             logs.debug("Actived by debuglevel == 2 : no FULLSCREEN when EXIT")
         dispatcher.publish('quit', ack=True, limit=['TARGET', 'STRIP'])
         sleep(1)
-        logs.log("DEBUG", "Stop TARGETLEDS and STRIPLEDS when EXIT")
-        # end added by Manu script.
-        logs.log("DEBUG", "Exit")
+        logs.debug("Stop TARGETLEDS and STRIPLEDS when EXIT")
+        logs.debug("Exit")
     elif game_type == 'shutdown':
         import subprocess
-        logs.log("DEBUG", "Shutdown")
+        logs.debug("Shutdown")
         dmd.shutdown()
         subprocess.call(['poweroff'], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     elif game_type == 'restart':
@@ -2226,6 +2349,6 @@ finally:
             f = open("restart", "w", encoding="utf-8")
             f.write("")
             f.close()
-            logs.log("DEBUG", "Restart")
+            logs.debug("Restart")
         except:
-            logs.log("DEBUG", "Unable to create restart file")
+            logs.debug("Unable to create restart file")

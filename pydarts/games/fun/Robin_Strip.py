@@ -11,7 +11,7 @@ import pygame
 from addons import Colors
 
 # Dictionnay of options - Text format only
-OPTIONS = {'theme': 'default', 'max_round': 10, 'mode_random': False, 'chaos': False}
+OPTIONS = {'theme': 'default', 'max_round': 5, 'mode_random': True, 'chaos': False}
 # background image - relative to images folder - Name it like the game itself
 LOGO = 'Robin_Strip.png' # background image
 # Columns headers - Better as a string
@@ -122,6 +122,8 @@ class Game(cgame.Game):
    def pre_dart_check(self,players,actual_round,actual_player,player_launch):
         return_code = 0
 
+        handler = self.init_handler()
+        
         self.player_launch = player_launch
 
         self.display.specialbg = 'bg_robin_strip.jpg'
@@ -222,7 +224,9 @@ class Game(cgame.Game):
         segmentsAsStr = "|".join("{}#{}".format(*s) for s in segments.items()) #convertion du dict segments en string
         self.rpi.set_target_leds(segmentsAsStr)
 
-        return return_code
+        #return return_code
+        handler['return_code'] = return_code
+        return handler
 
 
    # Function launched when the  put player button before having launched all his darts
@@ -245,7 +249,7 @@ class Game(cgame.Game):
         """
         EMPTY
         """
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         print('player-launch')
         print(player_launch)       
         return_code=1
@@ -266,7 +270,7 @@ class Game(cgame.Game):
         
    def post_dart_check(self,hit,players,actual_round,actual_player,player_launch):
 
-
+        handler = self.init_handler()
         return_code = 0
         self.show_hit = False
 
@@ -348,7 +352,12 @@ class Game(cgame.Game):
           self.winner = bestscoreid
           return_code = 3
 
-        return return_code
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        handler['return_code'] = return_code
+        return handler
+
+        #return return_code
 
    ###############
    # Method to frefresh player.stat - Adapt to the stats you want. They represent mathematical formulas used to calculate stats. Refreshed after every launch
@@ -406,6 +415,8 @@ class Game(cgame.Game):
       Show the selection of a random player
       """
 
+      handler = self.init_handler()
+
       # list to random without actual player
       pls = []
       for j in range(0,len(players)) :
@@ -414,7 +425,8 @@ class Game(cgame.Game):
 
       o = random.randint(0, len(pls) - 1)
 
-      self.display.play_sound('robin_strip_random')
+      #self.display.play_sound('robin_strip_random')
+      handler['sound'] = 'robin_strip_random'
 
       nb = 24 + random.randint(1, len(self.target_order))
       seg = 1
@@ -432,6 +444,8 @@ class Game(cgame.Game):
 
           seg = seg + 1
           p = (p + 1) % len(pls)
+          
+      return handler    
       return o
 
    def show_player_name(self, player, color, selected) :
@@ -448,6 +462,8 @@ class Game(cgame.Game):
       Show message on screen
       """
 
+      handler = self.init_handler()
+
       if refreshbackground :
           self.display.display_background('bg_robin_strip_back')
 
@@ -456,20 +472,25 @@ class Game(cgame.Game):
 
       if typeMessage == 'opponent' :
           message = self.display.lang.translate('robin_strip-opponent')
-          self.display.play_sound('robin_strip_opponent')
+          #self.display.play_sound('robin_strip_opponent')
+          handler['sound'] = 'robin_stripopponent'
       if typeMessage == 'targetOpponent' :
           message = self.display.lang.translate('robin_strip-targetOpponent')
-          self.display.play_sound('robin_strip_targeted')
+          #self.display.play_sound('robin_strip_targeted')
+          handler['sound'] = 'robin_strip_targetled'
       elif typeMessage == 'player' :
           message = self.display.lang.translate('robin_strip-player')
-          self.display.play_sound('robin_strip_player')
+          #self.display.play_sound('robin_strip_player')
+          handler['sound'] = 'robin_strip_player'
       elif typeMessage == 'all' :
           message = self.display.lang.translate('robin_strip-all')
-          self.display.play_sound('robin_strip_bull')
+          #self.display.play_sound('robin_strip_bull')
+          handler['sound'] = 'robin_strip_bull'
           numImg = 0
       elif typeMessage == 'pass' :
           message = self.display.lang.translate('robin_strip-pass')
-          self.display.play_sound('robin_strip_pass')
+          #self.display.play_sound('robin_strip_pass')
+          handler['sound'] = 'robin_strip_pass'
 
       glasses = f"{multi} {self.display.lang.translate('robin_strip-glasses') if multi>1 else self.display.lang.translate('robin_strip-glass')}"
       message = message.replace('#drink#',glasses).replace("#PlayerName#",player.name)
@@ -488,4 +509,6 @@ class Game(cgame.Game):
       self.display.update_screen()
 
       pygame.time.wait(delay)
+      
+      return handler
 

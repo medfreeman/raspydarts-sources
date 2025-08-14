@@ -1,6 +1,6 @@
 #!/bin/sh
 
-files2save_maj="/pydarts/to_delete.lst /pydarts/RaspyDarts.sh /pydarts/raspydarts.py /pydarts/VERSION /pydarts/locales/ /pydarts/include/*.py /pydarts/games/*/*.py /pydarts/addons/*.py /pydarts/images/background.png /pydarts/scripts/*.sh"
+files2save_maj="/pydarts/to_delete.lst /pydarts/RaspyDarts.sh /pydarts/raspydarts.py /pydarts/VERSION /pydarts/locales/ /pydarts/include/*.py /pydarts/games/*/*.py /pydarts/addons/*.py /pydarts/scripts/*.sh"
 files2save_full="/pydarts/*"
 
 Usage(){

@@ -160,7 +160,7 @@ class Game(cgame.Game):
             try:
                 self.check_handicap(players)
             except Exception as exception: # pylint: disable=broad-except
-                self.logs.log("ERROR", f"Handicap failed : {exception}")
+                self.logs.error(f"Handicap failed : {exception}")
 
             for player in players:
                 # Init score
@@ -233,7 +233,7 @@ class Game(cgame.Game):
         if self.sudden_death:
             players[actual_player].columns[3] = (players[actual_player].lives, 'int')
         # Print debug output
-        self.logs.log("DEBUG",self.infos)
+        self.logs.debug(self.infos)
         return return_code
 
     def pnj_score(self, players, actual_player, level, player_launch):
@@ -388,6 +388,9 @@ class Game(cgame.Game):
                 # No winner : last round reached
                 handler['return_code'] = 2
 
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+
         return handler
 
     def post_round_check(self, players, actual_round, actual_player):
@@ -406,10 +409,10 @@ class Game(cgame.Game):
                 winner = self.get_winner(players)
                 if winner is not None:
                     self.winner = winner
-                    self.logs.log("DEBUG", f"winner is {winner}")
+                    self.logs.debug(f"winner is {winner}")
                     handler['return_code'] = winner
                 else:
-                    self.logs.log("DEBUG", f"dead is {dead}")
+                    self.logs.debug(f"dead is {dead}")
                     handler['announcement'] = f'{players[dead].name} est éliminé'
         elif actual_round >= self.max_round and actual_player == len(players) - 1:
             # Last round, last player
@@ -474,7 +477,7 @@ class Game(cgame.Game):
         print('miss')
         #players[actual_player].columns[6] = (self.moyenne, 'int')
         players[actual_player].columns[player_launch-1] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         players[actual_player].darts_thrown += 1
         self.super_multiplicateur = 1
         players[actual_player].super_multiplicateur = 1

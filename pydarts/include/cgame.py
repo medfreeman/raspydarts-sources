@@ -83,13 +83,13 @@ class Game:
 
         return {'return_code': return_code, 'message': None, 'show': None,
                 'video': None, 'sound': None, 'light': None, 'strobe': None,
-                'dmd': None, 'speech': None, 'speech_speed': None, 'announcement': None}
+                'dmd': None, 'speech': None, 'speech_speed': None, 'announcement': None, 'event': None, 'take_shot': None}
 
     def play_intro(self):
         """
         Play intro : video or sound
         """
-        self.logs.log("DEBUG", f"Try to play intros/intro_{self.game}")
+        self.logs.debug(f"Try to play intros/intro_{self.game}")
         video = self.display.file_class.get_full_filename(
             f"intros/intro_{self.game}", 'videos')
 
@@ -97,12 +97,12 @@ class Game:
                 f"{self.game}_intro", 'sounds')
 
         return self.display.play_sound(sound), self.video_player.play_video(video)
-    
+
     def play_intro_only_video(self):
         """
         Play intro : video
         """
-        self.logs.log("DEBUG", f"Try to play intros/intro_{self.game}")
+        self.logs.debug(f"Try to play ONLY intros/intro_{self.game}")
         video = self.display.file_class.get_full_filename(
             f"intros/intro_{self.game}", 'videos')
 
@@ -145,13 +145,13 @@ class Game:
 
     def display_dmd(self):
         """
-        Return true if segment should be displayed
+        Return true if segment should be displayed on DMD
         """
         return self.show_dmd
 
     def display_segment(self):
         """
-        Return true if segment should be displayed
+        Return true if segment should be displayed on screen
         """
         return self.show_segment
 
@@ -191,7 +191,7 @@ class Game:
         #####
         # Write your code here.
         #####
-        self.logs.log("DEBUG", self.infos)
+        self.logs.debug(self.infos)
         return return_code
 
         ###############
@@ -282,8 +282,7 @@ class Game:
                     try:
                         scores.add_score(data)
                     except:  # pylint: disable=bare-except
-                        self.logs.log(
-                            "ERROR", "Error inserting data into local database")
+                        self.logs.error("Error inserting data into local database")
                         return False
         return True
 
@@ -339,11 +338,10 @@ class Game:
         try:
             self.previous_backup = deepcopy(self.backup)
         except:  # pylint: disable=bare-except
-            self.logs.log(
-                "DEBUG", "Probably first player of first round. Nothing to backup.")
+            self.logs.debug("Probably first player of first round. Nothing to backup.")
             self.previous_backup = deepcopy(players)
         self.backup = deepcopy(players)
-        self.logs.log("DEBUG", "Backuped score in case of BackUpTurn request.")
+        self.logs.debug("Backuped score in case of BackUpTurn request.")
 
     def early_player_button(self, players, actual_player, actual_round):
         """
@@ -357,13 +355,10 @@ class Game:
         # players[actual_player].darts_thrown += self.nb_darts - actual_round + 1
         self.display.message([self.display.lang.translate(
             'Missed !')], 1000, None, 'middle', 'big')
-        self.logs.log(
-            "DEBUG", "You pushed player button and default action will occur.")
+        self.logs.debug("You pushed player button and default action will occur.")
         if actual_round == int(self.max_round) and actual_player == self.nb_players - 1:
-            self.logs.log(
-                "DEBUG", "At last round, default action is to return game over.")
-            self.logs.log(
-                "DEBUG", "If it's not what you expect, raise a bug please.")
+            self.logs.debug("At last round, default action is to return game over.")
+            self.logs.debug("If it's not what you expect, raise a bug please.")
             # If its a early_player_button just at the last round - return GameOver
             return 2
         return return_code
@@ -373,15 +368,14 @@ class Game:
         MISSED BUTTON
         """
         return_code = 0
-        self.logs.log("DEBUG", "You missed the dart (or pressed the missbutton) and \
+        self.logs.debug("You missed the dart (or pressed the missbutton) and \
                 default action will occur.")
         # Return same code than early_player_button and perform the same actions
         if player_launch == int(self.nb_darts):
-            self.logs.log(
-                "DEBUG", "Running the early_player_button method because it is last dart.")
+            self.logs.debug("Running the early_player_button method because it is last dart.")
             return_code = self.early_player_button(
                 players, actual_player, actual_round)
-            self.logs.log("DEBUG", f"Which return {return_code}")
+            self.logs.debug(f"Which return {return_code}")
         # Or just increment dart thrown
         else:
             players[actual_player].darts_thrown += 1
@@ -443,7 +437,7 @@ class Game:
             try:
                 player.stats['Score'] = player.score
             except:  # pylint: disable=bare-except
-                self.logs.log("DEBUG", "No Score statistic for player")
+                self.logs.debug("No Score statistic for player")
 
     def pnj_score(self, players, actual_player, level, player_launch):
         """
@@ -508,16 +502,16 @@ class Game:
         if 'master' in self.options: # master , true or false , le score doit etre egale pour gagner
             if self.options['master']:
                 master = True
-            self.logs.log("DEBUG", f"check_winner master is in self.options with value = {master}")
+            self.logs.debug(f"check_winner master is in self.options with value = {master}")
 
         if 'winscore' in self.options: # score minimal pour gagner
             best_score = int(self.options['winscore'])
-            self.logs.log("DEBUG", f"check_winner winscore is in self.options with value = {best_score}")
+            self.logs.debug(f"check_winner winscore is in self.options with value = {best_score}")
             if not master:
                 best_score -= 1
         elif 'startingat' in self.options:
             best_score = int(self.options['startingat'])
-            self.logs.log("DEBUG", f"check_winner startingat is in self.options with value = {best_score}")
+            self.logs.debug(f"check_winner startingat is in self.options with value = {best_score}")
         elif high:
             best_score = 0
         else:
@@ -538,11 +532,22 @@ class Game:
                     deuce = False
                     break
 # best_count not exist                
-#        self.logs.log("DEBUG", \
+#        self.logs.debug(\
 #                f"Best score : {best_score} / Count={best_count} / Player = {best_player}")
         if deuce:
             self.infos += f"There is a score deuce ! Two people have {best_score}.{self.lf}"
             self.infos += f"No winner!{self.lf}"
             return None
         return best_player
-
+    
+    def time_to_take_shot_or_video(self, hit):
+        '''
+        Method for indicate if you take shot or video
+        True : action
+        None : Nothing
+        '''
+        
+        if hit in str(self.config.get_value('Camera', 'events')).split(','):
+            return True
+        else:
+            return None

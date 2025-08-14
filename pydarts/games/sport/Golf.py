@@ -105,6 +105,8 @@ class Game(cgame.Game):
         """
         Is the contract done ?
         """
+        
+        handler = self.init_handler()
 
         self.infos = ""
         if player_launch == 1:
@@ -149,8 +151,10 @@ class Game(cgame.Game):
                 hit = 'albatros'
                 points = 0
 
-        super(Game, self).SendTextToDmd(self.display.lang.translate(f'Golf-{hit}'), tempo=3, sens=None, iteration=None)
-        self.video_player.play_video(self.display.file_class.get_full_filename(f'golf/{hit}', 'videos'))
+        #super(Game, self).SendTextToDmd(self.display.lang.translate(f'Golf-{hit}'), tempo=3, sens=None, iteration=None)
+        handler['dmd'] = 'Golf-'+hit
+        #self.video_player.play_video(self.display.file_class.get_full_filename(f'golf/{hit}', 'videos'))
+        handler['video'] = 'golf/'+hit
         players[actual_player].marque = points
         players[actual_player].columns[5] = [players[actual_player].marque, 'int']
         players[actual_player].contrat_done = True
@@ -179,9 +183,13 @@ class Game(cgame.Game):
             players[actual_player].par = players[actual_player].score - (actual_round * 3)
             players[actual_player].columns[6] = [players[actual_player].par, 'int']
 
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        #handler['return_code'] = return_code ==> pas utilise
+        return handler
+        
         # Display Recapitulation Text
-        self.logs.log("DEBUG", self.infos)
-        return 0
+        self.logs.debug(self.infos)
+        #return 0
 
     def check_winner(self, players):
         """
@@ -210,18 +218,20 @@ class Game(cgame.Game):
         """
         # Jump to next player by default
         self.infos = "Pneu (or early player buttton) function\n"
-        self.logs.log('DEBUG', f'actual_round={actual_round} / max_round={self.max_round} / contrat_done={players[actual_player].contrat_done}')
+        self.logs.debug(f'actual_round={actual_round} / max_round={self.max_round} / contrat_done={players[actual_player].contrat_done}')
 
         # CONDITION SI JOUEUR NE TOUCHE RIEN
         if not players[actual_player].contrat_done:
             hit = 'double_bogey'
 
-            self.logs.log('DEBUG', 'je suis dans la condiftion IF NOT PLAYERS[ACTUAL-PLAYER].CONTRAT..DONE')
+            self.logs.debug('je suis dans la condiftion IF NOT PLAYERS[ACTUAL-PLAYER].CONTRAT..DONE')
 
             # contrat non reussi : penalite
-            self.logs.log('DEBUG', 'contrat non reussi - appui sur next player (section early player button)')
-            self.dmd.send_text(self.display.lang.translate(f'Golf-{hit}'), tempo=3, sens=None, iteration=None)
-            self.video_player.play_video(self.display.file_class.get_full_filename(f'golf/{hit}', 'videos'))
+            self.logs.debug('contrat non reussi - appui sur next player (section early player button)')
+            #self.dmd.send_text(self.display.lang.translate(f'Golf-{hit}'), tempo=3, sens=None, iteration=None)
+            handler['dmd'] = 'Golf-'+hit
+            #self.video_player.play_video(self.display.file_class.get_full_filename(f'golf/{hit}', 'videos'))
+            handler['video'] = 'golf/'+hit
             points = 5
             players[actual_player].marque = points
             players[actual_player].columns[5] = [players[actual_player].marque, 'int']
@@ -233,7 +243,7 @@ class Game(cgame.Game):
             # Go te next player. Avoid multiple calls of miss_button method
             return 4
         else:
-            self.logs.log('DEBUG', 'contrat reussi - 1 ou 2 fleches jouees')
+            self.logs.debug('contrat reussi - 1 ou 2 fleches jouees')
             #self.infos += f"Bien joué Calhagan ! {self.jackpot} touches !{self.lf}"
             players[actual_player].score += players[actual_player].marque
             players[actual_player].par = players[actual_player].score - (actual_round * 3)
@@ -254,7 +264,7 @@ class Game(cgame.Game):
         # Pas de gagnant, sauvegarde du score
         self.display.message([self.display.lang.translate('Golf-save')], 1000, None, 'middle', 'big')
 
-        self.logs.log('DEBUG', self.infos)
+        self.logs.debug(self.infos)
         return 4
 
     def miss_button(self, players, actual_player, actual_round, player_launch):
@@ -262,7 +272,7 @@ class Game(cgame.Game):
         Miss button
         '''
         players[actual_player].columns[player_launch] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         players[actual_player].darts_thrown += 1
         players[actual_player].marque = 5
         pass

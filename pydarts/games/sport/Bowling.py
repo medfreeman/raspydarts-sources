@@ -100,6 +100,8 @@ class Game(cgame.Game):
         Actions done before each dart throw - for example, check if the player is allowed to play
         """
         return_code = 0
+        
+        handler = self.init_handler()
 
         if self.leds :
             for player in players :
@@ -109,9 +111,6 @@ class Game(cgame.Game):
 
                 player.targets = hitsS + hitsD + hitsT
 
-                print('players target')
-                print (player.targets)
-
                 self.leds = False
 
         # Set score at startup
@@ -119,7 +118,7 @@ class Game(cgame.Game):
             try:
                 self.check_handicap(players)
             except Exception as exception: # pylint: disable=broad-except
-                self.logs.log("ERROR", f"Handicap failed : {exception}")
+                self.logs.error(f"Handicap failed : {exception}")
 
             for player in players:
                 # Init score
@@ -159,6 +158,7 @@ class Game(cgame.Game):
 
             self.message = 'Bowling-choix'
             self.display.message([self.display.lang.translate(self.message)], 500, None, 'middle', 'big')
+            handler['message'] = self.message
 
             #Reset display Table
             players[actual_player].columns = []
@@ -256,8 +256,10 @@ class Game(cgame.Game):
             print (players[actual_player].double)
 
         # Print debug output
-        self.logs.log("DEBUG",self.infos)
-        return return_code
+        self.logs.debug(self.infos)
+        handler['return_code'] = return_code
+        return handler
+        #return return_code
 
     def pnj_score(self, players, actual_player, level, player_launch):
         """
@@ -286,12 +288,12 @@ class Game(cgame.Game):
                 best_score = player.score
                 best_player = player.ident
                 best_count = 1
-                self.logs.log("DEBUG", \
+                self.logs.debug(\
                         f"Best found : {best_score} / Count={best_count} / player = {best_player}")
             elif player.score == best_score:
                 best_count += 1
 
-        self.logs.log("DEBUG", \
+        self.logs.debug(\
                 f"Best score : {best_score} / Count={best_count} / Player = {best_player}")
 
         if best_count == 1:
@@ -302,6 +304,9 @@ class Game(cgame.Game):
         """
         Function run after each dart throw - for example, add points to player
         """
+        
+        handler = self.init_handler()
+         
         ### test pour early
         self.fleche_jouee = player_launch
 
@@ -332,7 +337,8 @@ class Game(cgame.Game):
             print('score a 0 car fleche1 (choix de la piste)')
             score = 0
             self.fleche1 = 0
-            self.display.play_sound('bowling-choix')
+            #self.display.play_sound('bowling-choix')
+            handler['sound'] = 'bowling-choix'
             players[actual_player].choix = False
 
         ### si ne touche pas la cible
@@ -342,9 +348,11 @@ class Game(cgame.Game):
             score = 0
             self.fleche1 = 0
 
-            self.display.play_sound('bowling-miss')
+            #self.display.play_sound('bowling-miss')
+            handler['sound'] = 'bowling-miss'
             self.message = 'Bowling-miss'
-            self.display.message([self.display.lang.translate(self.message)], 500, None, 'middle', 'big')
+            #self.display.message([self.display.lang.translate(self.message)], 500, None, 'middle', 'big')
+            handler['message'] = self.message
             self.next = 1
 
 # ~ ### PHASE CHIIFRRE A JOUER
@@ -371,7 +379,8 @@ class Game(cgame.Game):
                                         print('score fleche 2')
                                         print(self.fleche2)
                                         print('')
-                                        self.display.play_sound('bowling-4quilles')
+                                        #self.display.play_sound('bowling-4quilles')
+                                        handler['sound'] = 'bowling-4quilles'
                                         #players[actual_player].double = 0
 
                                 elif (hit[:1]) == 'D' in players[actual_player].targets_ajouer and not players[actual_player].choix:
@@ -380,7 +389,8 @@ class Game(cgame.Game):
                                         print('score fleche 2')
                                         print(self.fleche2)
                                         print('')
-                                        self.display.play_sound('bowling-7quilles')
+                                        #self.display.play_sound('bowling-7quilles')
+                                        handler['sound'] = 'bowling-7quilles'
                                         #players[actual_player].double = 0
 
                                 elif (hit[:1]) == 'T' in players[actual_player].targets_ajouer and not players[actual_player].choix:
@@ -394,8 +404,10 @@ class Game(cgame.Game):
                                                 print('score fleche 2')
                                                 print(self.fleche2)
                                                 print('')
-                                                self.display.play_sound('bowling-strike')
-                                                self.dmd.send_text("STRIKE", sens=None, iteration=None)
+                                                #self.display.play_sound('bowling-strike')
+                                                handler['sound'] = 'bowling-strike'
+                                                #self.dmd.send_text("STRIKE", sens=None, iteration=None)
+                                                handler['dmd'] = 'STRIKE'
                                         else:
                                                 self.fleche2 = 10
                                                 ### passe strike en true
@@ -405,8 +417,10 @@ class Game(cgame.Game):
                                                 print('score fleche 2')
                                                 print(self.fleche2)
                                                 print('')
-                                                self.display.play_sound('bowling-strike')
-                                                self.dmd.send_text("STRIKE", sens=None, iteration=None)
+                                                #self.display.play_sound('bowling-strike')
+                                                handler['sound'] = 'bowling-strike'
+                                                #self.dmd.send_text("STRIKE", sens=None, iteration=None)
+                                                handler['dmd'] = 'STRIKE'
 
                                         #players[actual_player].double += 1
                                         #print(' ligne 395 - bonus double +1 (car triple voir si pas doublon avec playerlaunch 2 = 10')
@@ -424,7 +438,8 @@ class Game(cgame.Game):
                                         print('score fleche 3')
                                         print(self.fleche3)
                                         print('')
-                                        self.display.play_sound('bowling-4quilles')
+                                        #self.display.play_sound('bowling-4quilles')
+                                        handler['sound'] = 'bowling-4quilles'
                                         #players[actual_player].double = 0
 
                                 elif (hit[:1]) == 'D' in players[actual_player].targets_ajouer and not players[actual_player].choix:
@@ -433,7 +448,8 @@ class Game(cgame.Game):
                                         print('score fleche 3')
                                         print(self.fleche3)
                                         print('')
-                                        self.display.play_sound('bowling-7quilles')
+                                        #self.display.play_sound('bowling-7quilles')
+                                        handler['sound'] = 'bowling-7quilles'
                                         #players[actual_player].double = 0
 
                                 elif (hit[:1]) == 'T' in players[actual_player].targets_ajouer and not players[actual_player].choix:
@@ -442,8 +458,10 @@ class Game(cgame.Game):
                                         print('score fleche 3')
                                         print(self.fleche3)
                                         print('')
-                                        self.display.play_sound('bowling-spare')
-                                        self.dmd.send_text("SPARE", sens=None, iteration=None)
+                                        #self.display.play_sound('bowling-spare')
+                                        handler['sound'] = 'bowlingspare'
+                                        #self.dmd.send_text("SPARE", sens=None, iteration=None)
+                                        handler['dmd'] = 'SPARE'
                                         #players[actual_player].double += 1
 
 ### CALCUL DU SCORE
@@ -517,7 +535,8 @@ class Game(cgame.Game):
                                         print('score fleche 4')
                                         print(self.fleche4)
                                         print('')
-                                        self.display.play_sound('bowling-4quilles')
+                                        #self.display.play_sound('bowling-4quilles')
+                                        handler['sound'] = 'bowling-4quilles'
                                         score_temporaire = self.fleche4 * 2
                                         players[actual_player].bonus = False
                                         players[actual_player].strike = False
@@ -529,7 +548,8 @@ class Game(cgame.Game):
                                         print('score fleche 4')
                                         print(self.fleche4)
                                         print('')
-                                        self.display.play_sound('bowling-7quilles')
+                                        #self.display.play_sound('bowling-7quilles')
+                                        handler['sound'] = 'bowling-7quilles'
                                         score_temporaire = self.fleche4 * 2
                                         players[actual_player].bonus = False
                                         players[actual_player].strike = False
@@ -541,7 +561,8 @@ class Game(cgame.Game):
                                         print('score fleche 4')
                                         print(self.fleche4)
                                         print('')
-                                        self.display.play_sound('bowling-spare')
+                                        #self.display.play_sound('bowling-spare')
+                                        handler['sound'] = 'bowling-spare'
                                         score_temporaire = self.fleche4 * 2
                                         players[actual_player].bonus = False
                                         players[actual_player].strike = False
@@ -624,12 +645,14 @@ class Game(cgame.Game):
         if player_launch == 3 :
             if self.fleche2 + self.fleche3 == 10 :
                 players[actual_player].spare = True
-                self.dmd.send_text("SPARE", sens=None, iteration=None)
+                #self.dmd.send_text("SPARE", sens=None, iteration=None)
+                handler['dmd'] = 'SPARE'
 
         if player_launch == 3 :
             if self.fleche2 + self.fleche3 == 20 and not players[actual_player].spare :
                 players[actual_player].poststrike = True
-                self.dmd.send_text("STRIKE", sens=None, iteration=None)
+                #self.dmd.send_text("STRIKE", sens=None, iteration=None)
+                handler['dmd'] = 'STRIKE'
                 players[actual_player].double += 1
 
         if player_launch == 3 :
@@ -650,19 +673,22 @@ class Game(cgame.Game):
 
                         if players[actual_player].double == 0 :
                                 self.message = 'A effacer double= 0'
-                                self.display.message([self.display.lang.translate(self.message)], 1000, None, 'middle', 'big')
+                                #self.display.message([self.display.lang.translate(self.message)], 1000, None, 'middle', 'big')
+                                handler['message'] = self.message
                                 score += self.bonus
 
                         if players[actual_player].double == 2 :
                                 self.message = 'Bowling-double-strike'
                                 if self.bonus == 10 :
-                                        self.display.message([self.display.lang.translate(self.message)], 1000, None, 'middle', 'big')
+                                        #self.display.message([self.display.lang.translate(self.message)], 1000, None, 'middle', 'big')
+                                        handler['message'] = self.message
                                 score += self.bonus
 
                         if players[actual_player].double == 3 :
                                 self.message = 'Bowling-triple-strike'
                                 if self.bonus == 10 :
-                                        self.display.message([self.display.lang.translate(self.message)], 1000, None, 'middle', 'big')
+                                        #self.display.message([self.display.lang.translate(self.message)], 1000, None, 'middle', 'big')
+                                        handler['message'] = self.message
                                 score += self.bonus
 
 
@@ -689,19 +715,22 @@ class Game(cgame.Game):
 
                         if players[actual_player].double == 0 :
                                 self.message = 'A effacer double= 0'
-                                self.display.message([self.display.lang.translate(self.message)], 1000, None, 'middle', 'big')
+                                #self.display.message([self.display.lang.translate(self.message)], 1000, None, 'middle', 'big')
+                                handler['message'] = self.message
                                 score += self.bonus
 
                         if players[actual_player].double == 2 :
                                 self.message = 'Bowling-double-strike'
                                 if self.bonus == 10 :
-                                        self.display.message([self.display.lang.translate(self.message)], 1000, None, 'middle', 'big')
+                                        #self.display.message([self.display.lang.translate(self.message)], 1000, None, 'middle', 'big')
+                                        handler['message'] = self.message
                                 score += self.bonus
 
                         if players[actual_player].double == 3 :
                                 self.message = 'Bowling-triple-strike'
                                 if self.bonus == 10 :
-                                        self.display.message([self.display.lang.translate(self.message)], 1000, None, 'middle', 'big')
+                                        #self.display.message([self.display.lang.translate(self.message)], 1000, None, 'middle', 'big')
+                                        handler['message'] = self.message
                                 score += self.bonus
 
                         print('ligne 592 - bonus double =')
@@ -725,19 +754,22 @@ class Game(cgame.Game):
 
                         if players[actual_player].double == 0 :
                                 self.message = 'A effacer double= 0'
-                                self.display.message([self.display.lang.translate(self.message)], 500, None, 'middle', 'big')
+                                #self.display.message([self.display.lang.translate(self.message)], 500, None, 'middle', 'big')
+                                handler['message'] = self.message
                                 score += self.bonus
 
                         if players[actual_player].double == 2 :
                                 self.message = 'Bowling-double-strike'
                                 if self.bonus == 10 :
-                                        self.display.message([self.display.lang.translate(self.message)], 1000, None, 'middle', 'big')
+                                        #self.display.message([self.display.lang.translate(self.message)], 1000, None, 'middle', 'big')
+                                        handler['message'] = self.message
                                 score += self.bonus
 
                         if players[actual_player].double == 3 :
                                 self.message = 'Bowling-triple-strike'
                                 if self.bonus == 10 :
-                                        self.display.message([self.display.lang.translate(self.message)], 1000, None, 'middle', 'big')
+                                        #self.display.message([self.display.lang.translate(self.message)], 1000, None, 'middle', 'big')
+                                        handler['message'] = self.message
                                 score += self.bonus
 
                         print('ligne 604 - bonus double =')
@@ -806,7 +838,8 @@ class Game(cgame.Game):
 
         elif self.fleche2 == 0 :
                 players[actual_player].columns[1] = ['bowling/bowling-0', 'image']
-                self.display.play_sound('bowling-miss')
+                #self.display.play_sound('bowling-miss')
+                handler['sound'] = 'bowling-miss'
 
         # Affiche ce qui a ete touche avec la fleche3 dans la colonne 3
         if self.fleche3 >= 1 and self.fleche3 <= 9:
@@ -832,7 +865,8 @@ class Game(cgame.Game):
                 players[actual_player].columns[2] = ['', 'txt']
             else:
                 players[actual_player].columns[2] = ['bowling/bowling-0', 'image']
-                self.display.play_sound('bowling-miss')
+                #self.display.play_sound('bowling-miss')
+                handler['sound'] = 'bowling-miss'
 
         if players[actual_player].spare :
                 players[actual_player].columns[2] = ['bowling/bowling-spare', 'image']
@@ -848,7 +882,8 @@ class Game(cgame.Game):
 
         if self.fleche4 == 0 and actual_round == self.max_round and player_launch > 3 :
                 players[actual_player].columns[3] = ['bowling/bowling-0', 'image']
-                self.display.play_sound('bowling-miss')
+                #self.display.play_sound('bowling-miss')
+                handler['sound'] = 'bowling-miss'
 
         elif self.fleche4 == 0 and actual_round != self.max_round and player_launch != 4 :
                 players[actual_player].columns[3] = ['', 'txt']
@@ -866,8 +901,13 @@ class Game(cgame.Game):
             else:
                 # No winner : last round reached
                 return_code = 2
+                
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        handler['return_code'] = return_code
+        return handler
 
-        return return_code
+        #return return_code
 
     def early_player_button(self, players, actual_player, actual_round):
         ### a faire
@@ -880,7 +920,7 @@ class Game(cgame.Game):
             players[actual_player].columns[1] = ['bowling/bowling-0', 'image']
         if self.fleche_jouee in (0, 1, 2):
             players[actual_player].columns[2] = ['bowling/bowling-0', 'image']
-            self.display.play_sound('Bowling-miss')
+            self.display.play_sound('bowling-miss')
 
         self.display.message([self.display.lang.translate('Bowling-miss')], 1000, None, 'middle', 'big')
         return 1
@@ -890,7 +930,7 @@ class Game(cgame.Game):
         Miss button
         '''
         players[actual_player].columns[player_launch+1] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         players[actual_player].darts_thrown += 1       
 
     def post_round_check(self, players, actual_round, actual_player):

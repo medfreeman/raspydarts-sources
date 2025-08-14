@@ -104,7 +104,7 @@ class Game(cgame.Game):
             self.infos += f"Player {actual_player} :{self.lf}"
             self.infos += f"    your score was {players[actual_player].score}{self.lf}"
             players[actual_player].score += score
-            self.infos += f"    hit a {players[actual_player].get_touch_type(hit)}{self.lf}"
+            self.infos += f"    hit a {hit}{self.lf}"
             self.infos += f"    your score is now {players[actual_player].score}"
             self.infos += f"    you have now to hit {players[actual_player].actual_hit}{self.lf}"
             # Now update hit for next dart
@@ -186,8 +186,11 @@ class Game(cgame.Game):
             else:
                 players[actual_player].columns[0] = (players[actual_player].actual_hit, 'int')
 
-# Print debug infos
-        self.logs.log("DEBUG", self.infos)
+        # Print debug infos
+        self.logs.debug(self.infos)
+
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
 
         return handler
 
@@ -219,7 +222,7 @@ class Game(cgame.Game):
             try:
                 self.m_list.remove(players[actual_player].darts[-1][0])
             except: # pylint: disable=bare-except
-                self.logs.log("DEBUG", "already hit")
+                self.logs.debug("already hit")
 
         # Compte S18, D18
         self.targets_list = [f'{mult}{players[actual_player].actual_hit}' for mult in self.m_list]
@@ -240,11 +243,6 @@ class Game(cgame.Game):
         result = self.display.refresh_game_screen(players, actual_round, max_round, rem_darts, \
                           nb_darts, logo, headers, actual_player, TxtOnLogo, Wait, OnScreenButtons, \
                           showScores, end_of_game, endOfSet, Set, MaxSet)
-    
-        # Game qrcode
-        self.qr_x = int(self.display.res['x']) - (self.qrcode_icon.get_width() + 12)
-        self.qr_y = self.qrcode_icon.get_height() + 30
-        self.display.blit(self.qrcode_icon, (self.qr_x, self.qr_y ))
         self.display.update_screen()
 
         return result
@@ -284,7 +282,7 @@ class Game(cgame.Game):
         print('miss')
         #players[actual_player].columns[6] = (self.moyenne, 'int')
         players[actual_player].columns[player_launch+2] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         players[actual_player].darts_thrown += 1
         # play penality sound
         self.display.play_sound('penality')

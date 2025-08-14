@@ -31,6 +31,21 @@ class Logs:
         if key >= self.level:
             print(f"[{facility}] {datetime.now()} - {msg}", flush=True)
 
+    def debug(self, message):
+        self.log("DEBUG", message)
+
+    def warning(self, message):
+        self.log("WARNING", message)
+
+    def error(self, message):
+        self.log("ERROR", message)
+
+    def fatal(self, message):
+        self.log("FATAL", message)
+
+    def info(self, message):
+        self.log("INFO", message)
+
     def update_facility(self, level):
         """
         Update facility

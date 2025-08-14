@@ -132,7 +132,10 @@ class Game(cgame.Game):
         # It is recommanded to update stats every dart thrown
         self.refresh_stats(players, actual_round)
 
-        self.logs.log("DEBUG", self.infos)
+        self.logs.debug(self.infos)
+
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
 
         return handler
 
@@ -146,7 +149,7 @@ class Game(cgame.Game):
 
         ### PASSE LE JOUEUR AYANT UN SCORE A 0 OU INFERIEUR
         if not players[actual_player].alive:
-            self.logs.log("DEBUG", f'Le joueur {actual_player} est éliminé. Il passe son tour')
+            self.logs.debug(f'Le joueur {actual_player} est éliminé. Il passe son tour')
             return 4
 
         players[actual_player].columns[3] = (f'{self.nb_touche}', 'str')
@@ -263,9 +266,9 @@ class Game(cgame.Game):
         '''
         When missed button pressed
         '''
-        self.logs.log("DEBUG", f"MissButtonPressed : {player_launch}")
+        self.logs.debug(f"MissButtonPressed : {player_launch}")
         players[actual_player].darts_thrown += 1
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
 
         # Refresh stats
         if self.nb_touche_ok > 0:

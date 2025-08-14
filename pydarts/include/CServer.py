@@ -23,7 +23,7 @@ class CServer():
         self.MsgQueue = [] # Queue of Message Dict
         self.colorlist = [color for color in range(31,39)] # First color will be red, and then green, yellow, blue, rose, cyan, grey, and back to first color.
         self.Config = config
-        Self.logs=logs
+        self.logs=logs
         self.delim='|'
         self.send_timeout = 10 # Time after what a client is considered as disconnected
 
@@ -47,7 +47,7 @@ class CServer():
         while True:
             conn, addr = self.s.accept()
             userid="{}-{}".format(addr[0],addr[1])
-            Self.logs.log("WARNING","{} client joined server on port {}.".format(addr[0],addr[1]))
+            self.logs.warning("{} client joined server on port {}.".format(addr[0],addr[1]))
             self.color[userid] = self.colorlist[i]
             #print self.color
             #-_thread version_-thread.start_new_thread(self.client_thread,(conn,addr)) #start new thread takes 1st argument as a function name to be run, second is the tuple of arguments to the function.
@@ -79,16 +79,16 @@ class CServer():
                   #data=str(data.decode('UTF-8'))
                   conn.settimeout(None) # Reset timeout
                except:
-                  Self.logs.log("FATAL","Bad data received or timeout ({}) has been reached for connection with {}. Aborting.".format(timeout,userid))
+                  self.logs.fatal("Bad data received or timeout ({}) has been reached for connection with {}. Aborting.".format(timeout,userid))
                   sys.exit(2)
                if data=="":
-                  Self.logs.log("DEBUG","Closing connection or bad data received with {}. Aborting.".format(userid))
+                  self.logs.debug("Closing connection or bad data received with {}. Aborting.".format(userid))
                   sys.exit(3)
             """
             # Receive data
             data=self.rcv(conn,userid)
             # Print data for debug
-            Self.logs.log("DEBUG","\033[{}mReceived from client {} : {}\033[0m".format(self.color[userid],userid,data))
+            self.logs.debug("\033[{}mReceived from client {} : {}\033[0m".format(self.color[userid],userid,data))
             # Interpretation of the client message
             self.CheckMessage2(conn,data,addr)
 
@@ -112,11 +112,11 @@ class CServer():
                         #print("Returning {} because we found {} in buffer ({}) : {}".format(data,delim,found,buf))
                         return str(msg[0])
             except Exception as e:
-                Self.logs.log("DEBUG","Received {} and error was {}".format(data,e))
-                Self.logs.log("FATAL","Bad data received or timeout ({}) has been reached for connection with {}. Aborting.".format(timeout,userid))
+                self.logs.debug("Received {} and error was {}".format(data,e))
+                self.logs.fatal("Bad data received or timeout ({}) has been reached for connection with {}. Aborting.".format(timeout,userid))
                 sys.exit(2)
             if data=="":
-                Self.logs.log("DEBUG","Closing connection or bad data received with {}. Aborting.".format(userid))
+                self.logs.debug("Closing connection or bad data received with {}. Aborting.".format(userid))
                 sys.exit(3)
         #return data
 
@@ -127,7 +127,7 @@ class CServer():
         try:
             d=json.loads(data)
         except:
-            Self.logs.log("DEBUG","Error : Unable to load Json data from : {}".format(data))
+            self.logs.debug("Error : Unable to load Json data from : {}".format(data))
             return False
         if d:
             gamename=d['GAMENAME']
@@ -194,7 +194,7 @@ class CServer():
             MsgColor = self.color[userid]
         except:
             MsgColor = '31' # FallBaaaack to Blaaaaaack
-        #Self.logs.log("DEBUG","\033[{}m[{}][{}-{}] Sending : {}\033[0m".format(MsgColor,gamename,addr[0],addr[1],msg))
+        #self.logs.debug("\033[{}m[{}][{}-{}] Sending : {}\033[0m".format(MsgColor,gamename,addr[0],addr[1],msg))
         #conn.send(msg)
         # Print Debug
         # Try to send or timeout
@@ -204,13 +204,13 @@ class CServer():
             msg = json.dumps(msg)
             #msg = msg.encode('UTF-8')# No need anymore since python3 ! See : https://medium.com/better-programming/strings-unicode-and-bytes-in-python-3-everything-you-always-wanted-to-know-27dc02ff2686
             msg = str(msg) + str(self.delim)
-            Self.logs.log("DEBUG","\033[{}m[{}][{}-{}] Sending : {}\033[0m".format(MsgColor,gamename,addr[0],addr[1],msg))
+            self.logs.debug("\033[{}m[{}][{}-{}] Sending : {}\033[0m".format(MsgColor,gamename,addr[0],addr[1],msg))
             #msg = msg.decode('UTF-8')
             msg = msg.encode('UTF-8') # Convert unicode to bytes
             conn.send(msg)
         except Exception as e: # If timeout reached
-            Self.logs.log("DEBUG","Error is {}".format(e))
-            Self.logs.log("ERROR","Error or timeout ({}) has been reached for connection with client {}. Killing thread.".format(self.send_timeout,addr))
+            self.logs.debug("Error is {}".format(e))
+            self.logs.error("Error or timeout ({}) has been reached for connection with client {}. Killing thread.".format(self.send_timeout,addr))
             sys.exit(2)
         conn.settimeout(old_timeout) # Restore previous timeout
 
@@ -245,7 +245,7 @@ class CServer():
                         LstGames.PlayersNames.remove(P) # Remove players if they are ready
                     except:
                         pass # When there is still noone in the game (nobody's ready)
-                Self.logs.log("DEBUG","Some has left. Remaining in game {} : {}".format(gamename,LstGames.PlayersNames))
+                self.logs.debug("Some has left. Remaining in game {} : {}".format(gamename,LstGames.PlayersNames))
                 self.LeaveGame(userid,gamename)
 
 #
@@ -264,7 +264,7 @@ class CServer():
         for LstGames in self.Games:
             if LstGames.GameName == gamename:
                 for player in playernames:
-                    Self.logs.log("DEBUG","Adding player {} to game {}".format(player,gamename))
+                    self.logs.debug("Adding player {} to game {}".format(player,gamename))
                     LstGames.PlayersNames.append(player)
 
 #
@@ -297,7 +297,7 @@ class CServer():
         for LstGames in self.Games:
             if LstGames.GameName == gamename:
                 LstGames.ChoosedGame = ChoosedGame
-                Self.logs.log("DEBUG","Setting choosed game for {} : {}".format(gamename,LstGames.ChoosedGame))
+                self.logs.debug("Setting choosed game for {} : {}".format(gamename,LstGames.ChoosedGame))
 
     def SendGame(self,conn,gamename,addr): # JSON Version
         for LstGames in self.Games:
@@ -313,14 +313,14 @@ class CServer():
         availablegamename = True
         for LstGames in self.Games:
             if LstGames.GameName == gamename:
-                Self.logs.log("WARNING","There is already a running game with the name {}. We will join this guy to it.".format(gamename))
+                self.logs.warning("There is already a running game with the name {}. We will join this guy to it.".format(gamename))
                 availablegamename = False
                 ClientStatus = "YOUARESLAVE"
         if availablegamename:
-            Self.logs.log("WARNING","\033[{}m Creating a game with the name {}\033[0m".format(self.color[userid],gamename))
+            self.logs.warning("\033[{}m Creating a game with the name {}\033[0m".format(self.color[userid],gamename))
             self.Games.append(CNetGames.CNetGames(gamename))
             ClientStatus = "YOUAREMASTER"
-        Self.logs.log("DEBUG","\033[{}mJoining game {}\033[0m".format(self.color[userid],gamename))
+        self.logs.debug("\033[{}mJoining game {}\033[0m".format(self.color[userid],gamename))
         for LstGames in self.Games:
             if LstGames.GameName == gamename:
                 LstGames.MembersId.append(userid)
@@ -340,7 +340,7 @@ class CServer():
                     if P not in LstGames.PlayersNames:
                         LstGames.PlayersNames.append(P)
                 #LstGames.PlayersNames.extend(Players)
-                Self.logs.log("DEBUG","Players in this game : {} ".format(LstGames.PlayersNames))
+                self.logs.debug("Players in this game : {} ".format(LstGames.PlayersNames))
                 # If the game has been aborted by master player
                 if LstGames.Aborted==True:
                     d={'REQUEST':'ABORT','PLAYERSNAMES':[],'GAMENAME':gamename}
@@ -376,7 +376,7 @@ class CServer():
     def SetGameReady(self,gamename):
         for LstGames in self.Games:
             if LstGames.GameName == gamename:
-                Self.logs.log("DEBUG","{} is now complete. No more options to receive from server.".format(gamename))
+                self.logs.debug("{} is now complete. No more options to receive from server.".format(gamename))
                 LstGames.GameReady = True # All data has been received by server
 
 #
@@ -415,7 +415,7 @@ class CServer():
                 # Delete any stored values
                 LstGames.HitValues={}
                 # In any case, store actual hit
-                Self.logs.log("DEBUG","Storing hit {} for round {}, player {}, launch {} and game {}".format(hit,actual_round,actual_player,player_launch,gamename))
+                self.logs.debug("Storing hit {} for round {}, player {}, launch {} and game {}".format(hit,actual_round,actual_player,player_launch,gamename))
                 hitkey="{}{}{}".format(actual_round,actual_player,player_launch)
                 LstGames.HitValues[hitkey]=hit
 
@@ -448,7 +448,7 @@ class CServer():
         for LstGames in self.Games:
             if (gamename!=None and LstGames.GameName == gamename) or gamename == None:
                 if userid in LstGames.MembersId:
-                    Self.logs.log("DEBUG","Removing {} from members of game named {}".format(addr,LstGames.GameName))
+                    self.logs.debug("Removing {} from members of game named {}".format(addr,LstGames.GameName))
                     #filter(lambda a: a != userid, self.Games[gamename].MembersId)
                     LstGames.MembersId.remove(userid)
         # Remove color from color list (try/except is here if there is multiple connection from same ip address it will remove all of them)
@@ -462,7 +462,7 @@ class CServer():
             if len(self.Games[key].MembersId) == 0:
                 index2del = key
         if index2del >= 0:
-            Self.logs.log("WARNING","No more members in this game : {}. Removing.".format(self.Games[index2del].GameName))
+            self.logs.warning("No more members in this game : {}. Removing.".format(self.Games[index2del].GameName))
             del self.Games[index2del]
 
 #

@@ -87,8 +87,9 @@ class Game(cgame.Game):
         self.missdarts = True
 
     def penalite(self, players, actual_player):
-        self.logs.log('WARNING', 'ajout points aux advs car penalite (couelur) - boucle FOR')
+        self.logs.warning('ajout points aux advs car penalite (couelur) - boucle FOR')
         self.dmd.send_text("PENALITE", sens=None, iteration=None)
+        #handler['dmd'] = 'PENALITE'
         self.display.message([self.display.lang.translate('Snooker-penalite')], 1000, None, 'middle', 'big')
         for player in players:
             if player.ident != actual_player:
@@ -100,6 +101,8 @@ class Game(cgame.Game):
         Actions done before each dart throw - for example, check if the player is allowed to play
         """
         return_code = 0
+        
+        handler = self.init_handler()
 
 ### INITIALISE LES LEDS (bille) POUR CHAQUE JOUEUR -- player.targets
         if self.leds:
@@ -169,7 +172,7 @@ class Game(cgame.Game):
             try:
                 self.check_handicap(players)
             except Exception as exception: # pylint: disable=broad-except
-                self.logs.log("ERROR", f"Handicap failed : {exception}")
+                self.logs.error(f"Handicap failed : {exception}")
 
             for player in players:
                 # Init score
@@ -277,7 +280,8 @@ class Game(cgame.Game):
             self.rpi.set_target_leds('|'.join(players[actual_player].targets_rouge))
             self.rpi.set_target_leds_blink ('')
             self.rpi.set_target_leds_blink('|'.join(players[actual_player].targets_couleur))
-            self.dmd.send_text("BILLE DE COULEUR", sens=None, iteration=None)
+            #self.dmd.send_text("BILLE DE COULEUR", sens=None, iteration=None)
+            handler['dmd'] = 'BILLE DE COULEUR'
 
         elif not players[actual_player].couleur:
             ### rouge active, fait clignoter les leds rouge
@@ -285,7 +289,8 @@ class Game(cgame.Game):
             self.rpi.set_target_leds('|'.join(players[actual_player].targets_couleur))
             self.rpi.set_target_leds_blink ('')
             self.rpi.set_target_leds_blink('|'.join(players[actual_player].targets_rouge))
-            self.dmd.send_text("BILLE ROUGE", sens=None, iteration=None)
+            #self.dmd.send_text("BILLE ROUGE", sens=None, iteration=None)
+            handler['dmd'] = 'BILLE ROUGE'
 
         elif players[actual_player].couleur and players[actual_player].allcouleur:
                 if self.message == 'Snooker-jaune':
@@ -295,7 +300,9 @@ class Game(cgame.Game):
                     ### PLUS DE ROUGE, fait clignoter la plus petite bille de couleur (jaune)
                     self.rpi.set_target_leds_blink ('')
                     self.rpi.set_target_leds_blink('S2#yellow|D2#yellow|T2#yellow|SB#red|DB#red')
-                    self.dmd.send_text("BILLE JAUNE", sens=None, iteration=None)
+                    #self.dmd.send_text("BILLE JAUNE", sens=None, iteration=None)
+                    handler['dmd'] = 'BILLE JAUNE'
+                    
 
                 elif self.message == 'Snooker-vert':
                     self.rpi.set_target_leds ('')
@@ -304,7 +311,8 @@ class Game(cgame.Game):
                     ### PLUS DE ROUGE, fait clignoter la plus petite bille de couleur (verte)
                     self.rpi.set_target_leds_blink ('')
                     self.rpi.set_target_leds_blink('S3#green|D3#green|T3#green|SB#red|DB#red')
-                    self.dmd.send_text("BILLE VERTE", sens=None, iteration=None)
+                    #self.dmd.send_text("BILLE VERTE", sens=None, iteration=None)
+                    handler['dmd'] = 'BILLE VERTE'
 
                 elif self.message == 'Snooker-brun':
                     self.rpi.set_target_leds ('')
@@ -313,7 +321,8 @@ class Game(cgame.Game):
                     ### PLUS DE ROUGE, fait clignoter la plus petite bille de couleur (brune)
                     self.rpi.set_target_leds_blink ('')
                     self.rpi.set_target_leds_blink('S4#orange|D4#orange|T4#orange|SB#red|DB#red')
-                    self.dmd.send_text("BILLE BRUNE", sens=None, iteration=None)
+                    #self.dmd.send_text("BILLE BRUNE", sens=None, iteration=None)
+                    handler['dmd'] = 'BILLE BRUNE'
 
                 elif self.message == 'Snooker-bleu':
                     self.rpi.set_target_leds ('')
@@ -322,7 +331,8 @@ class Game(cgame.Game):
                     ### PLUS DE ROUGE, fait clignoter la plus petite bille de couleur (bleue)
                     self.rpi.set_target_leds_blink ('')
                     self.rpi.set_target_leds_blink('S5#blue|D5#blue|T5#blue|SB#red|DB#red')
-                    self.dmd.send_text("BILLE BLEUE", sens=None, iteration=None)
+                    #self.dmd.send_text("BILLE BLEUE", sens=None, iteration=None)
+                    handler['dmd'] = 'BILLE BLEUE'
 
                 elif self.message == 'Snooker-rose':
                     self.rpi.set_target_leds ('')
@@ -331,18 +341,22 @@ class Game(cgame.Game):
                     ### PLUS DE ROUGE, fait clignoter la plus petite bille de couleur (rose)
                     self.rpi.set_target_leds_blink ('')
                     self.rpi.set_target_leds_blink('S6#purple|D6#purple|T6#purple|SB#red|DB#red')
-                    self.dmd.send_text("BILLE ROSE", sens=None, iteration=None)
+                    #self.dmd.send_text("BILLE ROSE", sens=None, iteration=None)
+                    handler['dmd'] = 'BILLE ROSE'
 
                 elif self.message == 'Snooker-noir':
                     self.rpi.set_target_leds ('')
                     ### PLUS DE ROUGE, fait clignoter la plus petite bille de couleur (noire)
                     self.rpi.set_target_leds_blink ('')
                     self.rpi.set_target_leds_blink('S7#white|D7#white|T7#white|SB#red|DB#red')
-                    self.dmd.send_text("BILLE NOIRE", sens=None, iteration=None)
+                    #self.dmd.send_text("BILLE NOIRE", sens=None, iteration=None)
+                    handler['dmd'] = 'BILLE NOIRE'
 
         # Print debug output
-        self.logs.log("DEBUG",self.infos)
-        return return_code
+        self.logs.debug(self.infos)
+        handler['return_code'] = return_code
+        return handler
+        #return return_code
 
     def pnj_score(self, players, actual_player, level, player_launch):
         """
@@ -371,12 +385,12 @@ class Game(cgame.Game):
                 best_score = player.score
                 best_player = player.ident
                 best_count = 1
-                self.logs.log("DEBUG", \
+                self.logs.debug(\
                         f"Best found : {best_score} / Count={best_count} / player = {best_player}")
             elif player.score == best_score:
                 best_count += 1
 
-        self.logs.log("DEBUG", \
+        self.logs.debug(\
                 f"Best score : {best_score} / Count={best_count} / Player = {best_player}")
 
         if best_count == 1:
@@ -387,6 +401,8 @@ class Game(cgame.Game):
         """
         Function run after each dart throw - for example, add points to player
         """
+        
+        handler = self.init_handler()
 
         ### retire le bandeau de ce qu on a touche
         self.show_segment = False
@@ -419,7 +435,8 @@ class Game(cgame.Game):
                             self.next = 0
 
                             #joue video bille rouge
-                            self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/rouge', 'videos'))
+                            #self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/rouge', 'videos'))
+                            handler['video'] = 'snooker/rouge'
 
                         elif (hit+'#yellow') in players[actual_player].targets or (hit+'#green') in players[actual_player].targets or (hit+'#orange') in players[actual_player].targets or (hit+'#blue') in players[actual_player].targets or (hit+'#purple') in players[actual_player].targets or (hit+'#white') in players[actual_player].targets:
 
@@ -469,17 +486,23 @@ class Game(cgame.Game):
                                 #player_launch -= 1
                                 #joue video bille couleur
                                 if int(hit[1:]) == 2:
-                                    self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/jaune', 'videos'))
+                                    #self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/jaune', 'videos'))
+                                    handler['video'] = 'snooker/rouge'
                                 elif int(hit[1:]) == 3:
-                                    self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/vert', 'videos'))
+                                    #self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/vert', 'videos'))
+                                    handler['video'] = 'snooker/vert'
                                 elif int(hit[1:]) == 4:
-                                    self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/marron', 'videos'))
+                                    #self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/marron', 'videos'))
+                                    handler['video'] = 'snooker/marron'
                                 elif int(hit[1:]) == 5:
-                                    self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/bleu', 'videos'))
+                                    #self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/bleu', 'videos'))
+                                    handler['video'] = 'snooker/bleu'
                                 elif int(hit[1:]) == 6:
-                                    self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/rose', 'videos'))
+                                    #self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/rose', 'videos'))
+                                    handler['video'] = 'snooker/rose'
                                 elif int(hit[1:]) == 7:
-                                    self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/noir', 'videos'))
+                                    #self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/couleur/noir', 'videos'))
+                                    handler['video'] = 'snooker/noir'
 
                         else:
                             players[actual_player].columns[0] = ['cross_mark', 'image']
@@ -584,17 +607,23 @@ class Game(cgame.Game):
 
                     ### joue la video
                     if self.video == 2:
-                        self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/jaune', 'videos'))
+                        #self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/jaune', 'videos'))
+                        handler['video'] = 'snooker/jaune'                        
                     elif self.video == 3:
-                        self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/vert', 'videos'))
+                        #self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/vert', 'videos'))
+                        handler['video'] = 'snooker/vert'
                     elif self.video == 4:
-                        self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/marron', 'videos'))
+                        #self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/marron', 'videos'))
+                        handler['video'] = 'snooker/marron'
                     elif self.video == 5:
-                        self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/bleu', 'videos'))
+                        #self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/bleu', 'videos'))
+                        handler['video'] = 'snooker/bleu'
                     elif self.video == 6:
-                        self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/rose', 'videos'))
+                        #self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/rose', 'videos'))
+                        handler['video'] = 'snooker/rose'
                     elif self.video == 7:
-                        self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/noir', 'videos'))
+                        #self.played_video = self.video_player.play_video(self.display.file_class.get_full_filename('snooker/noir', 'videos'))
+                        handler['video'] = 'snooker/noir'
 
                     self.video = 0
 
@@ -702,8 +731,13 @@ class Game(cgame.Game):
             else:
                 # No winner : last round reached
                 return_code = 2
+                
+        # Time for shot or video ?
+        handler['take_shot'] = self.time_to_take_shot_or_video(hit)
+        handler['return_code'] = return_code
+        return handler
 
-        return return_code
+        #return return_code
 
     def early_player_button(self, players, actual_player, actual_round):
         #SI LE JOUEUR N A PAS NETTOYE LA TABLE ALORS PENALITE SI APPUI SUR NEXTPLAYER
@@ -796,7 +830,7 @@ class Game(cgame.Game):
         Miss button
         '''
         players[actual_player].columns[0] = ('MISS', 'str')
-        self.display.play_sound('treasure_crane_jaune')
+        self.display.play_sound('miss')
         self.penalite(players, actual_player)
         players[actual_player].couleur = False
         self.missdarts = True
